@@ -1,0 +1,94 @@
+@model DTOs.StaffDashboardDto
+
+@{
+    ViewData["Title"] = "Staff Dashboard";
+}
+
+<h1>Staff Dashboard</h1>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Available Rooms</div>
+            <div class="card-body">
+                <h5 class="card-title">@Model.AvailableRoomsCount</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-header">Occupied Rooms</div>
+            <div class="card-body">
+                <h5 class="card-title">@Model.OccupiedRoomsCount</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Reserved Rooms</div>
+            <div class="card-body">
+                <h5 class="card-title">@Model.ReservedRoomsCount</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-secondary mb-3">
+            <div class="card-header">Maintenance</div>
+            <div class="card-body">
+                <h5 class="card-title">@Model.MaintenanceRoomsCount</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+             <div class="card-body">
+                <h5 class="card-title">Room Management</h5>
+                <p class="card-text">Add, update or view room details.</p>
+                <a asp-controller="Room" asp-action="Index" class="btn btn-primary">Manage Rooms</a>
+            </div>
+        </div>
+    </div>
+     <div class="col-md-4">
+        <div class="card">
+             <div class="card-body">
+                <h5 class="card-title">User Management</h5>
+                <p class="card-text">Manage staff and customer accounts.</p>
+                <a asp-controller="User" asp-action="Index" class="btn btn-primary">Manage Users</a>
+            </div>
+        </div>
+    </div>
+     <div class="col-md-4">
+        <div class="card">
+             <div class="card-body">
+                <h5 class="card-title">Cleaning Schedule</h5>
+                <p class="card-text">Assign tasks and track cleaning status.</p>
+                <a asp-controller="RoomCleaning" asp-action="Index" class="btn btn-primary">Manage Cleaning</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Room Status Details</h3>
+<div class="row">
+    <div class="col-md-6">
+        <h4>Occupied</h4>
+        <ul class="list-group">
+            @foreach(var room in Model.OccupiedRooms)
+            {
+                <li class="list-group-item">@room.RoomNumber (@room.RoomType)</li>
+            }
+        </ul>
+    </div>
+     <div class="col-md-6">
+        <h4>Reserved</h4>
+        <ul class="list-group">
+            @foreach(var room in Model.ReservedRooms)
+            {
+                <li class="list-group-item">@room.RoomNumber (@room.RoomType)</li>
+            }
+        </ul>
+    </div>
+</div>

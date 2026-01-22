@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Assign Cleaning";
+}
+
+<h1>Assign Cleaning Task</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Assign">
+            <div class="form-group">
+                <label class="control-label">Room</label>
+                <select name="roomId" class="form-control" asp-items="ViewBag.Rooms"></select>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Staff Member</label>
+                <select name="staffUserId" class="form-control" asp-items="ViewBag.Staff"></select>
+            </div>
+            <div class="form-group mt-2">
+                <input type="submit" value="Assign" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
