@@ -17,7 +17,13 @@ builder.Services.AddDbContext<HotelDbContext>(options =>
 
 // Register Repositories and Services
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRoomCleaningRepository, RoomCleaningRepository>();
+
 builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoomCleaningService, RoomCleaningService>();
+builder.Services.AddScoped<IStaffDashboardService, StaffDashboardService>();
 
 var app = builder.Build();
 
