@@ -1,4 +1,8 @@
 using DAL;
+using DAL.Interfaces;
+using DAL.Repository;
+using BLL.Interfaces;
+using BLL.Service;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +14,10 @@ builder.Services.AddControllersWithViews();
 // This reads the "DefaultConnection" string from appsettings.json
 builder.Services.AddDbContext<HotelDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register Repositories and Services
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 var app = builder.Build();
 
