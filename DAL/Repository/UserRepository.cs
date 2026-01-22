@@ -21,5 +21,12 @@ namespace DAL.Repository
                 .Where(u => u.Staffs.Any())
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<User>> GetAllWithDetailsAsync()
+        {
+            return await _context.Users
+                .Include(u => u.Staffs)
+                .ToListAsync();
+        }
     }
 }

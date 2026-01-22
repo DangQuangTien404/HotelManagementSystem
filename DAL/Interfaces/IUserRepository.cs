@@ -7,5 +7,6 @@ namespace DAL.Interfaces
     public interface IUserRepository : IGenericRepository<User>
     {
         Task<IEnumerable<User>> GetStaffUsersAsync();
+        Task<IEnumerable<User>> GetAllWithDetailsAsync();
     }
 }
