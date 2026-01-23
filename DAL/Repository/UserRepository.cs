@@ -1,25 +1,55 @@
-using DAL.Interfaces;
+﻿using DAL.Interfaces;
 using DTOs.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DAL.Repository
 {
-    public class UserRepository : GenericRepository<User>, IUserRepository
+    public class UserRepository : IUserRepository
     {
-        public UserRepository(HotelDbContext context) : base(context)
+        private readonly HotelDbContext _context;
+
+        public UserRepository(HotelDbContext context)
         {
+            _context = context;
         }
 
-        public async Task<IEnumerable<User>> GetStaffUsersAsync()
+        public async Task<User?> GetByUsernameAsync(string username)
         {
-            // Select Users where Id is present in the Staffs table (userId)
-            // or where the user has entries in the Staffs navigation collection.
             return await _context.Users
-                .Where(u => u.Staffs.Any())
-                .ToListAsync();
+                .FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<User?> GetByIdAsync(int id)
+        {
+            return await _context.Users.FindAsync(id);
+        }
+
+        public async Task<bool> UsernameExistsAsync(string username)
+        {
+            return await _context.Users
+                .AnyAsync(u => u.Username == username);
+        }
+
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            return await _context.Users
+                .AnyAsync(u => u.Email == email);
+        }
+
+        public async Task AddUserAsync(User user)
+        {
+            await _context.Users.AddAsync(user);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }

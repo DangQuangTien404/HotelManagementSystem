@@ -1,126 +1,103 @@
-using DAL;
-using DTOs;
-using DTOs.Entities;
+﻿using BLL.Interfaces;
+using DTOs.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using BCrypt.Net;
 
 namespace HotelManagementSystem.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly HotelDbContext _context;
+        private readonly IAuthService _authService;
 
-        public AccountController(HotelDbContext context)
+        public AccountController(IAuthService authService)
         {
-            _context = context;
+            _authService = authService;
         }
 
-        public IActionResult Login()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginDto loginDto)
-        {
-            if (ModelState.IsValid)
-            {
-                // Find user by username
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Username == loginDto.Username);
-
-                // Verify password using bcrypt
-                if (user != null && BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
-                {
-                    var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, user.Username),
-                        new Claim(ClaimTypes.Role, user.Role),
-                        new Claim("UserId", user.Id.ToString())
-                    };
-
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity));
-
-                    if (user.Role == "Staff")
-                    {
-                        return RedirectToAction("Index", "StaffDashboard");
-                    }
-                    else
-                    {
-                        return RedirectToAction("Index", "Home");
-                    }
-                }
-
-                ModelState.AddModelError("", "Invalid login attempt.");
-            }
-            return View(loginDto);
-        }
-
+        // GET: Account/Register
+        [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
+        // POST: Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(UserDto userDto)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            // Force role to Customer
-            userDto.Role = "Customer";
-
-            // Basic validation
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var exists = await _context.Users.AnyAsync(u => u.Username == userDto.Username);
-                if (exists)
-                {
-                    ModelState.AddModelError("Username", "Username already taken.");
-                    return View(userDto);
-                }
-
-                var user = new User
-                {
-                    Username = userDto.Username,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
-                    Role = "Customer",
-                    FullName = userDto.FullName,
-                    Email = userDto.Email,
-                    CreatedAt = System.DateTime.UtcNow
-                };
-
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
-
-                // Auto login after register
-                 var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.Role, user.Role),
-                    new Claim("UserId", user.Id.ToString())
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity));
-
-                return RedirectToAction("Index", "Home");
+                return View(model);
             }
-            return View(userDto);
+
+            var result = await _authService.RegisterAsync(model);
+
+            if (!result.Success)
+            {
+                ModelState.AddModelError("", result.Message);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Registration successful! Please login.";
+            return RedirectToAction(nameof(Login));
         }
 
+        // GET: Account/Login
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // POST: Account/Login
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var result = await _authService.LoginAsync(model);
+
+            if (!result.Success)
+            {
+                ModelState.AddModelError("", result.Message);
+                return View(model);
+            }
+
+            // Create claims for the authenticated user
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, result.User!.Id.ToString()),
+                new Claim(ClaimTypes.Name, result.User.Username),
+                new Claim(ClaimTypes.Email, result.User.Email),
+                new Claim(ClaimTypes.Role, result.User.Role),
+                new Claim("FullName", result.User.FullName)
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = model.RememberMe,
+                ExpiresUtc = model.RememberMe ? DateTimeOffset.UtcNow.AddDays(30) : DateTimeOffset.UtcNow.AddHours(1)
+            };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        // POST: Account/Logout
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
