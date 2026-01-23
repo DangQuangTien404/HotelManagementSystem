@@ -9,7 +9,10 @@ namespace DAL
         public static void Initialize(HotelDbContext context)
         {
             context.Database.EnsureCreated();
+        }
 
+        public static void SeedData(HotelDbContext context, string adminPasswordHash)
+        {
             // Look for any users.
             if (context.Users.Any())
             {
@@ -19,7 +22,7 @@ namespace DAL
             var adminUser = new User
             {
                 Username = "admin",
-                PasswordHash = "admin123", // Plaintext for simplicity as requested
+                PasswordHash = adminPasswordHash,
                 Role = "Staff",
                 FullName = "System Administrator",
                 Email = "admin@hotel.com",
@@ -41,3 +44,5 @@ namespace DAL
         }
     }
 }
+
+

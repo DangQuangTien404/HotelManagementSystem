@@ -33,6 +33,7 @@ builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoomCleaningService, RoomCleaningService>();
 builder.Services.AddScoped<IStaffDashboardService, StaffDashboardService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 var app = builder.Build();
 
@@ -41,7 +42,10 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<HotelDbContext>();
+    var passwordHasher = services.GetRequiredService<IPasswordHasher>();
+    
     DbInitializer.Initialize(context);
+    DbInitializer.SeedData(context, passwordHasher.HashPassword("admin123"));
 }
 
 // Configure the HTTP request pipeline.

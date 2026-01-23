@@ -1,6 +1,7 @@
 using DAL;
 using DTOs;
 using DTOs.Entities;
+using BLL.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,12 @@ namespace HotelManagementSystem.Controllers
     public class AccountController : Controller
     {
         private readonly HotelDbContext _context;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public AccountController(HotelDbContext context)
+        public AccountController(HotelDbContext context, IPasswordHasher passwordHasher)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
         }
 
         public IActionResult Login()
@@ -31,11 +34,10 @@ namespace HotelManagementSystem.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Simple password check (plaintext as per current implementation)
                 var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Username == loginDto.Username && u.PasswordHash == loginDto.Password);
+                    .FirstOrDefaultAsync(u => u.Username == loginDto.Username);
 
-                if (user != null)
+                if (user != null && _passwordHasher.VerifyPassword(loginDto.Password, user.PasswordHash))
                 {
                     var claims = new List<Claim>
                     {
@@ -90,7 +92,7 @@ namespace HotelManagementSystem.Controllers
                 var user = new User
                 {
                     Username = userDto.Username,
-                    PasswordHash = userDto.Password,
+                    PasswordHash = _passwordHasher.HashPassword(userDto.Password),
                     Role = "Customer",
                     FullName = userDto.FullName,
                     Email = userDto.Email,

@@ -12,13 +12,12 @@ namespace BLL.Service
     public class UserService : IUserService
     {
         private readonly IUserRepository _repository;
-        // Ideally we would inject IStaffRepository too if we needed to create Staff records explicitly,
-        // but for now we'll assume setting the role or existence makes them relevant.
-        // Actually, the requirement says "manage users".
+        private readonly IPasswordHasher _passwordHasher;
 
-        public UserService(IUserRepository repository)
+        public UserService(IUserRepository repository, IPasswordHasher passwordHasher)
         {
             _repository = repository;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
@@ -44,7 +43,7 @@ namespace BLL.Service
             var user = new User
             {
                 Username = userDto.Username,
-                PasswordHash = userDto.Password, // In real app, hash this!
+                PasswordHash = _passwordHasher.HashPassword(userDto.Password),
                 Role = userDto.Role,
                 FullName = userDto.FullName,
                 Email = userDto.Email,
@@ -79,7 +78,7 @@ namespace BLL.Service
                 // Only update password if provided
                 if (!string.IsNullOrEmpty(userDto.Password))
                 {
-                    user.PasswordHash = userDto.Password;
+                    user.PasswordHash = _passwordHasher.HashPassword(userDto.Password);
                 }
 
                 await _repository.UpdateAsync(user);
