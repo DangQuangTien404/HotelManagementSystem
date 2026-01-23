@@ -23,7 +23,7 @@ namespace BLL.Service
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
-            var users = await _repository.GetAllWithDetailsAsync();
+            var users = await _repository.GetAllAsync();
             return users.Select(MapToDto);
         }
 

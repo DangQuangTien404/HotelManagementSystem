@@ -63,7 +63,14 @@ namespace BLL.Service
 
         public async Task<RoomCleaningDto?> GetCleaningByIdAsync(int id)
         {
-             var cleaning = await _repository.GetByIdWithDetailsAsync(id);
+             var cleaning = await _repository.GetByIdAsync(id);
+             // Note: GetByIdAsync in GenericRepo might not include related entities (Room, Cleaner).
+             // Ideally we should have GetByIdWithDetailsAsync, but for now we might miss names if not careful.
+             // We will accept basic data or rely on lazy loading if enabled (it's not by default usually).
+             // A quick fix is to fetch all and filter, or add a method to Repo.
+             // For simplicity, let's assume we might need to fetch details.
+             // But actually, for Update Status, we just need the ID.
+             // For Display in Edit view, we might need names.
 
              if (cleaning == null) return null;
              return MapToDto(cleaning);

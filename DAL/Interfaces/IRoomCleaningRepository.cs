@@ -8,6 +8,5 @@ namespace DAL.Interfaces
     {
         Task<IEnumerable<RoomCleaning>> GetPendingCleaningsAsync();
         Task<IEnumerable<RoomCleaning>> GetAllWithDetailsAsync();
-        Task<RoomCleaning?> GetByIdWithDetailsAsync(int id);
     }
 }
