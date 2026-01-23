@@ -1,103 +1,124 @@
-﻿using BLL.Interfaces;
-using DTOs.ViewModels;
+using DAL;
+using DTOs;
+using DTOs.Entities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace HotelManagementSystem.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IAuthService _authService;
+        private readonly HotelDbContext _context;
 
-        public AccountController(IAuthService authService)
+        public AccountController(HotelDbContext context)
         {
-            _authService = authService;
+            _context = context;
         }
 
-        // GET: Account/Register
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        // POST: Account/Register
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var result = await _authService.RegisterAsync(model);
-
-            if (!result.Success)
-            {
-                ModelState.AddModelError("", result.Message);
-                return View(model);
-            }
-
-            TempData["SuccessMessage"] = "Registration successful! Please login.";
-            return RedirectToAction(nameof(Login));
-        }
-
-        // GET: Account/Login
-        [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return View(model);
+                // Simple password check (plaintext as per current implementation)
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Username == loginDto.Username && u.PasswordHash == loginDto.Password);
+
+                if (user != null)
+                {
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, user.Username),
+                        new Claim(ClaimTypes.Role, user.Role),
+                        new Claim("UserId", user.Id.ToString())
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity));
+
+                    if (user.Role == "Staff")
+                    {
+                        return RedirectToAction("Index", "StaffDashboard");
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+
+                ModelState.AddModelError("", "Invalid login attempt.");
             }
-
-            var result = await _authService.LoginAsync(model);
-
-            if (!result.Success)
-            {
-                ModelState.AddModelError("", result.Message);
-                return View(model);
-            }
-
-            // Create claims for the authenticated user
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, result.User!.Id.ToString()),
-                new Claim(ClaimTypes.Name, result.User.Username),
-                new Claim(ClaimTypes.Email, result.User.Email),
-                new Claim(ClaimTypes.Role, result.User.Role),
-                new Claim("FullName", result.User.FullName)
-            };
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var authProperties = new AuthenticationProperties
-            {
-                IsPersistent = model.RememberMe,
-                ExpiresUtc = model.RememberMe ? DateTimeOffset.UtcNow.AddDays(30) : DateTimeOffset.UtcNow.AddHours(1)
-            };
-
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                authProperties);
-
-            return RedirectToAction("Index", "Home");
+            return View(loginDto);
         }
 
-        // POST: Account/Logout
+        public IActionResult Register()
+        {
+            return View();
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(UserDto userDto)
+        {
+            // Force role to Customer
+            userDto.Role = "Customer";
+
+            // Basic validation
+            if (ModelState.IsValid)
+            {
+                var exists = await _context.Users.AnyAsync(u => u.Username == userDto.Username);
+                if (exists)
+                {
+                    ModelState.AddModelError("Username", "Username already taken.");
+                    return View(userDto);
+                }
+
+                var user = new User
+                {
+                    Username = userDto.Username,
+                    PasswordHash = userDto.Password,
+                    Role = "Customer",
+                    FullName = userDto.FullName,
+                    Email = userDto.Email,
+                    CreatedAt = System.DateTime.UtcNow
+                };
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                // Auto login after register
+                 var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Role, user.Role),
+                    new Claim("UserId", user.Id.ToString())
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity));
+
+                return RedirectToAction("Index", "Home");
+            }
+            return View(userDto);
+        }
+
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

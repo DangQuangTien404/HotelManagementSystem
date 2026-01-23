@@ -1,11 +1,13 @@
 using BLL.Interfaces;
 using DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Threading.Tasks;
 
 namespace HotelManagementSystem.Controllers
 {
+    [Authorize(Roles = "Staff")]
     public class RoomCleaningController : Controller
     {
         private readonly IRoomCleaningService _cleaningService;

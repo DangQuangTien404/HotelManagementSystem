@@ -1,10 +1,12 @@
 using BLL.Interfaces;
 using DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace HotelManagementSystem.Controllers
 {
+    [Authorize(Roles = "Staff")]
     public class UserController : Controller
     {
         private readonly IUserService _userService;

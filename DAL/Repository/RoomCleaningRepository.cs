@@ -29,5 +29,13 @@ namespace DAL.Repository
                 .Include(rc => rc.Cleaner)
                 .ToListAsync();
         }
+
+        public async Task<RoomCleaning?> GetByIdWithDetailsAsync(int id)
+        {
+            return await _context.RoomCleanings
+                .Include(rc => rc.Room)
+                .Include(rc => rc.Cleaner)
+                .FirstOrDefaultAsync(rc => rc.Id == id);
+        }
     }
 }
