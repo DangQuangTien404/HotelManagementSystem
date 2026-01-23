@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DTOs.Enums;
 
 namespace DTOs.Entities
 {
@@ -6,10 +7,10 @@ namespace DTOs.Entities
     {
         public int Id { get; set; }
         public string RoomNumber { get; set; } = string.Empty;
-        public string RoomType { get; set; } = string.Empty; // Single, Double, Suite
+        public RoomType RoomType { get; set; } = RoomType.Single;
         public int Capacity { get; set; }
         public decimal Price { get; set; }
-        public string Status { get; set; } = "Available"; // Available, Occupied, Maintenance
+        public RoomStatus Status { get; set; } = RoomStatus.Available;
 
         // Navigation
         public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();

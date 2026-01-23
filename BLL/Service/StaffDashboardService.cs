@@ -2,6 +2,7 @@
 using DAL.Interfaces;
 using DTOs;
 using DTOs.Entities;
+using DTOs.Enums;
 using System.Linq;
 using System.Threading.Tasks;
 

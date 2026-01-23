@@ -2,6 +2,7 @@
 using DAL.Interfaces;
 using DTOs;
 using DTOs.Entities;
+using DTOs.Enums;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -84,6 +85,40 @@ namespace BLL.Service
         public async Task DeleteRoomAsync(int id)
         {
             await _repository.DeleteAsync(id);
+        }
+
+        public async Task<IEnumerable<RoomDto>> SearchAvailableRoomsAsync(string? searchTerm, RoomType? roomType, decimal? maxPrice)
+        {
+            var rooms = await _repository.GetAllAsync();
+            
+            var availableRooms = rooms.Where(r => r.Status == RoomStatus.Available);
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                availableRooms = availableRooms.Where(r => 
+                    r.RoomNumber.Contains(searchTerm, System.StringComparison.OrdinalIgnoreCase) ||
+                    r.RoomType.ToString().Contains(searchTerm, System.StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (roomType.HasValue)
+            {
+                availableRooms = availableRooms.Where(r => r.RoomType == roomType.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                availableRooms = availableRooms.Where(r => r.Price <= maxPrice.Value);
+            }
+
+            return availableRooms.Select(r => new RoomDto
+            {
+                Id = r.Id,
+                RoomNumber = r.RoomNumber,
+                RoomType = r.RoomType,
+                Capacity = r.Capacity,
+                Price = r.Price,
+                Status = r.Status
+            }).OrderBy(r => r.Price);
         }
     }
 }
