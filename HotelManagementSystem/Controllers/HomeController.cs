@@ -1,5 +1,6 @@
 using BLL.Interfaces;
 using DTOs.Enums;
+using HotelManagementSystem.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -18,11 +19,15 @@ namespace HotelManagementSystem.Controllers
         {
             var rooms = await _roomService.SearchAvailableRoomsAsync(searchTerm, roomType, maxPrice);
             
-            ViewBag.SearchTerm = searchTerm;
-            ViewBag.RoomType = roomType;
-            ViewBag.MaxPrice = maxPrice;
+            var viewModel = new HomeIndexViewModel
+            {
+                Rooms = rooms,
+                SearchTerm = searchTerm,
+                SelectedRoomType = roomType,
+                MaxPrice = maxPrice
+            };
             
-            return View(rooms);
+            return View(viewModel);
         }
 
         public IActionResult Privacy()

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DTOs.RoomDto>
+﻿@model HotelManagementSystem.ViewModels.HomeIndexViewModel
 @using DTOs.Enums
 
 @{
@@ -20,7 +20,7 @@
                            id="searchTerm" 
                            name="searchTerm" 
                            placeholder="Room number or type..." 
-                           value="@ViewBag.SearchTerm">
+                           value="@Model.SearchTerm">
                 </div>
                 <div class="col-md-3">
                     <label for="roomType" class="form-label">Room Type</label>
@@ -28,7 +28,7 @@
                         <option value="">All Types</option>
                         @foreach (RoomType type in Enum.GetValues(typeof(RoomType)))
                         {
-                            <option value="@type" selected="@(ViewBag.RoomType == type)">@type</option>
+                            <option value="@type" selected="@(Model.SelectedRoomType == type)">@type</option>
                         }
                     </select>
                 </div>
@@ -40,13 +40,13 @@
                            name="maxPrice" 
                            placeholder="0.00" 
                            step="0.01" 
-                           value="@ViewBag.MaxPrice">
+                           value="@Model.MaxPrice">
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100">Search</button>
                 </div>
             </form>
-            @if (!string.IsNullOrEmpty(ViewBag.SearchTerm as string) || ViewBag.RoomType != null || ViewBag.MaxPrice != null)
+            @if (Model.HasActiveFilters)
             {
                 <div class="mt-3">
                     <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Clear Filters</a>
@@ -56,10 +56,10 @@
     </div>
 
     <!-- Room List -->
-    @if (Model != null && Model.Any())
+    @if (Model.Rooms != null && Model.Rooms.Any())
     {
         <div class="row">
-            @foreach (var room in Model)
+            @foreach (var room in Model.Rooms)
             {
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 shadow-sm">

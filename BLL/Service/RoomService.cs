@@ -89,6 +89,7 @@ namespace BLL.Service
 
         public async Task<IEnumerable<RoomDto>> SearchAvailableRoomsAsync(string? searchTerm, RoomType? roomType, decimal? maxPrice)
         {
+            var query = IQueryable.Empty<Room>();
             var rooms = await _repository.GetAllAsync();
             
             var availableRooms = rooms.Where(r => r.Status == RoomStatus.Available);
