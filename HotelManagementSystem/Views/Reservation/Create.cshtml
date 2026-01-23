@@ -102,7 +102,7 @@
                     <ul class="list-unstyled">
                         <li class="mb-2"><strong>Room Number:</strong> @room?.RoomNumber</li>
                         <li class="mb-2"><strong>Capacity:</strong> @room?.Capacity person(s)</li>
-                        <li class="mb-2"><strong>Price:</strong> @room?.Price.ToString("N0") ? / night</li>
+                        <li class="mb-2"><strong>Price:</strong> @room?.Price.ToString("N0") &#8363; / night</li>
                         <li class="mb-2">
                             <span class="badge bg-success">@room?.Status</span>
                         </li>
@@ -118,9 +118,9 @@
                     <p class="text-muted small">Select dates to see total price</p>
                     <div id="bookingSummary" style="display: none;">
                         <p><strong>Number of Nights:</strong> <span id="nights">0</span></p>
-                        <p><strong>Price per Night:</strong> @room?.Price.ToString("N0") ?</p>
+                        <p><strong>Price per Night:</strong> @room?.Price.ToString("N0") &#8363;</p>
                         <hr />
-                        <h6><strong>Total Price:</strong> <span id="totalPrice">0</span> ?</h6>
+                        <h6><strong>Total Price:</strong> <span id="totalPrice">0</span> &#8363;</h6>
                     </div>
                 </div>
             </div>
