@@ -55,7 +55,7 @@ namespace BLL.Service
                 RoomType = roomDto.RoomType,
                 Capacity = roomDto.Capacity,
                 Price = roomDto.Price,
-                Status = roomDto.Status
+                Status = "Available"
             };
             await _repository.AddAsync(room);
         }
@@ -69,12 +69,9 @@ namespace BLL.Service
                 room.RoomType = roomDto.RoomType;
                 room.Capacity = roomDto.Capacity;
                 room.Price = roomDto.Price;
-                room.Status = roomDto.Status;
-
                 await _repository.UpdateAsync(room);
             }
         }
-
         public async Task DeleteRoomAsync(int id)
         {
             await _repository.DeleteAsync(id);
