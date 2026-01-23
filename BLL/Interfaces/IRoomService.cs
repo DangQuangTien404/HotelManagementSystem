@@ -11,5 +11,6 @@ namespace BLL.Interfaces
         Task AddRoomAsync(RoomDto roomDto);
         Task UpdateRoomAsync(RoomDto roomDto);
         Task DeleteRoomAsync(int id);
+        Task UpdateRoomStatusAsync(int roomId, string status);
     }
 }

@@ -7,65 +7,82 @@
 <h1>Staff Dashboard</h1>
 
 <div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-header">Available Rooms</div>
+    <div class="col">
+        <div class="card text-white bg-success mb-3 h-100">
+            <div class="card-header">Available</div>
             <div class="card-body">
-                <h5 class="card-title">@Model.AvailableRoomsCount</h5>
+                <h5 class="card-title display-4">@Model.AvailableRoomsCount</h5>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-danger mb-3">
-            <div class="card-header">Occupied Rooms</div>
+    <div class="col">
+        <div class="card text-white bg-danger mb-3 h-100">
+            <div class="card-header">Occupied</div>
             <div class="card-body">
-                <h5 class="card-title">@Model.OccupiedRoomsCount</h5>
+                <h5 class="card-title display-4">@Model.OccupiedRoomsCount</h5>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-header">Reserved Rooms</div>
+    <div class="col">
+        <div class="card text-white bg-warning mb-3 h-100">
+            <div class="card-header">Reserved</div>
             <div class="card-body">
-                <h5 class="card-title">@Model.ReservedRoomsCount</h5>
+                <h5 class="card-title display-4">@Model.ReservedRoomsCount</h5>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-secondary mb-3">
+    <div class="col">
+        <div class="card text-white bg-info mb-3 h-100">
+            <div class="card-header">Cleaning</div>
+            <div class="card-body">
+                <h5 class="card-title display-4">@Model.CleaningRoomsCount</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card text-white bg-secondary mb-3 h-100">
             <div class="card-header">Maintenance</div>
             <div class="card-body">
-                <h5 class="card-title">@Model.MaintenanceRoomsCount</h5>
+                <h5 class="card-title display-4">@Model.MaintenanceRoomsCount</h5>
             </div>
         </div>
     </div>
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card">
-             <div class="card-body">
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
                 <h5 class="card-title">Room Management</h5>
                 <p class="card-text">Add, update or view room details.</p>
-                <a asp-controller="Room" asp-action="Index" class="btn btn-primary">Manage Rooms</a>
+                <a asp-controller="Room" asp-action="Index" class="btn btn-primary w-100 mt-auto">Manage Rooms</a>
             </div>
         </div>
     </div>
-     <div class="col-md-4">
-        <div class="card">
-             <div class="card-body">
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
                 <h5 class="card-title">User Management</h5>
                 <p class="card-text">Manage staff and customer accounts.</p>
-                <a asp-controller="User" asp-action="Index" class="btn btn-primary">Manage Users</a>
+                <a asp-controller="User" asp-action="Index" class="btn btn-primary w-100 mt-auto">Manage Users</a>
             </div>
         </div>
     </div>
-     <div class="col-md-4">
-        <div class="card">
-             <div class="card-body">
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
                 <h5 class="card-title">Cleaning Schedule</h5>
                 <p class="card-text">Assign tasks and track cleaning status.</p>
-                <a asp-controller="RoomCleaning" asp-action="Index" class="btn btn-primary">Manage Cleaning</a>
+                <a asp-controller="RoomCleaning" asp-action="Index" class="btn btn-primary w-100 mt-auto">Manage Cleaning</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 border-warning">
+            <div class="card-body">
+                <h5 class="card-title text-warning">Maintenance</h5>
+                <p class="card-text">Set rooms to maintenance mode.</p>
+                <a asp-controller="Maintenance" asp-action="Index" class="btn btn-warning w-100 mt-auto">Manage Maintenance</a>
             </div>
         </div>
     </div>
@@ -73,21 +90,82 @@
 
 <h3>Room Status Details</h3>
 <div class="row">
-    <div class="col-md-6">
-        <h4>Occupied</h4>
+    <div class="col-md-3">
+        <h4 class="text-danger">Occupied</h4>
         <ul class="list-group">
-            @foreach(var room in Model.OccupiedRooms)
+            @if (Model.OccupiedRooms.Any())
             {
-                <li class="list-group-item">@room.RoomNumber (@room.RoomType)</li>
+                @foreach (var room in Model.OccupiedRooms)
+                {
+                    <li class="list-group-item list-group-item-danger">
+                        <strong>@room.RoomNumber</strong> <br />
+                        <small>@room.RoomType</small>
+                    </li>
+                }
+            }
+            else
+            {
+                <li class="list-group-item text-muted">No rooms occupied</li>
             }
         </ul>
     </div>
-     <div class="col-md-6">
-        <h4>Reserved</h4>
+
+    <div class="col-md-3">
+        <h4 class="text-warning">Reserved</h4>
         <ul class="list-group">
-            @foreach(var room in Model.ReservedRooms)
+            @if (Model.ReservedRooms.Any())
             {
-                <li class="list-group-item">@room.RoomNumber (@room.RoomType)</li>
+                @foreach (var room in Model.ReservedRooms)
+                {
+                    <li class="list-group-item list-group-item-warning">
+                        <strong>@room.RoomNumber</strong> <br />
+                        <small>@room.RoomType</small>
+                    </li>
+                }
+            }
+            else
+            {
+                <li class="list-group-item text-muted">No reservations</li>
+            }
+        </ul>
+    </div>
+
+    <div class="col-md-3">
+        <h4 class="text-info">Cleaning</h4>
+        <ul class="list-group">
+            @if (Model.CleaningRooms != null && Model.CleaningRooms.Any())
+            {
+                @foreach (var room in Model.CleaningRooms)
+                {
+                    <li class="list-group-item list-group-item-info">
+                        <strong>@room.RoomNumber</strong> <br />
+                        <small>@room.RoomType</small>
+                    </li>
+                }
+            }
+            else
+            {
+                <li class="list-group-item text-muted">No rooms cleaning</li>
+            }
+        </ul>
+    </div>
+
+    <div class="col-md-3">
+        <h4 class="text-secondary">Maintenance</h4>
+        <ul class="list-group">
+            @if (Model.MaintenanceRooms != null && Model.MaintenanceRooms.Any())
+            {
+                @foreach (var room in Model.MaintenanceRooms)
+                {
+                    <li class="list-group-item list-group-item-secondary">
+                        <strong>@room.RoomNumber</strong> <br />
+                        <small>@room.RoomType</small>
+                    </li>
+                }
+            }
+            else
+            {
+                <li class="list-group-item text-muted">No maintenance</li>
             }
         </ul>
     </div>

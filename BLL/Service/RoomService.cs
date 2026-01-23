@@ -1,4 +1,4 @@
-using BLL.Interfaces;
+﻿using BLL.Interfaces;
 using DAL.Interfaces;
 using DTOs;
 using DTOs.Entities;
@@ -16,7 +16,16 @@ namespace BLL.Service
         {
             _repository = repository;
         }
-
+        // Thêm hàm này vào cuối class RoomService
+        public async Task UpdateRoomStatusAsync(int roomId, string status)
+        {
+            var room = await _repository.GetByIdAsync(roomId);
+            if (room != null)
+            {
+                room.Status = status;
+                await _repository.UpdateAsync(room);
+            }
+        }
         public async Task<IEnumerable<RoomDto>> GetAllRoomsAsync()
         {
             var rooms = await _repository.GetAllAsync();
