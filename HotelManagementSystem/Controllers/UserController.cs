@@ -1,12 +1,13 @@
-using BLL.Interfaces;
+﻿using BLL.Interfaces;
 using DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq; // Thêm thư viện này để dùng Where
 using System.Threading.Tasks;
 
 namespace HotelManagementSystem.Controllers
 {
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Staff")] // Hoặc Roles = "Admin" tùy bạn
     public class UserController : Controller
     {
         private readonly IUserService _userService;
@@ -16,16 +17,35 @@ namespace HotelManagementSystem.Controllers
             _userService = userService;
         }
 
-        public async Task<IActionResult> Index()
+        // Cập nhật hàm Index để nhận từ khóa tìm kiếm và lọc Role
+        public async Task<IActionResult> Index(string searchString, string roleFilter)
         {
+            // 1. Lấy tất cả user
             var users = await _userService.GetAllUsersAsync();
+
+            // 2. Lọc theo tên hoặc email nếu có searchString
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                searchString = searchString.ToLower();
+                users = users.Where(u => u.FullName.ToLower().Contains(searchString)
+                                      || u.Email.ToLower().Contains(searchString));
+            }
+
+            // 3. Lọc theo Role nếu có chọn
+            if (!string.IsNullOrEmpty(roleFilter))
+            {
+                users = users.Where(u => u.Role == roleFilter);
+            }
+
+            // Lưu giữ giá trị để hiển thị lại trên View
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentRole"] = roleFilter;
+
             return View(users);
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
+        // ... Các hàm Create, Edit, Delete giữ nguyên ...
+        public IActionResult Create() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -42,10 +62,7 @@ namespace HotelManagementSystem.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
             return View(user);
         }
 
@@ -53,11 +70,7 @@ namespace HotelManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, UserDto userDto)
         {
-            if (id != userDto.Id)
-            {
-                return NotFound();
-            }
-
+            if (id != userDto.Id) return NotFound();
             if (ModelState.IsValid)
             {
                 await _userService.UpdateUserAsync(userDto);
@@ -69,10 +82,7 @@ namespace HotelManagementSystem.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
             return View(user);
         }
 

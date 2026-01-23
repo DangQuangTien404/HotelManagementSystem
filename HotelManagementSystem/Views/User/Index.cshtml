@@ -1,38 +1,78 @@
 @model IEnumerable<DTOs.UserDto>
 
 @{
-    ViewData["Title"] = "Users";
+    ViewData["Title"] = "User Management";
 }
 
-<h1>Users</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>User Management</h1>
+    <a asp-action="Create" class="btn btn-primary shadow-sm">
+        <i class="fas fa-plus"></i> Create New User
+    </a>
+</div>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Username</th>
-            <th>Full Name</th>
-            <th>Role</th>
-            <th>Email</th>
-            <th>Is Staff?</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>@item.Username</td>
-            <td>@item.FullName</td>
-            <td>@item.Role</td>
-            <td>@item.Email</td>
-            <td>@item.IsStaff</td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="card mb-4 shadow-sm">
+    <div class="card-body p-3">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+                       class="form-control" placeholder="Search by name or email..." />
+            </div>
+            <div class="col-md-4">
+                <select name="roleFilter" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- All Roles --</option>
+                    <option value="Staff" selected="@((string)ViewData["CurrentRole"] == "Staff")">Staff</option>
+                    <option value="Customer" selected="@((string)ViewData["CurrentRole"] == "Customer")">Customer</option>
+                    <option value="Admin" selected="@((string)ViewData["CurrentRole"] == "Admin")">Admin</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="align-middle fw-bold">@item.FullName</td>
+                        <td class="align-middle">@item.Email</td>
+                        <td class="align-middle">
+                            @if (item.Role == "Admin")
+                            {
+                                <span class="badge bg-danger">Admin</span>
+                            }
+                            else if (item.Role == "Staff")
+                            {
+
+                                <span class="badge bg-primary">Staff</span>
+                            }
+                            else
+                            {
+
+                                <span class="badge bg-success">Customer</span>
+                            }
+                        </td>
+                        <td class="text-end align-middle">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning mx-1">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

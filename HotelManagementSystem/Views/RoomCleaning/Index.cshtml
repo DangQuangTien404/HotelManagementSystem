@@ -1,48 +1,54 @@
-@model IEnumerable<DTOs.RoomCleaningDto>
+@model DTOs.RoomCleaningDto
 
 @{
-    ViewData["Title"] = "Cleaning Schedule";
+    ViewData["Title"] = "Update Cleaning Status";
 }
 
-<h1>Cleaning Schedule</h1>
+<h1>Update Progress</h1>
+<h4>Task Details</h4>
+<hr />
 
-<p>
-    <a asp-action="Assign" class="btn btn-primary">Assign New Cleaning</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Room</th>
-            <th>Cleaner</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>@item.RoomNumber</td>
-            <td>@item.CleanerName</td>
-            <td>@item.CleaningDate</td>
-            <td>
-                @if(item.Status == "Completed")
-                {
-                    <span class="badge bg-success">@item.Status</span>
-                }
-                else if(item.Status == "In Progress")
-                {
-                    <span class="badge bg-warning">@item.Status</span>
-                }
-                else
-                {
-                    <span class="badge bg-secondary">@item.Status</span>
-                }
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Update Status</a>
-            </td>
-        </tr>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form asp-action="Edit">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="form-group mb-3">
+                        <label class="control-label fw-bold">Room</label>
+                        <input type="text" class="form-control bg-light" value="@Model.RoomNumber" readonly />
+                        <small class="text-muted">You cannot change the assigned room.</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="control-label fw-bold">Assigned Staff</label>
+                        <input type="text" class="form-control bg-light" value="@Model.CleanerName" readonly />
+                        <small class="text-muted">Re-assigning must be done by deleting and creating a new task.</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="control-label fw-bold">Assigned Date</label>
+                        <input type="text" class="form-control bg-light" value="@Model.CleaningDate.ToString("g")" readonly />
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label asp-for="Status" class="control-label fw-bold text-primary">Current Status</label>
+                        <select name="status" class="form-select form-select-lg border-primary" asp-items="ViewBag.Statuses"></select>
+                    </div>
+
+                    <div class="form-group d-grid gap-2">
+                        <input type="submit" value="Update Status" class="btn btn-primary" />
+                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
-    </tbody>
-</table>

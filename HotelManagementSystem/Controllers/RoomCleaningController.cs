@@ -1,4 +1,4 @@
-using BLL.Interfaces;
+﻿using BLL.Interfaces;
 using DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -51,8 +51,8 @@ namespace HotelManagementSystem.Controllers
             var cleaning = await _cleaningService.GetCleaningByIdAsync(id);
             if (cleaning == null) return NotFound();
 
-            // We only really need to update status
-            ViewBag.Statuses = new SelectList(new[] { "Pending", "In Progress", "Completed" });
+            ViewBag.Statuses = new SelectList(new[] { "Pending", "In Progress", "Completed" }, cleaning.Status);
+
             return View(cleaning);
         }
 
@@ -60,6 +60,7 @@ namespace HotelManagementSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, string status)
         {
+            // Hàm này giữ nguyên, chỉ update status
             await _cleaningService.UpdateStatusAsync(id, status);
             return RedirectToAction(nameof(Index));
         }
