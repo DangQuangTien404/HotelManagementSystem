@@ -1,0 +1,83 @@
+@model DTOs.CustomerDto
+
+@{
+    ViewData["Title"] = "Delete Customer";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar màu xanh nước biển -->
+        <div class="col-md-3 col-lg-2 px-0" style="background-color: #0066cc; min-height: 100vh; position: fixed; left: 0; top: 56px; z-index: 1000;">
+            <div class="p-3">
+                <h5 class="text-white mb-4">Admin Panel</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminStaff" asp-action="Index">
+                            <i class="bi bi-people"></i> Staff Management
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white active" style="background-color: rgba(255,255,255,0.2); border-radius: 5px;" asp-controller="AdminCustomer" asp-action="Index">
+                            <i class="bi bi-person"></i> Customer Management
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminTask" asp-action="Index">
+                            <i class="bi bi-clipboard-check"></i> Task Assignment
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" href="#" style="opacity: 0.7;">
+                            <i class="bi bi-bell"></i> Notifications
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" href="#" style="opacity: 0.7;">
+                            <i class="bi bi-cash-coin"></i> Revenue Management
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-auto" style="margin-left: 16.66666667%;">
+            <div class="p-4">
+                <h1>Delete Customer</h1>
+                <hr />
+
+                <h3>Are you sure you want to delete this customer?</h3>
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> This action cannot be undone. All customer information, related reservations, and login account will be permanently deleted.
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-3">Username:</dt>
+                            <dd class="col-sm-9">@Model.Username</dd>
+
+                            <dt class="col-sm-3">Full Name:</dt>
+                            <dd class="col-sm-9">@Model.FullName</dd>
+
+                            <dt class="col-sm-3">Email:</dt>
+                            <dd class="col-sm-9">@Model.Email</dd>
+
+                            <dt class="col-sm-3">Total Reservations:</dt>
+                            <dd class="col-sm-9">
+                                <span class="badge bg-info">@Model.TotalReservations</span>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <form asp-action="Delete" method="post" class="mt-4">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="submit" value="Delete" class="btn btn-danger" />
+                    <a asp-action="Index" class="btn btn-secondary">Back</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
