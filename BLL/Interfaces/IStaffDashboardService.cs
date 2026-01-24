@@ -6,5 +6,6 @@ namespace BLL.Interfaces
     public interface IStaffDashboardService
     {
         Task<StaffDashboardDto> GetDashboardDataAsync();
+        Task<StaffTaskDto> GetStaffTasksAsync(int staffUserId);
     }
 }

@@ -17,7 +17,13 @@ namespace HotelManagementSystem.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var data = await _dashboardService.GetDashboardDataAsync();
+        var userIdClaim = User.FindFirst("UserId");
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+        {
+             return RedirectToAction("Login", "Account");
+        }
+
+        var data = await _dashboardService.GetStaffTasksAsync(userId);
             return View(data);
         }
     }

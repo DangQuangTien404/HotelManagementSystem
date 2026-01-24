@@ -12,5 +12,6 @@ namespace BLL.Interfaces
         Task UpdateStatusAsync(int cleaningId, string status);
         Task DeleteCleaningAsync(int id);
         Task<RoomCleaningDto?> GetCleaningByIdAsync(int id);
+        Task<IEnumerable<RoomCleaningDto>> GetCleaningsByStaffIdAsync(int staffId);
     }
 }

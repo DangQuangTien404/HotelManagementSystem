@@ -10,10 +10,12 @@ namespace BLL.Service
     public class StaffDashboardService : IStaffDashboardService
     {
         private readonly IGenericRepository<Room> _roomRepository;
+        private readonly IRoomCleaningService _cleaningService;
 
-        public StaffDashboardService(IGenericRepository<Room> roomRepository)
+        public StaffDashboardService(IGenericRepository<Room> roomRepository, IRoomCleaningService cleaningService)
         {
             _roomRepository = roomRepository;
+            _cleaningService = cleaningService;
         }
 
         public async Task<StaffDashboardDto> GetDashboardDataAsync()
@@ -44,6 +46,32 @@ namespace BLL.Service
                 ReservedRooms = roomDtos.Where(r => r.Status == "Reserved"),
                 CleaningRooms = roomDtos.Where(r => r.Status == "Cleaning"),
                 MaintenanceRooms = roomDtos.Where(r => r.Status == "Maintenance") // Dòng này sửa lỗi logic hiển thị
+            };
+        }
+
+        public async Task<StaffTaskDto> GetStaffTasksAsync(int staffUserId)
+        {
+            // 1. Get assigned cleaning tasks
+            var cleaningTasks = await _cleaningService.GetCleaningsByStaffIdAsync(staffUserId);
+
+            // 2. Get rooms in maintenance
+            var allRooms = await _roomRepository.GetAllAsync();
+            var maintenanceRooms = allRooms
+                .Where(r => r.Status == "Maintenance")
+                .Select(r => new RoomDto
+                {
+                    Id = r.Id,
+                    RoomNumber = r.RoomNumber,
+                    RoomType = r.RoomType,
+                    Capacity = r.Capacity,
+                    Price = r.Price,
+                    Status = r.Status
+                });
+
+            return new StaffTaskDto
+            {
+                MyCleaningTasks = cleaningTasks,
+                MaintenanceRooms = maintenanceRooms
             };
         }
     }

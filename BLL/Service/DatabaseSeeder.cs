@@ -22,33 +22,67 @@ namespace BLL.Service
         {
             await _context.Database.EnsureCreatedAsync();
 
-            // Look for any users.
-            if (_context.Users.Any())
+            // 1. Ensure Administrator exists
+            var adminUser = _context.Users.FirstOrDefault(u => u.Username == "admin");
+            if (adminUser == null)
             {
-                return;   // DB has been seeded
+                adminUser = new User
+                {
+                    Username = "admin",
+                    PasswordHash = _passwordHasher.HashPassword("admin123"),
+                    Role = "Administrator",
+                    FullName = "System Administrator",
+                    Email = "admin@hotel.com",
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                // Admin also gets a Staff record for simplicity in management
+                var adminStaff = new Staff
+                {
+                    User = adminUser,
+                    Position = "Manager",
+                    Shift = "Day",
+                    HireDate = DateTime.Now
+                };
+
+                _context.Users.Add(adminUser);
+                _context.Staffs.Add(adminStaff);
+            }
+            else
+            {
+                // Update role if existing admin is not Administrator
+                if (adminUser.Role != "Administrator")
+                {
+                    adminUser.Role = "Administrator";
+                    _context.Users.Update(adminUser);
+                }
             }
 
-            var adminUser = new User
+            // 2. Ensure a Regular Staff exists (for testing)
+            if (!_context.Users.Any(u => u.Username == "staff"))
             {
-                Username = "admin",
-                PasswordHash = _passwordHasher.HashPassword("admin123"),
-                Role = "Staff",
-                FullName = "System Administrator",
-                Email = "admin@hotel.com",
-                CreatedAt = DateTime.UtcNow
-            };
+                var staffUser = new User
+                {
+                    Username = "staff",
+                    PasswordHash = _passwordHasher.HashPassword("staff123"),
+                    Role = "Staff",
+                    FullName = "Regular Staff",
+                    Email = "staff@hotel.com",
+                    CreatedAt = DateTime.UtcNow
+                };
 
-            // Add Staff entity
-            var staff = new Staff
-            {
-                User = adminUser,
-                Position = "Manager",
-                Shift = "Day",
-                HireDate = DateTime.Now
-            };
+                var staffEntity = new Staff
+                {
+                    User = staffUser,
+                    Position = "Housekeeping",
+                    Shift = "Day",
+                    HireDate = DateTime.Now
+                };
 
-            _context.Users.Add(adminUser);
-            _context.Staffs.Add(staff);
+                _context.Users.Add(staffUser);
+                _context.Staffs.Add(staffEntity);
+            }
+
             await _context.SaveChangesAsync();
         }
     }

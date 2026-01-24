@@ -27,10 +27,16 @@
                         </li>
                         @if (User?.Identity?.IsAuthenticated == true)
                         {
+                            @if (User.IsInRole("Administrator"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Administrator" asp-action="Index">Admin Dashboard</a>
+                                </li>
+                            }
                             @if (User.IsInRole("Staff"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="StaffDashboard" asp-action="Index">Dashboard</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="StaffDashboard" asp-action="Index">My Dashboard</a>
                                 </li>
                             }
                             <li class="nav-item">

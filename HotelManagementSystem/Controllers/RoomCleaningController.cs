@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HotelManagementSystem.Controllers
 {
-    [Authorize(Roles = "Staff")]
+    [Authorize]
     public class RoomCleaningController : Controller
     {
         private readonly IRoomCleaningService _cleaningService;
@@ -21,12 +21,14 @@ namespace HotelManagementSystem.Controllers
             _userService = userService;
         }
 
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Index()
         {
             var cleanings = await _cleaningService.GetAllCleaningsAsync();
             return View(cleanings);
         }
 
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Assign()
         {
             var rooms = await _roomService.GetAllRoomsAsync();
@@ -40,12 +42,14 @@ namespace HotelManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Assign(int roomId, int staffUserId)
         {
             await _cleaningService.AssignCleanerAsync(roomId, staffUserId);
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Staff, Administrator")]
         public async Task<IActionResult> Edit(int id)
         {
             var cleaning = await _cleaningService.GetCleaningByIdAsync(id);
@@ -58,11 +62,17 @@ namespace HotelManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Staff, Administrator")]
         public async Task<IActionResult> Edit(int id, string status)
         {
             // Hàm này giữ nguyên, chỉ update status
             await _cleaningService.UpdateStatusAsync(id, status);
-            return RedirectToAction(nameof(Index));
+
+            if (User.IsInRole("Administrator"))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            return RedirectToAction("Index", "StaffDashboard");
         }
     }
 }

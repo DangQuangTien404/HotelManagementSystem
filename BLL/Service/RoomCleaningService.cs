@@ -97,6 +97,15 @@ namespace BLL.Service
             return MapToDto(cleaning);
         }
 
+        public async Task<IEnumerable<RoomCleaningDto>> GetCleaningsByStaffIdAsync(int staffId)
+        {
+            var allCleanings = await _repository.GetAllWithDetailsAsync();
+            // Filter for the specific staff and exclude completed tasks
+            return allCleanings
+                .Where(rc => rc.CleanedBy == staffId && rc.Status != "Completed")
+                .Select(MapToDto);
+        }
+
         private RoomCleaningDto MapToDto(RoomCleaning rc)
         {
             return new RoomCleaningDto
