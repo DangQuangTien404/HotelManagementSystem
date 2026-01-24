@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HotelManagementSystem.Controllers
 {
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = "Staff")] // Hoặc Roles = "Admin" tùy bạn
     public class UserController : Controller
     {
         private readonly IUserService _userService;

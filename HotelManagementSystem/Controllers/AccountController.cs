@@ -56,10 +56,6 @@ namespace HotelManagementSystem.Controllers
                     {
                         return RedirectToAction("Index", "StaffDashboard");
                     }
-                    else if (user.Role == "Administrator")
-                    {
-                        return RedirectToAction("Index", "Administrator");
-                    }
                     else
                     {
                         return RedirectToAction("Index", "Home");

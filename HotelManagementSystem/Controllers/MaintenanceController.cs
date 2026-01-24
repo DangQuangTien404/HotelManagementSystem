@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace HotelManagementSystem.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Staff")]
     public class MaintenanceController : Controller
     {
         private readonly IRoomService _roomService;
@@ -17,7 +17,6 @@ namespace HotelManagementSystem.Controllers
         }
 
         // Hiển thị danh sách các phòng để quản lý bảo trì
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Index()
         {
             var rooms = await _roomService.GetAllRoomsAsync();
@@ -29,7 +28,6 @@ namespace HotelManagementSystem.Controllers
         // Chuyển sang trạng thái Maintenance
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> StartMaintenance(int id)
         {
             var room = await _roomService.GetRoomByIdAsync(id);
@@ -43,7 +41,6 @@ namespace HotelManagementSystem.Controllers
         // Hoàn tất bảo trì, trả về Available
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Staff, Administrator")]
         public async Task<IActionResult> FinishMaintenance(int id)
         {
             var room = await _roomService.GetRoomByIdAsync(id);
@@ -51,12 +48,7 @@ namespace HotelManagementSystem.Controllers
             {
                 await _roomService.UpdateRoomStatusAsync(id, "Available");
             }
-
-            if (User.IsInRole("Administrator"))
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            return RedirectToAction("Index", "StaffDashboard");
+            return RedirectToAction(nameof(Index));
         }
     }
 }
