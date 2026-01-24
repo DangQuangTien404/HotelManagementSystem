@@ -1,0 +1,146 @@
+@model DTOs.CustomerDto
+@{
+    ViewData["Title"] = "Customer Details";
+    var reservations = ViewBag.Reservations as IEnumerable<DTOs.ReservationDto> ?? new List<DTOs.ReservationDto>();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar màu xanh nước biển -->
+        <div class="col-md-3 col-lg-2 px-0" style="background-color: #0066cc; min-height: 100vh; position: fixed; left: 0; top: 56px; z-index: 1000;">
+            <div class="p-3">
+                <h5 class="text-white mb-4">Admin Panel</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminStaff" asp-action="Index">
+                            <i class="bi bi-people"></i> Staff Management
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white active" style="background-color: rgba(255,255,255,0.2); border-radius: 5px;" asp-controller="AdminCustomer" asp-action="Index">
+                            <i class="bi bi-person"></i> Customer Management
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminTask" asp-action="Index">
+                            <i class="bi bi-clipboard-check"></i> Task Assignment
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" href="#" style="opacity: 0.7;">
+                            <i class="bi bi-bell"></i> Notifications
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" href="#" style="opacity: 0.7;">
+                            <i class="bi bi-cash-coin"></i> Revenue Management
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-auto" style="margin-left: 16.66666667%;">
+            <div class="p-4">
+                <h1>Customer Information</h1>
+                <hr />
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Personal Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Username:</dt>
+                                    <dd class="col-sm-8">@Model.Username</dd>
+
+                                    <dt class="col-sm-4">Full Name:</dt>
+                                    <dd class="col-sm-8">@Model.FullName</dd>
+
+                                    <dt class="col-sm-4">Email:</dt>
+                                    <dd class="col-sm-8">@Model.Email</dd>
+
+                                    <dt class="col-sm-4">Created Date:</dt>
+                                    <dd class="col-sm-8">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                                    <dt class="col-sm-4">Total Reservations:</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge bg-info">@Model.TotalReservations</span>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Reservation History</h3>
+                <div class="card shadow">
+                    <div class="card-body p-0">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Reservation ID</th>
+                                    <th>Room Number</th>
+                                    <th>Room Type</th>
+                                    <th>Check-in Date</th>
+                                    <th>Check-out Date</th>
+                                    <th>Status</th>
+                                    <th>Booked By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (reservations.Any())
+                                {
+                                    @foreach (var reservation in reservations)
+                                    {
+                                        <tr>
+                                            <td class="align-middle">#@reservation.Id</td>
+                                            <td class="align-middle">@reservation.RoomNumber</td>
+                                            <td class="align-middle">@reservation.RoomType</td>
+                                            <td class="align-middle">@reservation.CheckInDate.ToString("dd/MM/yyyy")</td>
+                                            <td class="align-middle">@reservation.CheckOutDate.ToString("dd/MM/yyyy")</td>
+                                            <td class="align-middle">
+                                                @if (reservation.Status == "Pending")
+                                                {
+                                                    <span class="badge bg-warning">@reservation.Status</span>
+                                                }
+                                                else if (reservation.Status == "Confirmed")
+                                                {
+                                                    <span class="badge bg-info">@reservation.Status</span>
+                                                }
+                                                else if (reservation.Status == "Cancelled")
+                                                {
+                                                    <span class="badge bg-secondary">@reservation.Status</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-primary">@reservation.Status</span>
+                                                }
+                                            </td>
+                                            <td class="align-middle">@reservation.ReservedByName</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">No reservations found</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">Back</a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete Customer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

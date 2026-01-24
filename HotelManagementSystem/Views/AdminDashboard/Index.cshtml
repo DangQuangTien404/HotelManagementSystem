@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar màu xanh nước biển -->
+        <div class="col-md-3 col-lg-2 px-0" style="background-color: #0066cc; min-height: 100vh; position: fixed; left: 0; top: 56px; z-index: 1000;">
+            <div class="p-3">
+                <h5 class="text-white mb-4">Admin Panel</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminStaff" asp-action="Index">
+                            <i class="bi bi-people"></i> Staff Management
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminCustomer" asp-action="Index">
+                            <i class="bi bi-person"></i> Customer Management
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminTask" asp-action="Index">
+                            <i class="bi bi-clipboard-check"></i> Task Assignment
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminNotification" asp-action="Index">
+                            <i class="bi bi-bell"></i> Notifications
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminRevenue" asp-action="Index">
+                            <i class="bi bi-cash-coin"></i> Revenue Management
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-auto" style="margin-left: 16.66666667%;">
+            <div class="p-4">
+                <h1>Admin Dashboard</h1>
+                <p class="text-muted">Welcome to the administration page</p>
+            </div>
+        </div>
+    </div>
+</div>
+
