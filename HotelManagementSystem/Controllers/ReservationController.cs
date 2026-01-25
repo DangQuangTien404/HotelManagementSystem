@@ -3,6 +3,7 @@ using DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HotelManagementSystem.Controllers
@@ -100,6 +101,14 @@ namespace HotelManagementSystem.Controllers
             }
 
             return RedirectToAction(nameof(MyReservations));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUnavailableDates(int roomId)
+        {
+            var unavailableDates = await _reservationService.GetUnavailableDatesAsync(roomId);
+            var dateStrings = unavailableDates.Select(d => d.ToString("yyyy-MM-dd"));
+            return Json(dateStrings);
         }
     }
 }

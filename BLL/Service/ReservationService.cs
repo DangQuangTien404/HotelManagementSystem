@@ -110,6 +110,11 @@ namespace BLL.Service
                 throw new InvalidOperationException("Reservation is already cancelled.");
             }
 
+            if (reservation.CheckInDate <= DateTime.UtcNow.AddHours(24))
+            {
+                throw new InvalidOperationException("Cannot cancel a reservation on or after check-in date.");
+            }
+
             reservation.Status = ReservationStatus.Cancelled;
             await _reservationRepository.UpdateAsync(reservation);
 
@@ -124,6 +129,41 @@ namespace BLL.Service
         public async Task<bool> IsRoomAvailableAsync(int roomId, DateTime checkIn, DateTime checkOut)
         {
             return await _reservationRepository.IsRoomAvailableAsync(roomId, checkIn, checkOut);
+        }
+
+        public async Task<IEnumerable<DateTime>> GetUnavailableDatesAsync(int roomId)
+        {
+            var unavailableDates = new List<DateTime>();
+
+            // Get booked date ranges from reservations
+            var bookedRanges = await _reservationRepository.GetBookedDateRangesAsync(roomId);
+            foreach (var (start, end) in bookedRanges)
+            {
+                for (var date = start.Date; date < end.Date; date = date.AddDays(1))
+                {
+                    if (!unavailableDates.Contains(date))
+                    {
+                        unavailableDates.Add(date);
+                    }
+                }
+            }
+
+            // Check if room is currently in maintenance
+            var room = await _roomRepository.GetByIdAsync(roomId);
+            if (room != null && room.Status == RoomStatus.Maintenance)
+            {
+                // Add today and next 30 days as unavailable for maintenance rooms
+                for (var i = 0; i < 30; i++)
+                {
+                    var date = DateTime.UtcNow.Date.AddDays(i);
+                    if (!unavailableDates.Contains(date))
+                    {
+                        unavailableDates.Add(date);
+                    }
+                }
+            }
+
+            return unavailableDates.OrderBy(d => d);
         }
 
         private async Task<Customer> GetOrCreateCustomerAsync(CreateReservationDto reservationDto, string username)

@@ -15,5 +15,11 @@ namespace DTOs
         public ReservationStatus Status { get; set; } = ReservationStatus.Pending;
         public decimal TotalPrice { get; set; }
         public int NumberOfNights { get; set; }
+
+        /// <summary>
+        /// Indicates whether the reservation can be cancelled.
+        /// A reservation can only be cancelled if it is confirmed and the check-in date is in the future.
+        /// </summary>
+        public bool CanCancel => Status == ReservationStatus.Confirmed && CheckInDate > DateTime.UtcNow;
     }
 }

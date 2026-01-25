@@ -104,7 +104,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
-                            @if (reservation.Status == ReservationStatus.Confirmed && reservation.CheckInDate > DateTime.Now)
+                            @if (reservation.CanCancel)
                             {
                                 <form asp-action="Cancel" asp-route-id="@reservation.Id" method="post" class="d-inline"
                                       onsubmit="return confirm('Are you sure you want to cancel this reservation?');">

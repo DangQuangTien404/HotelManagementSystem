@@ -11,5 +11,6 @@ namespace DAL.Interfaces
         Task<Reservation?> GetReservationWithDetailsAsync(int id);
         Task<IEnumerable<Reservation>> GetReservationsByRoomIdAsync(int roomId);
         Task<bool> IsRoomAvailableAsync(int roomId, DateTime checkIn, DateTime checkOut);
+        Task<IEnumerable<(DateTime Start, DateTime End)>> GetBookedDateRangesAsync(int roomId);
     }
 }

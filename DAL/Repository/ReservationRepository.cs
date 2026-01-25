@@ -54,5 +54,17 @@ namespace DAL.Repository
 
             return !hasOverlap;
         }
+
+        public async Task<IEnumerable<(DateTime Start, DateTime End)>> GetBookedDateRangesAsync(int roomId)
+        {
+            var reservations = await _context.Reservations
+                .Where(r => r.RoomId == roomId &&
+                       r.Status != ReservationStatus.Cancelled &&
+                       r.CheckOutDate >= DateTime.UtcNow.Date)
+                .Select(r => new { r.CheckInDate, r.CheckOutDate })
+                .ToListAsync();
+
+            return reservations.Select(r => (r.CheckInDate, r.CheckOutDate));
+        }
     }
 }
