@@ -15,9 +15,6 @@ builder.Services.AddControllersWithViews(options =>
     options.ModelBinderProviders.Insert(0, new DateTimeModelBinderProvider());
 });
 
-// Register AutoMapper
-builder.Services.AddAutoMapper(typeof(BLL.MappingProfiles.RoomMappingProfile).Assembly);
-
 // Register the HotelDbContext to use SQL Server
 // This reads the "DefaultConnection" string from appsettings.json
 builder.Services.AddDbContext<HotelDbContext>(options =>

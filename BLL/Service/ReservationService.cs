@@ -1,4 +1,3 @@
-using AutoMapper;
 using BLL.Interfaces;
 using DAL.Interfaces;
 using DTOs;
@@ -17,26 +16,22 @@ namespace BLL.Service
         private readonly IGenericRepository<Room> _roomRepository;
         private readonly IGenericRepository<Customer> _customerRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
 
         public ReservationService(
             IReservationRepository reservationRepository,
             IGenericRepository<Room> roomRepository,
             IGenericRepository<Customer> customerRepository,
-            IUserRepository userRepository,
-            IMapper mapper)
+            IUserRepository userRepository)
         {
             _reservationRepository = reservationRepository;
             _roomRepository = roomRepository;
             _customerRepository = customerRepository;
             _userRepository = userRepository;
-            _mapper = mapper;
         }
 
         public async Task<ReservationDto> CreateReservationAsync(CreateReservationDto reservationDto, string username)
         {
-            // Validate dates
-            if (reservationDto.CheckInDate < DateTime.Now.Date)
+            if (reservationDto.CheckInDate < DateTime.UtcNow)
             {
                 throw new InvalidOperationException("Check-in date cannot be in the past.");
             }
@@ -46,7 +41,6 @@ namespace BLL.Service
                 throw new InvalidOperationException("Check-out date must be after check-in date.");
             }
 
-            // Check room availability
             var isAvailable = await _reservationRepository.IsRoomAvailableAsync(
                 reservationDto.RoomId, 
                 reservationDto.CheckInDate, 
@@ -57,20 +51,16 @@ namespace BLL.Service
                 throw new InvalidOperationException("Room is not available for the selected dates.");
             }
 
-            // Get or create customer
             var customer = await GetOrCreateCustomerAsync(reservationDto, username);
 
-            // Get user who is making the reservation
             var user = await _userRepository.GetByUsernameAsync(username);
 
-            // Get room and update status
             var room = await _roomRepository.GetByIdAsync(reservationDto.RoomId);
             if (room == null)
             {
                 throw new InvalidOperationException("Room not found.");
             }
 
-            // Create reservation
             var reservation = new Reservation
             {
                 CustomerId = customer.Id,
@@ -84,25 +74,23 @@ namespace BLL.Service
 
             await _reservationRepository.AddAsync(reservation);
 
-            // Update room status to Reserved
             room.Status = RoomStatus.Reserved;
             await _roomRepository.UpdateAsync(room);
 
-            // Get the full reservation with details for mapping
             var createdReservation = await _reservationRepository.GetReservationWithDetailsAsync(reservation.Id);
-            return _mapper.Map<ReservationDto>(createdReservation);
+            return MapToDto(createdReservation!);
         }
 
         public async Task<IEnumerable<ReservationDto>> GetUserReservationsAsync(string username)
         {
             var reservations = await _reservationRepository.GetReservationsByUsernameAsync(username);
-            return _mapper.Map<IEnumerable<ReservationDto>>(reservations);
+            return reservations.Select(MapToDto);
         }
 
         public async Task<ReservationDto?> GetReservationByIdAsync(int id)
         {
             var reservation = await _reservationRepository.GetReservationWithDetailsAsync(id);
-            return _mapper.Map<ReservationDto>(reservation);
+            return reservation != null ? MapToDto(reservation) : null;
         }
 
         public async Task CancelReservationAsync(int id)
@@ -157,6 +145,24 @@ namespace BLL.Service
             }
 
             return customer;
+        }
+
+        private static ReservationDto MapToDto(Reservation reservation)
+        {
+            var numberOfNights = (reservation.CheckOutDate - reservation.CheckInDate).Days;
+            return new ReservationDto
+            {
+                Id = reservation.Id,
+                CustomerId = reservation.CustomerId,
+                CustomerName = reservation.Customer?.FullName ?? string.Empty,
+                RoomId = reservation.RoomId,
+                RoomNumber = reservation.Room?.RoomNumber ?? string.Empty,
+                CheckInDate = reservation.CheckInDate,
+                CheckOutDate = reservation.CheckOutDate,
+                Status = reservation.Status,
+                NumberOfNights = numberOfNights,
+                TotalPrice = (reservation.Room?.Price ?? 0) * numberOfNights
+            };
         }
     }
 }

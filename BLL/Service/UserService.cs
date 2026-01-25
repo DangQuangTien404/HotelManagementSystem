@@ -1,4 +1,3 @@
-using AutoMapper;
 using BLL.Interfaces;
 using DAL.Interfaces;
 using DTOs;
@@ -14,36 +13,34 @@ namespace BLL.Service
     {
         private readonly IUserRepository _repository;
         private readonly IPasswordHasher _passwordHasher;
-        private readonly IMapper _mapper;
 
-        public UserService(IUserRepository repository, IPasswordHasher passwordHasher, IMapper mapper)
+        public UserService(IUserRepository repository, IPasswordHasher passwordHasher)
         {
             _repository = repository;
             _passwordHasher = passwordHasher;
-            _mapper = mapper;
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
             var users = await _repository.GetAllWithDetailsAsync();
-            return _mapper.Map<IEnumerable<UserDto>>(users);
+            return users.Select(MapToDto);
         }
 
         public async Task<IEnumerable<UserDto>> GetStaffUsersAsync()
         {
             var users = await _repository.GetStaffUsersAsync();
-            return _mapper.Map<IEnumerable<UserDto>>(users);
+            return users.Select(MapToDto);
         }
 
         public async Task<UserDto?> GetUserByIdAsync(int id)
         {
             var user = await _repository.GetByIdAsync(id);
-            return _mapper.Map<UserDto>(user);
+            return user != null ? MapToDto(user) : null;
         }
 
         public async Task AddUserAsync(UserDto userDto)
         {
-            var user = _mapper.Map<User>(userDto);
+            var user = MapToEntity(userDto);
             user.PasswordHash = _passwordHasher.HashPassword(userDto.Password);
             user.CreatedAt = DateTime.UtcNow;
 
@@ -68,7 +65,10 @@ namespace BLL.Service
             var user = await _repository.GetByIdAsync(userDto.Id);
             if (user != null)
             {
-                _mapper.Map(userDto, user);
+                user.Username = userDto.Username;
+                user.FullName = userDto.FullName;
+                user.Email = userDto.Email;
+                user.Role = userDto.Role;
                 
                 // Only update password if provided
                 if (!string.IsNullOrEmpty(userDto.Password))
@@ -83,6 +83,31 @@ namespace BLL.Service
         public async Task DeleteUserAsync(int id)
         {
             await _repository.DeleteAsync(id);
+        }
+
+        private static UserDto MapToDto(User user)
+        {
+            return new UserDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                FullName = user.FullName,
+                Email = user.Email,
+                Role = user.Role,
+                IsStaff = user.Role == "Staff"
+            };
+        }
+
+        private static User MapToEntity(UserDto dto)
+        {
+            return new User
+            {
+                Id = dto.Id,
+                Username = dto.Username,
+                FullName = dto.FullName,
+                Email = dto.Email,
+                Role = dto.Role
+            };
         }
     }
 }

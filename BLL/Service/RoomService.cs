@@ -1,11 +1,9 @@
-﻿using AutoMapper;
-using BLL.Interfaces;
+﻿using BLL.Interfaces;
 using DAL.Interfaces;
 using DTOs;
 using DTOs.Entities;
 using DTOs.Enums;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +14,10 @@ namespace BLL.Service
     public class RoomService : IRoomService
     {
         private readonly IGenericRepository<Room> _repository;
-        private readonly IMapper _mapper;
 
-        public RoomService(IGenericRepository<Room> repository, IMapper mapper)
+        public RoomService(IGenericRepository<Room> repository)
         {
             _repository = repository;
-            _mapper = mapper;
         }
         // Thêm hàm này vào cuối class RoomService
         public async Task UpdateRoomStatusAsync(int roomId, RoomStatus status)
@@ -36,18 +32,18 @@ namespace BLL.Service
         public async Task<IEnumerable<RoomDto>> GetAllRoomsAsync()
         {
             var rooms = await _repository.GetAllAsync();
-            return _mapper.Map<IEnumerable<RoomDto>>(rooms);
+            return rooms.Select(MapToDto);
         }
 
         public async Task<RoomDto?> GetRoomByIdAsync(int id)
         {
             var room = await _repository.GetByIdAsync(id);
-            return _mapper.Map<RoomDto>(room);
+            return room != null ? MapToDto(room) : null;
         }
 
         public async Task AddRoomAsync(RoomDto roomDto)
         {
-            var room = _mapper.Map<Room>(roomDto);
+            var room = MapToEntity(roomDto);
             await _repository.AddAsync(room);
         }
 
@@ -56,7 +52,11 @@ namespace BLL.Service
             var room = await _repository.GetByIdAsync(roomDto.Id);
             if (room != null)
             {
-                _mapper.Map(roomDto, room);
+                room.RoomNumber = roomDto.RoomNumber;
+                room.RoomType = roomDto.RoomType;
+                room.Price = roomDto.Price;
+                room.Status = roomDto.Status;
+                room.Capacity = roomDto.Capacity;
                 await _repository.UpdateAsync(room);
             }
         }
@@ -87,7 +87,7 @@ namespace BLL.Service
             }
 
             var rooms = await query.OrderBy(r => r.Price).ToListAsync();
-            return _mapper.Map<IEnumerable<RoomDto>>(rooms);
+            return rooms.Select(MapToDto);
         }
 
         public async Task BookRoom(int id)
@@ -102,6 +102,32 @@ namespace BLL.Service
                                          .Where(r => r.Status == RoomStatus.Available)
                                          .OrderBy(r => r.Price)
                                          .ToListAsync();
+        }
+
+        private static RoomDto MapToDto(Room room)
+        {
+            return new RoomDto
+            {
+                Id = room.Id,
+                RoomNumber = room.RoomNumber,
+                RoomType = room.RoomType,
+                Price = room.Price,
+                Status = room.Status,
+                Capacity = room.Capacity
+            };
+        }
+
+        private static Room MapToEntity(RoomDto dto)
+        {
+            return new Room
+            {
+                Id = dto.Id,
+                RoomNumber = dto.RoomNumber,
+                RoomType = dto.RoomType,
+                Price = dto.Price,
+                Status = dto.Status,
+                Capacity = dto.Capacity
+            };
         }
     }
 }

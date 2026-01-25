@@ -1,10 +1,10 @@
-﻿using AutoMapper;
-using BLL.Interfaces;
+﻿using BLL.Interfaces;
 using DAL.Interfaces;
 using DTOs;
 using DTOs.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BLL.Service
@@ -14,26 +14,24 @@ namespace BLL.Service
         private readonly IRoomCleaningRepository _repository;
         // 1. Thêm Repository của Room để cập nhật trạng thái phòng
         private readonly IGenericRepository<Room> _roomRepository;
-        private readonly IMapper _mapper;
 
         // Cập nhật Constructor để nhận thêm IGenericRepository<Room>
-        public RoomCleaningService(IRoomCleaningRepository repository, IGenericRepository<Room> roomRepository, IMapper mapper)
+        public RoomCleaningService(IRoomCleaningRepository repository, IGenericRepository<Room> roomRepository)
         {
             _repository = repository;
             _roomRepository = roomRepository;
-            _mapper = mapper;
         }
 
         public async Task<IEnumerable<RoomCleaningDto>> GetAllCleaningsAsync()
         {
             var cleanings = await _repository.GetAllWithDetailsAsync();
-            return _mapper.Map<IEnumerable<RoomCleaningDto>>(cleanings);
+            return cleanings.Select(MapToDto);
         }
 
         public async Task<IEnumerable<RoomCleaningDto>> GetPendingCleaningsAsync()
         {
             var cleanings = await _repository.GetPendingCleaningsAsync();
-            return _mapper.Map<IEnumerable<RoomCleaningDto>>(cleanings);
+            return cleanings.Select(MapToDto);
         }
 
         public async Task AssignCleanerAsync(int roomId, int staffUserId)
