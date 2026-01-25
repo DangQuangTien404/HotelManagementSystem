@@ -24,7 +24,7 @@ namespace BLL.Service
             _mapper = mapper;
         }
         // Thêm hàm này vào cuối class RoomService
-        public async Task UpdateRoomStatusAsync(int roomId, string status)
+        public async Task UpdateRoomStatusAsync(int roomId, RoomStatus status)
         {
             var room = await _repository.GetByIdAsync(roomId);
             if (room != null)

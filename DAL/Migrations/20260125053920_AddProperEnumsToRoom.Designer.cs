@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(HotelDbContext))]
-    [Migration("20260123064243_AddProperEnumsToRoom")]
+    [Migration("20260125053920_AddProperEnumsToRoom")]
     partial class AddProperEnumsToRoom
     {
         /// <inheritdoc />
@@ -124,9 +124,8 @@ namespace DAL.Migrations
                     b.Property<int>("RoomId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

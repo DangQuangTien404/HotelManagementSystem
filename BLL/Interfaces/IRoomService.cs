@@ -13,6 +13,6 @@ namespace BLL.Interfaces
         Task UpdateRoomAsync(RoomDto roomDto);
         Task DeleteRoomAsync(int id);
         Task<IEnumerable<RoomDto>> SearchAvailableRoomsAsync(string? searchTerm, RoomType? roomType, decimal? maxPrice);
-        Task UpdateRoomStatusAsync(int roomId, string status);
+        Task UpdateRoomStatusAsync(int roomId, RoomStatus status);
     }
 }

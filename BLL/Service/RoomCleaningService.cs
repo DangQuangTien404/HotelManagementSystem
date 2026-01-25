@@ -14,12 +14,14 @@ namespace BLL.Service
         private readonly IRoomCleaningRepository _repository;
         // 1. Thêm Repository của Room để cập nhật trạng thái phòng
         private readonly IGenericRepository<Room> _roomRepository;
+        private readonly IMapper _mapper;
 
         // Cập nhật Constructor để nhận thêm IGenericRepository<Room>
-        public RoomCleaningService(IRoomCleaningRepository repository, IGenericRepository<Room> roomRepository)
+        public RoomCleaningService(IRoomCleaningRepository repository, IGenericRepository<Room> roomRepository, IMapper mapper)
         {
             _repository = repository;
             _roomRepository = roomRepository;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<RoomCleaningDto>> GetAllCleaningsAsync()
@@ -51,7 +53,7 @@ namespace BLL.Service
             if (room != null)
             {
                 // Đổi status phòng sang "Cleaning" (hoặc "Maintenance" tùy quy định của bạn)
-                room.Status = "Cleaning";
+                room.Status = DTOs.Enums.RoomStatus.Cleaning;
                 await _roomRepository.UpdateAsync(room);
             }
         }
@@ -73,7 +75,7 @@ namespace BLL.Service
                     var room = await _roomRepository.GetByIdAsync(cleaning.RoomId);
                     if (room != null)
                     {
-                        room.Status = "Available";
+                        room.Status = DTOs.Enums.RoomStatus.Available;
                         await _roomRepository.UpdateAsync(room);
                     }
                 }
