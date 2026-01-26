@@ -138,6 +138,11 @@
         <button id="btnCheckIn" class="btn-action" onclick="doCheckIn()" disabled>Check-in</button>
         <button id="btnCheckOut" class="btn-action" onclick="doCheckOut()" disabled>Check-out</button>
         <button class="btn-action" onclick="window.location.reload()">Refresh</button>
+
+        <a asp-action="History" class="btn btn-action text-decoration-none text-center text-dark" style="margin-top:10px;">
+            Guest History
+        </a>
+
         <a asp-controller="StaffDashboard" asp-action="Index" class="btn btn-action text-decoration-none text-center" style="display:block; padding-top:10px;">Exit</a>
     </div>
 
@@ -180,7 +185,7 @@
 
     // --- ARRIVAL SELECTION ---
     function selectArrival(row, id) {
-        console.log("Selected Arrival ID:", id); // Check Console for this
+        console.log("Selected Arrival ID:", id);
 
         // 1. Remove blue color from all rows
         document.querySelectorAll('#tableArrivals tr').forEach(r => r.classList.remove('selected-row'));
@@ -198,7 +203,7 @@
 
     // --- IN-HOUSE SELECTION ---
     function selectInHouse(row, id) {
-        console.log("Selected In-House ID:", id); // Check Console for this
+        console.log("Selected In-House ID:", id);
 
         // 1. Remove blue color from all rows
         document.querySelectorAll('#tableInHouse tr').forEach(r => r.classList.remove('selected-row'));

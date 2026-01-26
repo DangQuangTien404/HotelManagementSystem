@@ -20,5 +20,7 @@ namespace DAL.Interfaces
         Task<Reservation> CreateReservationIfAvailableAsync(Reservation reservation);
         IEnumerable<Reservation> GetTodayArrivals();
         IEnumerable<Reservation> GetActiveReservations();
+        ///invoice
+        IEnumerable<Reservation> GetCheckedOutReservations();
     }
 }

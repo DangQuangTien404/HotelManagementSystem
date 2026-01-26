@@ -143,5 +143,15 @@ namespace DAL.Repository
                 .OrderBy(r => r.CheckOutDate)
                 .ToList();
         }
+        public IEnumerable<Reservation> GetCheckedOutReservations()
+        {
+            return _context.Reservations
+                .Include(r => r.Customer)
+                .Include(r => r.Room)
+                .Include(r => r.CheckInOuts) // Important for invoice details
+                .Where(r => r.Status == ReservationStatus.CheckedOut)
+                .OrderByDescending(r => r.CheckOutDate) // Show most recent first
+                .ToList();
+        }
     }
 }

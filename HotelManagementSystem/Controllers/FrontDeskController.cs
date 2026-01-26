@@ -113,6 +113,33 @@ namespace HotelManagementSystem.Controllers
 
             return View(reservation);
         }
+        public IActionResult History()
+        {
+            var history = _reservationRepo.GetCheckedOutReservations();
+            return View(history);
+        }
+
+        // 2. Show a specific Invoice (Printable)
+        public async Task<IActionResult> Invoice(int id)
+        {
+            var reservation = await _reservationRepo.GetReservationWithDetailsAsync(id);
+            if (reservation == null || reservation.Status != DTOs.Enums.ReservationStatus.CheckedOut)
+            {
+                return NotFound();
+            }
+
+            // Find the completed Check-In/Out record to get the final price
+            var record = reservation.CheckInOuts
+                .OrderByDescending(c => c.CheckOutTime)
+                .FirstOrDefault();
+
+            ViewBag.CheckInTime = record?.CheckInTime;
+            ViewBag.CheckOutTime = record?.CheckOutTime;
+            ViewBag.TotalAmount = record?.TotalAmount ?? 0;
+            ViewBag.StaffName = record?.CheckOutStaff?.FullName ?? "Unknown";
+
+            return View(reservation);
+        }
 
     }
 
