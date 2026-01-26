@@ -41,16 +41,6 @@ namespace BLL.Service
                 throw new InvalidOperationException("Check-out date must be after check-in date.");
             }
 
-            var isAvailable = await _reservationRepository.IsRoomAvailableAsync(
-                reservationDto.RoomId, 
-                reservationDto.CheckInDate, 
-                reservationDto.CheckOutDate);
-
-            if (!isAvailable)
-            {
-                throw new InvalidOperationException("Room is not available for the selected dates.");
-            }
-
             var customer = await GetOrCreateCustomerAsync(reservationDto, username);
 
             var user = await _userRepository.GetByUsernameAsync(username);
@@ -72,7 +62,8 @@ namespace BLL.Service
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _reservationRepository.AddAsync(reservation);
+            // Atomically check availability and create reservation within a transaction
+            await _reservationRepository.CreateReservationIfAvailableAsync(reservation);
 
             // Only update room status if check-in is today
             if (reservationDto.CheckInDate.Date == DateTime.UtcNow.Date)

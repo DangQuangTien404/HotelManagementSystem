@@ -2,6 +2,7 @@ using DAL.Interfaces;
 using DTOs.Entities;
 using DTOs.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,6 +54,46 @@ namespace DAL.Repository
                      (checkIn <= r.CheckInDate && checkOut >= r.CheckOutDate)));
 
             return !hasOverlap;
+        }
+
+        public async Task<Reservation> CreateReservationIfAvailableAsync(Reservation reservation)
+        {
+            // Use a serializable transaction to ensure atomicity of check + insert
+            var strategy = _context.Database.CreateExecutionStrategy();
+
+            return await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+                try
+                {
+                    // Check availability with row-level locking by querying overlapping reservations
+                    var hasOverlap = await _context.Reservations
+                        .Where(r => r.RoomId == reservation.RoomId &&
+                            r.Status != ReservationStatus.Cancelled &&
+                            ((reservation.CheckInDate >= r.CheckInDate && reservation.CheckInDate < r.CheckOutDate) ||
+                             (reservation.CheckOutDate > r.CheckInDate && reservation.CheckOutDate <= r.CheckOutDate) ||
+                             (reservation.CheckInDate <= r.CheckInDate && reservation.CheckOutDate >= r.CheckOutDate)))
+                        .AnyAsync();
+
+                    if (hasOverlap)
+                    {
+                        throw new InvalidOperationException("Room is not available for the selected dates.");
+                    }
+
+                    // Insert the reservation
+                    await _context.Reservations.AddAsync(reservation);
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+
+                    return reservation;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
         }
 
         public async Task<IEnumerable<(DateTime Start, DateTime End)>> GetBookedDateRangesAsync(int roomId)

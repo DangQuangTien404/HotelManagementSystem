@@ -12,5 +12,10 @@ namespace DAL.Interfaces
         Task<IEnumerable<Reservation>> GetReservationsByRoomIdAsync(int roomId);
         Task<bool> IsRoomAvailableAsync(int roomId, DateTime checkIn, DateTime checkOut);
         Task<IEnumerable<(DateTime Start, DateTime End)>> GetBookedDateRangesAsync(int roomId);
+        /// <summary>
+        /// Atomically checks room availability and creates the reservation within a transaction.
+        /// Throws InvalidOperationException if the room is not available for the specified dates.
+        /// </summary>
+        Task<Reservation> CreateReservationIfAvailableAsync(Reservation reservation);
     }
 }
