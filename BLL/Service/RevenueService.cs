@@ -67,7 +67,7 @@ namespace BLL.Service
 
             // Group by room type and calculate revenue
             var revenueByRoomType = reservationsInRange
-                .GroupBy(r => r.Room?.RoomType ?? "Unknown")
+                .GroupBy(r => r.Room?.RoomType.ToString() ?? "Unknown")
                 .Select(g => 
                 {
                     var reservationIds = g.Select(r => r.Id).ToList();

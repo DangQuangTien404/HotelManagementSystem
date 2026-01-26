@@ -128,12 +128,12 @@ namespace BLL.Service
                 CustomerName = reservation.Customer?.FullName ?? string.Empty,
                 RoomId = reservation.RoomId,
                 RoomNumber = reservation.Room?.RoomNumber ?? string.Empty,
-                RoomType = reservation.Room?.RoomType ?? string.Empty,
+                RoomType = reservation.Room?.RoomType.ToString() ?? string.Empty,
                 RoomPrice = reservation.Room?.Price ?? 0,
                 ReservedBy = reservation.ReservedBy,
                 ReservedByName = reservation.ReservedByUser?.FullName ?? "System",
-                CheckInDate = reservation.CheckInDate,
-                CheckOutDate = reservation.CheckOutDate,
+                CheckInDate = reservation.CheckInDate ?? DateTime.MinValue,
+                CheckOutDate = reservation.CheckOutDate ?? DateTime.MinValue,
                 Status = reservation.Status,
                 CreatedAt = reservation.CreatedAt
             };

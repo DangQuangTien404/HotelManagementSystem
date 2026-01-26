@@ -2,6 +2,7 @@ using BLL.Interfaces;
 using DAL.Interfaces;
 using DTOs;
 using DTOs.Entities;
+using DTOs.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +54,7 @@ namespace BLL.Service
             var room = await _roomRepository.GetByIdAsync(taskDto.RoomId);
             if (room != null)
             {
-                room.Status = "Maintenance";
+                room.Status = RoomStatus.Maintenance;
                 await _roomRepository.UpdateAsync(room);
             }
         }
@@ -114,7 +115,7 @@ namespace BLL.Service
             var room = await _roomRepository.GetByIdAsync(task.RoomId);
             if (room != null)
             {
-                room.Status = "Available";
+                room.Status = RoomStatus.Available;
                 await _roomRepository.UpdateAsync(room);
             }
         }

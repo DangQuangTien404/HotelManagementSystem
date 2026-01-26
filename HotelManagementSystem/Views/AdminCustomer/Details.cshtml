@@ -103,15 +103,15 @@
                                             <td class="align-middle">@reservation.CheckInDate.ToString("dd/MM/yyyy")</td>
                                             <td class="align-middle">@reservation.CheckOutDate.ToString("dd/MM/yyyy")</td>
                                             <td class="align-middle">
-                                                @if (reservation.Status == "Pending")
+                                                @if (reservation.Status == DTOs.Enums.ReservationStatus.Pending)
                                                 {
                                                     <span class="badge bg-warning">@reservation.Status</span>
                                                 }
-                                                else if (reservation.Status == "Confirmed")
+                                                else if (reservation.Status == DTOs.Enums.ReservationStatus.Confirmed)
                                                 {
                                                     <span class="badge bg-info">@reservation.Status</span>
                                                 }
-                                                else if (reservation.Status == "Cancelled")
+                                                else if (reservation.Status == DTOs.Enums.ReservationStatus.Cancelled)
                                                 {
                                                     <span class="badge bg-secondary">@reservation.Status</span>
                                                 }
