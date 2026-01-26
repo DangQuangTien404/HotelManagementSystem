@@ -8,6 +8,7 @@ namespace BLL.Interfaces
     {
         Task<IEnumerable<UserDto>> GetAllUsersAsync();
         Task<IEnumerable<UserDto>> GetStaffUsersAsync();
+        Task<IEnumerable<UserDto>> GetCustomerUsersAsync();
         Task<UserDto?> GetUserByIdAsync(int id);
         Task AddUserAsync(UserDto userDto);
         Task UpdateUserAsync(UserDto userDto);

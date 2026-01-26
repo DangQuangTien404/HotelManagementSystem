@@ -32,6 +32,12 @@ namespace BLL.Service
             return users.Select(MapToDto);
         }
 
+        public async Task<IEnumerable<UserDto>> GetCustomerUsersAsync()
+        {
+            var users = await _repository.GetCustomerUsersAsync();
+            return users.Select(MapToDto);
+        }
+
         public async Task<UserDto?> GetUserByIdAsync(int id)
         {
             var user = await _repository.GetByIdAsync(id);

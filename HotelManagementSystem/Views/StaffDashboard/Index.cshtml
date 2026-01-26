@@ -60,20 +60,20 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card h-100">
+        <div class="card h-100 border-success">
             <div class="card-body">
-                <h5 class="card-title">Room Management</h5>
-                <p class="card-text">Add, update or view room details.</p>
-                <a asp-controller="Room" asp-action="Index" class="btn btn-primary w-100 mt-auto">Manage Rooms</a>
+                <h5 class="card-title text-success">My Tasks</h5>
+                <p class="card-text">View and update your assigned maintenance tasks.</p>
+                <a asp-controller="StaffTask" asp-action="MyTasks" class="btn btn-success w-100 mt-auto">View My Tasks</a>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">User Management</h5>
-                <p class="card-text">Manage staff and customer accounts.</p>
-                <a asp-controller="User" asp-action="Index" class="btn btn-primary w-100 mt-auto">Manage Users</a>
+                <h5 class="card-title">Room Management</h5>
+                <p class="card-text">Add, update or view room details.</p>
+                <a asp-controller="Room" asp-action="Index" class="btn btn-primary w-100 mt-auto">Manage Rooms</a>
             </div>
         </div>
     </div>
@@ -92,6 +92,18 @@
                 <h5 class="card-title text-warning">Maintenance</h5>
                 <p class="card-text">Set rooms to maintenance mode.</p>
                 <a asp-controller="Maintenance" asp-action="Index" class="btn btn-warning w-100 mt-auto">Manage Maintenance</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">User Management</h5>
+                <p class="card-text">Manage staff and customer accounts.</p>
+                <a asp-controller="User" asp-action="Index" class="btn btn-primary w-100 mt-auto">Manage Users</a>
             </div>
         </div>
     </div>

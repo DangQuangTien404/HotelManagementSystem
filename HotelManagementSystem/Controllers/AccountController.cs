@@ -54,7 +54,11 @@ namespace HotelManagementSystem.Controllers
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity));
 
-                    if (user.Role == "Staff")
+                    if (user.Role == "Admin")
+                    {
+                        return RedirectToAction("Index", "AdminDashboard");
+                    }
+                    else if (user.Role == "Staff")
                     {
                         return RedirectToAction("Index", "StaffDashboard");
                     }

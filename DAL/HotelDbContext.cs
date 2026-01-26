@@ -16,6 +16,8 @@ namespace DAL
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<CheckInOut> CheckInOuts { get; set; }
         public DbSet<RoomCleaning> RoomCleanings { get; set; }
+        public DbSet<MaintenanceTask> MaintenanceTasks { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -92,6 +94,30 @@ namespace DAL
                 .HasOne(rc => rc.Cleaner)
                 .WithMany()
                 .HasForeignKey(rc => rc.CleanedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MaintenanceTask>()
+                .HasOne(mt => mt.AssignedStaff)
+                .WithMany()
+                .HasForeignKey(mt => mt.AssignedTo)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MaintenanceTask>()
+                .HasOne(mt => mt.ApprovedByUser)
+                .WithMany()
+                .HasForeignKey(mt => mt.ApprovedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Sender)
+                .WithMany()
+                .HasForeignKey(n => n.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Recipient)
+                .WithMany()
+                .HasForeignKey(n => n.RecipientId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

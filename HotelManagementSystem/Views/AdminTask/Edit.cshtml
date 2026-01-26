@@ -1,0 +1,123 @@
+@model DTOs.MaintenanceTaskDto
+
+@{
+    ViewData["Title"] = "Edit Task";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Edit Maintenance Task
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <!-- Room Number -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Room Number</label>
+                            <select asp-for="RoomId" class="form-select" asp-items="ViewBag.Rooms" required>
+                                <option value="">Select Room</option>
+                            </select>
+                            <span asp-validation-for="RoomId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Issue Description</label>
+                            <textarea asp-for="Description" 
+                                      class="form-control" 
+                                      rows="3" 
+                                      placeholder="Describe the maintenance issue..." 
+                                      required></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <!-- Priority -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Priority</label>
+                            <select asp-for="Priority" class="form-select" asp-items="ViewBag.Priorities" required>
+                            </select>
+                            <span asp-validation-for="Priority" class="text-danger"></span>
+                        </div>
+
+                        <!-- Assigned Staff -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Assigned Staff</label>
+                            <select asp-for="AssignedTo" class="form-select" asp-items="ViewBag.Staff">
+                                <option value="">Select Staff (Optional)</option>
+                            </select>
+                            <span asp-validation-for="AssignedTo" class="text-danger"></span>
+                        </div>
+
+                        <!-- Deadline -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Deadline</label>
+                            <input asp-for="Deadline" 
+                                   type="datetime-local" 
+                                   class="form-control" 
+                                   required />
+                            <span asp-validation-for="Deadline" class="text-danger"></span>
+                        </div>
+
+                        <!-- Current Status (Read-only) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Current Status</label>
+                            <div class="form-control-plaintext">
+                                @if (Model.Status == "Pending")
+                                {
+                                    <span class="badge bg-secondary">Pending</span>
+                                }
+                                else if (Model.Status == "InProgress")
+                                {
+                                    <span class="badge bg-primary">In Progress</span>
+                                }
+                                else if (Model.Status == "Completed")
+                                {
+                                    <span class="badge bg-success">Completed</span>
+                                }
+                                <small class="text-muted ms-2">(Status cannot be changed by admin)</small>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Task Info -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="text-muted">Task Information</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>Created:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</li>
+                        @if (Model.CompletedAt.HasValue)
+                        {
+                            <li><strong>Completed:</strong> @Model.CompletedAt.Value.ToString("MMM dd, yyyy hh:mm tt")</li>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.AssignedStaffName))
+                        {
+                            <li><strong>Assigned to:</strong> @Model.AssignedStaffName</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

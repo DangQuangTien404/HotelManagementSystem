@@ -1,0 +1,116 @@
+@model IEnumerable<DTOs.CustomerDto>
+
+@{
+    ViewData["Title"] = "Customer Management";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar màu xanh nước biển -->
+        <div class="col-md-3 col-lg-2 px-0" style="background-color: #0066cc; min-height: 100vh; position: fixed; left: 0; top: 56px; z-index: 1000;">
+            <div class="p-3">
+                <h5 class="text-white mb-4">Admin Panel</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminStaff" asp-action="Index">
+                            <i class="bi bi-people"></i> Staff Management
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white active" style="background-color: rgba(255,255,255,0.2); border-radius: 5px;" asp-controller="AdminCustomer" asp-action="Index">
+                            <i class="bi bi-person"></i> Customer Management
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminTask" asp-action="Index">
+                            <i class="bi bi-clipboard-check"></i> Task Assignment
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminNotification" asp-action="Index">
+                            <i class="bi bi-bell"></i> Notifications
+                        </a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-white" asp-controller="AdminRevenue" asp-action="Index">
+                            <i class="bi bi-cash-coin"></i> Revenue Management
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-auto" style="margin-left: 16.66666667%;">
+            <div class="p-4">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1>Customer Management</h1>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Create New Customer
+                    </a>
+                </div>
+
+                <div class="card shadow">
+                    <div class="card-body p-0">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Reservations</th>
+                                    <th>Created Date</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td class="align-middle fw-bold">@item.Username</td>
+                                            <td class="align-middle">@item.FullName</td>
+                                            <td class="align-middle">@item.Email</td>
+                                            <td class="align-middle">
+                                                <span class="badge bg-info">@item.TotalReservations</span>
+                                            </td>
+                                            <td class="align-middle">@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-end align-middle">
+                                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">No customers found</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

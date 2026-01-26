@@ -1,3 +1,4 @@
+using DAL;
 using DAL.Interfaces;
 using DTOs.Entities;
 using DTOs.Enums;
@@ -16,6 +17,7 @@ namespace DAL.Repository
         {
         }
 
+        // Methods from HEAD (main branch)
         public async Task<IEnumerable<Reservation>> GetReservationsByUsernameAsync(string username)
         {
             return await _context.Reservations
@@ -26,16 +28,17 @@ namespace DAL.Repository
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
         }
+        
         public IEnumerable<Reservation> GetPendingReservations()
         {
             return _context.Reservations
                 .Include(r => r.Customer)
                 .Include(r => r.Room)
-                // FIX: Use Enum instead of string "Pending"
                 .Where(r => r.Status == ReservationStatus.Pending)
                 .OrderBy(r => r.CreatedAt)
                 .ToList();
         }
+        
         public async Task<Reservation?> GetReservationWithDetailsAsync(int id)
         {
             return await _context.Reservations
@@ -55,7 +58,6 @@ namespace DAL.Repository
 
         public async Task<bool> IsRoomAvailableAsync(int roomId, DateTime checkIn, DateTime checkOut)
         {
-            // Check if there are any overlapping reservations
             var hasOverlap = await _context.Reservations
                 .AnyAsync(r => r.RoomId == roomId &&
                     r.Status != ReservationStatus.Cancelled &&
@@ -68,7 +70,6 @@ namespace DAL.Repository
 
         public async Task<Reservation> CreateReservationIfAvailableAsync(Reservation reservation)
         {
-            // Use a serializable transaction to ensure atomicity of check + insert
             var strategy = _context.Database.CreateExecutionStrategy();
 
             return await strategy.ExecuteAsync(async () =>
@@ -76,7 +77,6 @@ namespace DAL.Repository
                 using var transaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
                 try
                 {
-                    // Check availability with row-level locking by querying overlapping reservations
                     var hasOverlap = await _context.Reservations
                         .Where(r => r.RoomId == reservation.RoomId &&
                             r.Status != ReservationStatus.Cancelled &&
@@ -90,7 +90,6 @@ namespace DAL.Repository
                         throw new InvalidOperationException("Room is not available for the selected dates.");
                     }
 
-                    // Insert the reservation
                     await _context.Reservations.AddAsync(reservation);
                     await _context.SaveChangesAsync();
 
@@ -115,43 +114,75 @@ namespace DAL.Repository
                 .Select(r => new { r.CheckInDate, r.CheckOutDate })
                 .ToListAsync();
 
-            //  Filter out any potential nulls and explicitly access .Value
             return reservations
                 .Where(r => r.CheckInDate.HasValue && r.CheckOutDate.HasValue)
                 .Select(r => (r.CheckInDate!.Value, r.CheckOutDate!.Value));
         }
-        //  Implement GetTodayArrivals
+        
         public IEnumerable<Reservation> GetTodayArrivals()
         {
             return _context.Reservations
-        .Include(r => r.Customer)
-        .Include(r => r.Room)
-        .Where(r => r.Status == ReservationStatus.Confirmed)
-        .OrderBy(r => r.CheckInDate) // Sort by date so earliest appear first
-        .ToList();
+                .Include(r => r.Customer)
+                .Include(r => r.Room)
+                .Where(r => r.Status == ReservationStatus.Confirmed)
+                .OrderBy(r => r.CheckInDate)
+                .ToList();
         }
 
-        //  Implement GetActiveReservations (In-House Guests)
         public IEnumerable<Reservation> GetActiveReservations()
         {
             return _context.Reservations
                 .Include(r => r.Customer)
                 .Include(r => r.Room)
-                // FIX: Add this line to load the Check-In history (Staff & Time)
                 .Include(r => r.CheckInOuts)
                 .Where(r => r.Status == ReservationStatus.CheckedIn)
                 .OrderBy(r => r.CheckOutDate)
                 .ToList();
         }
+        
         public IEnumerable<Reservation> GetCheckedOutReservations()
         {
             return _context.Reservations
                 .Include(r => r.Customer)
                 .Include(r => r.Room)
-                .Include(r => r.CheckInOuts) // Important for invoice details
+                .Include(r => r.CheckInOuts)
                 .Where(r => r.Status == ReservationStatus.CheckedOut)
-                .OrderByDescending(r => r.CheckOutDate) // Show most recent first
+                .OrderByDescending(r => r.CheckOutDate)
                 .ToList();
+        }
+
+        // Methods from Test branch
+        public async Task<IEnumerable<Reservation>> GetAllWithDetailsAsync()
+        {
+            return await _context.Reservations
+                .Include(r => r.Room)
+                .Include(r => r.ReservedByUser)
+                .Include(r => r.Customer)
+                .Include(r => r.CheckInOuts)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Reservation>> GetReservationsByCustomerIdAsync(int customerId)
+        {
+            return await _context.Reservations
+                .Where(r => r.CustomerId == customerId)
+                .Include(r => r.Room)
+                .Include(r => r.ReservedByUser)
+                .Include(r => r.Customer)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Reservation>> GetReservationsByUserIdAsync(int userId)
+        {
+            return await _context.Reservations
+                .Where(r => r.ReservedBy == userId)
+                .Include(r => r.Room)
+                .Include(r => r.ReservedByUser)
+                .Include(r => r.Customer)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
         }
     }
 }

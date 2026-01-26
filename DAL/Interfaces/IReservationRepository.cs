@@ -7,6 +7,7 @@ namespace DAL.Interfaces
 {
     public interface IReservationRepository : IGenericRepository<Reservation>
     {
+        // Methods from HEAD (main branch)
         public IEnumerable<Reservation> GetPendingReservations();
         Task<IEnumerable<Reservation>> GetReservationsByUsernameAsync(string username);
         Task<Reservation?> GetReservationWithDetailsAsync(int id);
@@ -22,5 +23,10 @@ namespace DAL.Interfaces
         IEnumerable<Reservation> GetActiveReservations();
         ///invoice
         IEnumerable<Reservation> GetCheckedOutReservations();
+        
+        // Methods from Test branch
+        Task<IEnumerable<Reservation>> GetAllWithDetailsAsync();
+        Task<IEnumerable<Reservation>> GetReservationsByCustomerIdAsync(int customerId);
+        Task<IEnumerable<Reservation>> GetReservationsByUserIdAsync(int userId);
     }
 }

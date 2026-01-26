@@ -1,3 +1,4 @@
+using DAL;
 using DAL.Interfaces;
 using DTOs.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,14 @@ namespace DAL.Repository
             // or where the user has entries in the Staffs navigation collection.
             return await _context.Users
                 .Where(u => u.Staffs.Any())
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<User>> GetCustomerUsersAsync()
+        {
+            return await _context.Users
+                .Where(u => u.Role == "Customer")
+                .OrderByDescending(u => u.CreatedAt)
                 .ToListAsync();
         }
 
