@@ -1,0 +1,85 @@
+@model DTOs.ReservationDto
+
+@{
+    ViewData["Title"] = "Reservation Confirmed";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h3><i class="bi bi-check-circle"></i> Reservation Confirmed!</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success" role="alert">
+                        <h5 class="alert-heading">Thank you for your reservation!</h5>
+                        <p>Your booking has been confirmed. You will receive a confirmation email shortly.</p>
+                    </div>
+
+                    <h5 class="mt-4">Reservation Details</h5>
+                    <hr />
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Guest Name:</strong>
+                            <p class="text-muted">@Model.CustomerName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Status:</strong>
+                            <p><span class="badge bg-success">@Model.Status</span></p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Room Number:</strong>
+                            <p class="text-muted">@Model.RoomNumber</p>
+                        </div>
+                        <div class="col-md-6">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Check-in Date:</strong>
+                            <p class="text-muted">@Model.CheckInDate.ToString("MMMM dd, yyyy")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Check-out Date:</strong>
+                            <p class="text-muted">@Model.CheckOutDate.ToString("MMMM dd, yyyy")</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Number of Nights:</strong>
+                            <p class="text-muted">@Model.NumberOfNights night(s)</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Total Price:</strong>
+                            <p class="text-success fw-bold">@Model.TotalPrice.ToString("N0") &#8363;</p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="alert alert-info" role="alert">
+                        <strong>Important Information:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Please arrive at the hotel after 2:00 PM on your check-in date</li>
+                            <li>Check-out time is 11:00 AM</li>
+                            <li>Please bring a valid ID for verification</li>
+                            <li>You can view or cancel this reservation from "My Reservations"</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-controller="Reservation" asp-action="MyReservations" class="btn btn-outline-primary">View My Reservations</a>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

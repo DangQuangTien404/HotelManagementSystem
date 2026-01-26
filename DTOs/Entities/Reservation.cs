@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using DTOs.Enums;
 
 namespace DTOs.Entities
 {
@@ -20,7 +21,7 @@ namespace DTOs.Entities
 
         public DateTime CheckInDate { get; set; }
         public DateTime CheckOutDate { get; set; }
-        public string Status { get; set; } = "Pending";
+        public ReservationStatus Status { get; set; } = ReservationStatus.Pending;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation: 1-to-Many with CheckInOut

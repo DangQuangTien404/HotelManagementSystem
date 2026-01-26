@@ -35,20 +35,14 @@ namespace BLL.Service
         public async Task<UserDto?> GetUserByIdAsync(int id)
         {
             var user = await _repository.GetByIdAsync(id);
-            return user == null ? null : MapToDto(user);
+            return user != null ? MapToDto(user) : null;
         }
 
         public async Task AddUserAsync(UserDto userDto)
         {
-            var user = new User
-            {
-                Username = userDto.Username,
-                PasswordHash = _passwordHasher.HashPassword(userDto.Password),
-                Role = userDto.Role,
-                FullName = userDto.FullName,
-                Email = userDto.Email,
-                CreatedAt = DateTime.UtcNow
-            };
+            var user = MapToEntity(userDto);
+            user.PasswordHash = _passwordHasher.HashPassword(userDto.Password);
+            user.CreatedAt = DateTime.UtcNow;
 
             // If Role is Staff, automatically create a Staff entry
             if (string.Equals(userDto.Role, "Staff", StringComparison.OrdinalIgnoreCase))
@@ -72,9 +66,10 @@ namespace BLL.Service
             if (user != null)
             {
                 user.Username = userDto.Username;
-                user.Role = userDto.Role;
                 user.FullName = userDto.FullName;
                 user.Email = userDto.Email;
+                user.Role = userDto.Role;
+                
                 // Only update password if provided
                 if (!string.IsNullOrEmpty(userDto.Password))
                 {
@@ -90,19 +85,28 @@ namespace BLL.Service
             await _repository.DeleteAsync(id);
         }
 
-        private UserDto MapToDto(User user)
+        private static UserDto MapToDto(User user)
         {
             return new UserDto
             {
                 Id = user.Id,
                 Username = user.Username,
-                Role = user.Role,
                 FullName = user.FullName,
                 Email = user.Email,
-                // Check if they are in staff table?
-                // For now, IsStaff is loosely based on role or just false if we don't load navigation prop.
-                // The GetStaffUsersAsync ensures we get the right ones.
-                IsStaff = user.Staffs != null && user.Staffs.Any()
+                Role = user.Role,
+                IsStaff = user.Role == "Staff"
+            };
+        }
+
+        private static User MapToEntity(UserDto dto)
+        {
+            return new User
+            {
+                Id = dto.Id,
+                Username = dto.Username,
+                FullName = dto.FullName,
+                Email = dto.Email,
+                Role = dto.Role
             };
         }
     }

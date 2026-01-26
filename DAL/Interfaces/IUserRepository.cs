@@ -8,5 +8,6 @@ namespace DAL.Interfaces
     {
         Task<IEnumerable<User>> GetStaffUsersAsync();
         Task<IEnumerable<User>> GetAllWithDetailsAsync();
+        Task<User?> GetByUsernameAsync(string username);
     }
 }

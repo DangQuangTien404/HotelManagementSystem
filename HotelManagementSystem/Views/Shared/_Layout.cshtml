@@ -27,10 +27,16 @@
                         </li>
                         @if (User?.Identity?.IsAuthenticated == true)
                         {
-                            @if (User.IsInRole("Staff"))
+                            if (User.IsInRole("Staff"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="StaffDashboard" asp-action="Index">Dashboard</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Reservation" asp-action="MyReservations">My Reservations</a>
                                 </li>
                             }
                             <li class="nav-item">

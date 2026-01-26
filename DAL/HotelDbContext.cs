@@ -30,6 +30,14 @@ namespace DAL
                 .Property(c => c.TotalAmount)
                 .HasColumnType("decimal(18,2)");
 
+            modelBuilder.Entity<Room>()
+                .Property(r => r.RoomType)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Room>()
+                .Property(r => r.Status)
+                .HasConversion<string>();
+
             // --- UPDATED RELATIONSHIPS ---
 
             // 1. User (1) -> Staffs (Many)

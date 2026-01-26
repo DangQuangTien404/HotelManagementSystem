@@ -1,4 +1,4 @@
-@model DTOs.RoomDto
+﻿@model DTOs.RoomDto
 
 @{
     ViewData["Title"] = "Room Details";
@@ -32,7 +32,7 @@
             @Html.DisplayNameFor(model => model.Price)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
+            @Model.Price.ToString("N0") &#8363;
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Status)

@@ -51,7 +51,7 @@ namespace BLL.Service
             if (room != null)
             {
                 // Đổi status phòng sang "Cleaning" (hoặc "Maintenance" tùy quy định của bạn)
-                room.Status = "Cleaning";
+                room.Status = DTOs.Enums.RoomStatus.Cleaning;
                 await _roomRepository.UpdateAsync(room);
             }
         }
@@ -73,7 +73,7 @@ namespace BLL.Service
                     var room = await _roomRepository.GetByIdAsync(cleaning.RoomId);
                     if (room != null)
                     {
-                        room.Status = "Available";
+                        room.Status = DTOs.Enums.RoomStatus.Available;
                         await _roomRepository.UpdateAsync(room);
                     }
                 }

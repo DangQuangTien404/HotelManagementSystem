@@ -103,5 +103,10 @@ namespace HotelManagementSystem.Controllers
             }
             return View(room);
         }
+
+        public async Task Book(int id)
+        {
+            var room = await _roomService.GetRoomByIdAsync(id);
+        }
     }
 }

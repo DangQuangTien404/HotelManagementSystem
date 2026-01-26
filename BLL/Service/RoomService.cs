@@ -2,6 +2,9 @@
 using DAL.Interfaces;
 using DTOs;
 using DTOs.Entities;
+using DTOs.Enums;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +20,7 @@ namespace BLL.Service
             _repository = repository;
         }
         // Thêm hàm này vào cuối class RoomService
-        public async Task UpdateRoomStatusAsync(int roomId, string status)
+        public async Task UpdateRoomStatusAsync(int roomId, RoomStatus status)
         {
             var room = await _repository.GetByIdAsync(roomId);
             if (room != null)
@@ -29,43 +32,18 @@ namespace BLL.Service
         public async Task<IEnumerable<RoomDto>> GetAllRoomsAsync()
         {
             var rooms = await _repository.GetAllAsync();
-            return rooms.Select(r => new RoomDto
-            {
-                Id = r.Id,
-                RoomNumber = r.RoomNumber,
-                RoomType = r.RoomType,
-                Capacity = r.Capacity,
-                Price = r.Price,
-                Status = r.Status
-            });
+            return rooms.Select(MapToDto);
         }
 
         public async Task<RoomDto?> GetRoomByIdAsync(int id)
         {
             var room = await _repository.GetByIdAsync(id);
-            if (room == null) return null;
-
-            return new RoomDto
-            {
-                Id = room.Id,
-                RoomNumber = room.RoomNumber,
-                RoomType = room.RoomType,
-                Capacity = room.Capacity,
-                Price = room.Price,
-                Status = room.Status
-            };
+            return room != null ? MapToDto(room) : null;
         }
 
         public async Task AddRoomAsync(RoomDto roomDto)
         {
-            var room = new Room
-            {
-                RoomNumber = roomDto.RoomNumber,
-                RoomType = roomDto.RoomType,
-                Capacity = roomDto.Capacity,
-                Price = roomDto.Price,
-                Status = "Available"
-            };
+            var room = MapToEntity(roomDto);
             await _repository.AddAsync(room);
         }
 
@@ -76,14 +54,81 @@ namespace BLL.Service
             {
                 room.RoomNumber = roomDto.RoomNumber;
                 room.RoomType = roomDto.RoomType;
-                room.Capacity = roomDto.Capacity;
                 room.Price = roomDto.Price;
+                room.Status = roomDto.Status;
+                room.Capacity = roomDto.Capacity;
                 await _repository.UpdateAsync(room);
             }
         }
         public async Task DeleteRoomAsync(int id)
         {
             await _repository.DeleteAsync(id);
+        }
+
+        public async Task<IEnumerable<RoomDto>> SearchAvailableRoomsAsync(string? searchTerm, RoomType? roomType, decimal? maxPrice)
+        {
+            var query = _repository.GetQueryable();
+
+            // Include rooms that are Available or Reserved (Reserved rooms can still be booked for different dates)
+            query = query.Where(r => r.Status == RoomStatus.Available || r.Status == RoomStatus.Reserved);
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(r => r.RoomNumber.Contains(searchTerm));
+            }
+
+            if (roomType.HasValue)
+            {
+                query = query.Where(r => r.RoomType == roomType.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(r => r.Price <= maxPrice.Value);
+            }
+
+            var rooms = await query.OrderBy(r => r.Price).ToListAsync();
+            return rooms.Select(MapToDto);
+        }
+
+        public async Task BookRoom(int id)
+        {
+            var room = await _repository.GetByIdAsync(id);
+            if (room != null && room.Status == RoomStatus.Available)
+            {
+                room.Status = RoomStatus.Occupied;
+                await _repository.UpdateAsync(room);
+            }
+            var rooms = await _repository.GetQueryable()
+                                         .Where(r => r.Status == RoomStatus.Available)
+                                         .OrderBy(r => r.Price)
+                                         .ToListAsync();
+        }
+
+        private static RoomDto MapToDto(Room room)
+        {
+            return new RoomDto
+            {
+                Id = room.Id,
+                RoomNumber = room.RoomNumber,
+                RoomType = room.RoomType,
+                Price = room.Price,
+                Status = room.Status,
+                Capacity = room.Capacity
+            };
+        }
+
+        private static Room MapToEntity(RoomDto dto)
+        {
+            return new Room
+            {
+                Id = dto.Id,
+                RoomNumber = dto.RoomNumber,
+                RoomType = dto.RoomType,
+                Price = dto.Price,
+                Status = dto.Status,
+                Capacity = dto.Capacity
+            };
         }
     }
 }
