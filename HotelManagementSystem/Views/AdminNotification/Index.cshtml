@@ -2,249 +2,198 @@
 
 @{
     ViewData["Title"] = "Notifications";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 px-0" style="background-color: #0066cc; min-height: 100vh; position: fixed; left: 0; top: 56px; z-index: 1000;">
-            <div class="p-3">
-                <h5 class="text-white mb-4">Admin Panel</h5>
-                <ul class="nav flex-column">
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminStaff" asp-action="Index">
-                            <i class="bi bi-people"></i> Staff Management
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminCustomer" asp-action="Index">
-                            <i class="bi bi-person"></i> Customer Management
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminTask" asp-action="Index">
-                            <i class="bi bi-clipboard-check"></i> Task Assignment
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white active" style="background-color: rgba(255,255,255,0.2); border-radius: 5px;" asp-controller="AdminNotification" asp-action="Index">
-                            <i class="bi bi-bell"></i> Notifications
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminRevenue" asp-action="Index">
-                            <i class="bi bi-cash-coin"></i> Revenue Management
-                        </a>
-                    </li>
-                </ul>
+<div class="page-header">
+    <h1 class="page-title">Notifications</h1>
+    <div class="text-muted small">Manage communications sent to users and staff</div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+         <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Send Notification Forms -->
+<div class="row mb-4">
+    <!-- Send to Staff -->
+    <div class="col-md-4">
+        <div class="card-admin h-100">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-people-fill me-2"></i>
+                    <h5 class="mb-0 text-white">Send to Staff</h5>
+                </div>
+            </div>
+            <div class="card-body">
+                <form asp-action="SendToStaff" method="post">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Message</label>
+                        <textarea name="Message" class="form-control" rows="4" placeholder="Type your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                        <i class="bi bi-send"></i> Send to All Staff
+                    </button>
+                </form>
             </div>
         </div>
+    </div>
 
-        <!-- Main Content -->
-        <div class="col-md-9 col-lg-10 ms-auto" style="margin-left: 16.66666667%;">
-            <div class="p-4">
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        @TempData["SuccessMessage"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-
-                @if (TempData["ErrorMessage"] != null)
-                {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        @TempData["ErrorMessage"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-
-                <h1 class="mb-2">Notifications</h1>
-                <p class="text-muted mb-4">Incoming Notifications from Customers and Staff</p>
-
-                <!-- Send Notification Forms -->
-                <div class="row mb-4">
-                    <!-- Send to Staff -->
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">Send to Staff</h5>
-                            </div>
-                            <div class="card-body">
-                                <form asp-action="SendToStaff" method="post">
-                                    <div class="mb-3">
-                                        <label class="form-label">Message</label>
-                                        <textarea name="Message" class="form-control" rows="4" placeholder="Type your message here..." required></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="bi bi-send"></i> Send to All Staff
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Send to Customer -->
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header bg-success text-white">
-                                <h5 class="mb-0">Send to Customer</h5>
-                            </div>
-                            <div class="card-body">
-                                <form asp-action="SendToCustomer" method="post">
-                                    <div class="mb-3">
-                                        <label class="form-label">Select Customer (Optional)</label>
-                                        <select name="RecipientId" class="form-select">
-                                            <option value="">All Customers</option>
-                                        @if (ViewBag.Customers != null)
-                                        {
-                                            @foreach (var customer in ViewBag.Customers as SelectList)
-                                            {
-                                                <option value="@customer.Value">@customer.Text</option>
-                                            }
-                                        }
-                                        </select>
-                                        <small class="text-muted">Leave empty to send to all customers</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Message</label>
-                                        <textarea name="Message" class="form-control" rows="4" placeholder="Type your message here..." required></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-success w-100">
-                                        <i class="bi bi-send"></i> Send
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Create Announcement -->
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header bg-warning text-dark">
-                                <h5 class="mb-0">Create Announcement</h5>
-                            </div>
-                            <div class="card-body">
-                                <form asp-action="CreateAnnouncement" method="post">
-                                    <div class="mb-3">
-                                        <label class="form-label">Message</label>
-                                        <textarea name="Message" class="form-control" rows="4" placeholder="Type your announcement here..." required></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-warning w-100">
-                                        <i class="bi bi-megaphone"></i> Create Announcement
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Send to Customer -->
+    <div class="col-md-4">
+        <div class="card-admin h-100">
+            <div class="card-header bg-success text-white">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-person-fill me-2"></i>
+                    <h5 class="mb-0 text-white">Send to Customer</h5>
                 </div>
+            </div>
+            <div class="card-body">
+                <form asp-action="SendToCustomer" method="post">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Select Customer</label>
+                        <select name="RecipientId" class="form-select">
+                            <option value="">All Customers</option>
+                        @if (ViewBag.Customers != null)
+                        {
+                            @foreach (var customer in ViewBag.Customers as SelectList)
+                            {
+                                <option value="@customer.Value">@customer.Text</option>
+                            }
+                        }
+                        </select>
+                        <small class="text-muted d-block mt-1">Leave empty to send to all</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Message</label>
+                        <textarea name="Message" class="form-control" rows="3" placeholder="Type your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 shadow-sm">
+                        <i class="bi bi-send"></i> Send
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-                <!-- Notifications List -->
-                <div class="card shadow">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">All Notifications</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Sender</th>
-                                    <th>Message Preview</th>
-                                    <th>Recipient</th>
-                                    <th>Date & Time</th>
-                                    <th>Type</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model != null && Model.Any())
-                                {
-                                    @foreach (var notification in Model)
-                                    {
-                                        <tr class="@(notification.IsRead ? "" : "table-info")">
-                                            <td class="align-middle">
-                                                <div>
-                                                    <strong>@notification.SenderName</strong>
-                                                    @if (!string.IsNullOrEmpty(notification.SenderType))
-                                                    {
-                                                        <span class="badge bg-secondary">@notification.SenderType</span>
-                                                    }
-                                                </div>
-                                            </td>
-                                            <td class="align-middle">
-                                                <div style="max-width: 400px; overflow: hidden; text-overflow: ellipsis;">
-                                                    @if (notification.IsAnnouncement)
-                                                    {
-                                                        <span class="badge bg-warning text-dark me-2">Announcement</span>
-                                                    }
-                                                    @(notification.Message.Length > 80 ? notification.Message.Substring(0, 80) + "..." : notification.Message)
-                                                </div>
-                                            </td>
-                                            <td class="align-middle">
-                                                @if (notification.RecipientType == "All")
-                                                {
-                                                    <span class="badge bg-info">All Users</span>
-                                                }
-                                                else if (notification.RecipientType == "Staff")
-                                                {
-                                                    <span class="badge bg-primary">All Staff</span>
-                                                }
-                                                else if (notification.RecipientType == "Customer")
-                                                {
-                                                    <span class="badge bg-success">All Customers</span>
-                                                }
-                                                else if (!string.IsNullOrEmpty(notification.RecipientName))
-                                                {
-                                                    <span>@notification.RecipientName</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">-</span>
-                                                }
-                                            </td>
-                                            <td class="align-middle">
-                                                @notification.CreatedAt.ToString("yyyy-MM-dd HH:mm")
-                                            </td>
-                                            <td class="align-middle">
-                                                @if (notification.IsAnnouncement)
-                                                {
-                                                    <span class="badge bg-warning text-dark">Announcement</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-secondary">Notification</span>
-                                                }
-                                            </td>
-                                            <td class="text-end align-middle">
-                                                @if (!notification.IsRead)
-                                                {
-                                                    <form asp-action="MarkAsRead" method="post" class="d-inline">
-                                                        <input type="hidden" name="id" value="@notification.Id" />
-                                                        <button type="submit" class="btn btn-sm btn-outline-primary">
-                                                            <i class="bi bi-check-circle"></i> Mark as Read
-                                                        </button>
-                                                    </form>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Read</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">No notifications found</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+    <!-- Create Announcement -->
+    <div class="col-md-4">
+        <div class="card-admin h-100">
+            <div class="card-header bg-warning text-dark">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-megaphone-fill me-2"></i>
+                    <h5 class="mb-0">Create Announcement</h5>
                 </div>
+            </div>
+            <div class="card-body">
+                <form asp-action="CreateAnnouncement" method="post">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Announcement Text</label>
+                        <textarea name="Message" class="form-control" rows="4" placeholder="Type your announcement here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100 shadow-sm">
+                        <i class="bi bi-broadcast"></i> Broadcast
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Notifications List -->
+<div class="card-admin">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">All Notifications</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-admin table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Sender</th>
+                        <th>Message</th>
+                        <th>Recipient</th>
+                        <th>Sent At</th>
+                        <th>Type</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var notification in Model)
+                        {
+                            <tr class="@(notification.IsRead ? "" : "bg-light-blue")">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="fw-bold me-2">@notification.SenderName</div>
+                                        @if (!string.IsNullOrEmpty(notification.SenderType))
+                                        {
+                                            <span class="badge badge-soft-secondary" style="font-size: 0.7em;">@notification.SenderType</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="max-width: 300px;" class="text-truncate" title="@notification.Message">
+                                        @if (notification.IsAnnouncement)
+                                        {
+                                            <span class="badge bg-warning text-dark me-1" style="font-size: 0.7em;">📢</span>
+                                        }
+                                        @notification.Message
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (notification.RecipientType == "All") { <span class="badge badge-soft-info">All Users</span> }
+                                    else if (notification.RecipientType == "Staff") { <span class="badge badge-soft-primary">All Staff</span> }
+                                    else if (notification.RecipientType == "Customer") { <span class="badge badge-soft-success">All Customers</span> }
+                                    else if (!string.IsNullOrEmpty(notification.RecipientName)) { <span>@notification.RecipientName</span> }
+                                    else { <span class="text-muted">-</span> }
+                                </td>
+                                <td class="text-muted small">
+                                    @notification.CreatedAt.ToString("MMM dd HH:mm")
+                                </td>
+                                <td>
+                                    @if (notification.IsAnnouncement) { <span class="badge badge-soft-warning">Announcement</span> }
+                                    else { <span class="badge badge-soft-secondary">Notification</span> }
+                                </td>
+                                <td class="text-end">
+                                    @if (!notification.IsRead)
+                                    {
+                                        <form asp-action="MarkAsRead" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@notification.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-primary" title="Mark as Read">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small"><i class="bi bi-check2-all"></i> Read</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No notifications found</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

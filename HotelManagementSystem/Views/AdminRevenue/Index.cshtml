@@ -2,216 +2,167 @@
 
 @{
     ViewData["Title"] = "Revenue Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 px-0" style="background-color: #0066cc; min-height: 100vh; position: fixed; left: 0; top: 56px; z-index: 1000;">
-            <div class="p-3">
-                <h5 class="text-white mb-4">Admin Panel</h5>
-                <ul class="nav flex-column">
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminStaff" asp-action="Index">
-                            <i class="bi bi-people"></i> Staff Management
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminCustomer" asp-action="Index">
-                            <i class="bi bi-person"></i> Customer Management
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminTask" asp-action="Index">
-                            <i class="bi bi-clipboard-check"></i> Task Assignment
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminNotification" asp-action="Index">
-                            <i class="bi bi-bell"></i> Notifications
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white active" style="background-color: rgba(255,255,255,0.2); border-radius: 5px;" asp-controller="AdminRevenue" asp-action="Index">
-                            <i class="bi bi-cash-coin"></i> Revenue Management
-                        </a>
-                    </li>
-                </ul>
+<div class="page-header">
+    <h1 class="page-title">Revenue Management</h1>
+    <div class="text-muted small">Revenue statistics and reports</div>
+</div>
+
+<!-- Filter Section -->
+<div class="card-admin">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Filter Report</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" asp-action="Index">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold">Period Type</label>
+                    <select name="periodType" class="form-select" onchange="this.form.submit()">
+                        <option value="day" selected="@(ViewBag.PeriodType == "day")">Day</option>
+                        <option value="week" selected="@(ViewBag.PeriodType == "week")">Week</option>
+                        <option value="month" selected="@(ViewBag.PeriodType == "month")">Month</option>
+                        <option value="year" selected="@(ViewBag.PeriodType == "year")">Year</option>
+                        <option value="custom" selected="@(ViewBag.PeriodType == "custom")">Custom Range</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold">Start Date</label>
+                    <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold">End Date</label>
+                    <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm">Apply Filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Revenue Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card-admin bg-primary text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title fw-light text-white-50">Total Revenue</h5>
+                <h2 class="mb-0 fw-bold">@Model.Revenue.TotalRevenue.ToString("C")</h2>
+                <small class="text-white-50">@Model.Revenue.PeriodType</small>
             </div>
         </div>
-
-        <!-- Main Content -->
-        <div class="col-md-9 col-lg-10 ms-auto" style="margin-left: 16.66666667%;">
-            <div class="p-4">
-                <h1 class="mb-2">Revenue Management</h1>
-                <p class="text-muted mb-4">Revenue statistics and reports</p>
-
-                <!-- Filter Section -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Filter Report</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="get" asp-action="Index">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <label class="form-label">Period Type</label>
-                                    <select name="periodType" class="form-select" onchange="this.form.submit()">
-                                        <option value="day" selected="@(ViewBag.PeriodType == "day")">Day</option>
-                                        <option value="week" selected="@(ViewBag.PeriodType == "week")">Week</option>
-                                        <option value="month" selected="@(ViewBag.PeriodType == "month")">Month</option>
-                                        <option value="year" selected="@(ViewBag.PeriodType == "year")">Year</option>
-                                        <option value="custom" selected="@(ViewBag.PeriodType == "custom")">Custom Range</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Start Date</label>
-                                    <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate" />
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">End Date</label>
-                                    <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate" />
-                                </div>
-                                <div class="col-md-3 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Revenue Summary Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="card bg-primary text-white">
-                            <div class="card-body">
-                                <h5 class="card-title">Total Revenue</h5>
-                                <h2 class="mb-0">@Model.Revenue.TotalRevenue.ToString("C")</h2>
-                                <small>@Model.Revenue.PeriodType</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-danger text-white">
-                            <div class="card-body">
-                                <h5 class="card-title">Total Cost</h5>
-                                <h2 class="mb-0">@Model.Revenue.TotalCost.ToString("C")</h2>
-                                <small>@Model.Revenue.PeriodType</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-success text-white">
-                            <div class="card-body">
-                                <h5 class="card-title">Profit</h5>
-                                <h2 class="mb-0">@Model.Revenue.Profit.ToString("C")</h2>
-                                <small>@Model.Revenue.PeriodType</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Revenue by Room Type -->
-                <div class="card mb-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Revenue by Room Type</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Room Type</th>
-                                        <th>Booking Count</th>
-                                        <th>Total Revenue</th>
-                                        <th>Average Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (Model.RevenueByRoomType != null && Model.RevenueByRoomType.Any())
-                                    {
-                                        @foreach (var item in Model.RevenueByRoomType)
-                                        {
-                                            <tr>
-                                                <td><strong>@item.RoomType</strong></td>
-                                                <td>@item.BookingCount</td>
-                                                <td>@item.TotalRevenue.ToString("C")</td>
-                                                <td>@item.AverageRevenue.ToString("C")</td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">No data available</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Payment Method Statistics -->
-                <div class="card mb-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Payment Method Statistics</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Payment Method</th>
-                                        <th>Transaction Count</th>
-                                        <th>Total Amount</th>
-                                        <th>Percentage</th>
-                                        <th>Visual</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (Model.PaymentMethodStats != null && Model.PaymentMethodStats.Any())
-                                    {
-                                        @foreach (var item in Model.PaymentMethodStats)
-                                        {
-                                            <tr>
-                                                <td><strong>@item.PaymentMethod</strong></td>
-                                                <td>@item.TransactionCount</td>
-                                                <td>@item.TotalAmount.ToString("C")</td>
-                                                <td>@item.Percentage.ToString("F1")%</td>
-                                                <td>
-                                                    <div class="progress" style="height: 20px;">
-                                                        <div class="progress-bar" role="progressbar" style="width: @item.Percentage%" aria-valuenow="@item.Percentage" aria-valuemin="0" aria-valuemax="100">
-                                                            @item.Percentage.ToString("F1")%
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted">No data available</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Period Information -->
-                <div class="card">
-                    <div class="card-body">
-                        <p class="text-muted mb-0">
-                            <strong>Report Period:</strong> 
-                            @Model.Revenue.StartDate.ToString("MMM dd, yyyy") - @Model.Revenue.EndDate.ToString("MMM dd, yyyy")
-                        </p>
-                    </div>
-                </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-admin bg-danger text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title fw-light text-white-50">Total Cost</h5>
+                <h2 class="mb-0 fw-bold">@Model.Revenue.TotalCost.ToString("C")</h2>
+                <small class="text-white-50">@Model.Revenue.PeriodType</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-admin bg-success text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title fw-light text-white-50">Profit</h5>
+                <h2 class="mb-0 fw-bold">@Model.Revenue.Profit.ToString("C")</h2>
+                <small class="text-white-50">@Model.Revenue.PeriodType</small>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Revenue by Room Type -->
+<div class="card-admin">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Revenue by Room Type</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-admin table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Room Type</th>
+                        <th>Booking Count</th>
+                        <th>Total Revenue</th>
+                        <th>Average Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.RevenueByRoomType != null && Model.RevenueByRoomType.Any())
+                    {
+                        @foreach (var item in Model.RevenueByRoomType)
+                        {
+                            <tr>
+                                <td class="fw-bold">@item.RoomType</td>
+                                <td>@item.BookingCount</td>
+                                <td>@item.TotalRevenue.ToString("C")</td>
+                                <td>@item.AverageRevenue.ToString("C")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No data available</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Method Statistics -->
+<div class="card-admin">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Payment Method Statistics</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-admin table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Payment Method</th>
+                        <th>Transaction Count</th>
+                        <th>Total Amount</th>
+                        <th>Percentage</th>
+                        <th style="width: 30%">Visual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.PaymentMethodStats != null && Model.PaymentMethodStats.Any())
+                    {
+                        @foreach (var item in Model.PaymentMethodStats)
+                        {
+                            <tr>
+                                <td class="fw-bold">@item.PaymentMethod</td>
+                                <td>@item.TransactionCount</td>
+                                <td>@item.TotalAmount.ToString("C")</td>
+                                <td>@item.Percentage.ToString("F1")%</td>
+                                <td>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar" role="progressbar" style="width: @item.Percentage%" aria-valuenow="@item.Percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No data available</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="fw-bold text-muted small text-end">
+    Report Period: @Model.Revenue.StartDate.ToString("MMM dd, yyyy") - @Model.Revenue.EndDate.ToString("MMM dd, yyyy")
+</div>

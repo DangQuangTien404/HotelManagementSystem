@@ -1,50 +1,52 @@
 @{
     ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar màu xanh nước biển -->
-        <div class="col-md-3 col-lg-2 px-0" style="background-color: #0066cc; min-height: 100vh; position: fixed; left: 0; top: 56px; z-index: 1000;">
-            <div class="p-3">
-                <h5 class="text-white mb-4">Admin Panel</h5>
-                <ul class="nav flex-column">
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminStaff" asp-action="Index">
-                            <i class="bi bi-people"></i> Staff Management
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminCustomer" asp-action="Index">
-                            <i class="bi bi-person"></i> Customer Management
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminTask" asp-action="Index">
-                            <i class="bi bi-clipboard-check"></i> Task Assignment
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminNotification" asp-action="Index">
-                            <i class="bi bi-bell"></i> Notifications
-                        </a>
-                    </li>
-                    <li class="nav-item mb-2">
-                        <a class="nav-link text-white" asp-controller="AdminRevenue" asp-action="Index">
-                            <i class="bi bi-cash-coin"></i> Revenue Management
-                        </a>
-                    </li>
-                </ul>
+<div class="page-header">
+    <h1 class="page-title">Dashboard Overview</h1>
+    <div class="text-muted small">Welcome, @User.Identity.Name</div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card card-admin text-center p-3 h-100">
+            <div class="card-body">
+                <i class="bi bi-people display-4 text-primary mb-3"></i>
+                <h5 class="card-title">Staff</h5>
+                <p class="card-text text-muted">Manage hotel staff</p>
+                <a asp-controller="AdminStaff" asp-action="Index" class="btn btn-outline-primary btn-sm stretched-link">Go to Staff</a>
             </div>
         </div>
-
-        <!-- Main Content -->
-        <div class="col-md-9 col-lg-10 ms-auto" style="margin-left: 16.66666667%;">
-            <div class="p-4">
-                <h1>Admin Dashboard</h1>
-                <p class="text-muted">Welcome to the administration page</p>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-admin text-center p-3 h-100">
+            <div class="card-body">
+                <i class="bi bi-person display-4 text-success mb-3"></i>
+                <h5 class="card-title">Customers</h5>
+                <p class="card-text text-muted">View customer details</p>
+                <a asp-controller="AdminCustomer" asp-action="Index" class="btn btn-outline-success btn-sm stretched-link">Go to Customers</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-admin text-center p-3 h-100">
+            <div class="card-body">
+                <i class="bi bi-clipboard-check display-4 text-warning mb-3"></i>
+                <h5 class="card-title">Tasks</h5>
+                <p class="card-text text-muted">Assign maintenance</p>
+                <a asp-controller="AdminTask" asp-action="Index" class="btn btn-outline-warning btn-sm stretched-link">Go to Tasks</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-admin text-center p-3 h-100">
+            <div class="card-body">
+                <i class="bi bi-cash-coin display-4 text-danger mb-3"></i>
+                <h5 class="card-title">Revenue</h5>
+                <p class="card-text text-muted">Check financial stats</p>
+                <a asp-controller="AdminRevenue" asp-action="Index" class="btn btn-outline-danger btn-sm stretched-link">Go to Revenue</a>
             </div>
         </div>
     </div>
 </div>
-

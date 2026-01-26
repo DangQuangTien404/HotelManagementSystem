@@ -1,0 +1,57 @@
+@{
+    Layout = "_Layout";
+}
+
+<div class="container-fluid px-0">
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <nav class="admin-sidebar">
+            <div class="sidebar-header">
+                <h5 class="mb-0 text-white">Admin Panel</h5>
+                <small class="text-muted">Hotel Management</small>
+            </div>
+            <ul class="nav flex-column mt-3">
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminStaff" ? "active" : "")" 
+                       asp-controller="AdminStaff" asp-action="Index">
+                        <i class="bi bi-people"></i> Staff
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminCustomer" ? "active" : "")" 
+                       asp-controller="AdminCustomer" asp-action="Index">
+                        <i class="bi bi-person"></i> Customers
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminTask" ? "active" : "")" 
+                       asp-controller="AdminTask" asp-action="Index">
+                        <i class="bi bi-clipboard-check"></i> Tasks
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminNotification" ? "active" : "")" 
+                       asp-controller="AdminNotification" asp-action="Index">
+                        <i class="bi bi-bell"></i> Notifications
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminRevenue" ? "active" : "")" 
+                       asp-controller="AdminRevenue" asp-action="Index">
+                        <i class="bi bi-cash-coin"></i> Revenue
+                    </a>
+                </li>
+                 <li class="nav-item border-top mt-3 pt-3">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house-door"></i> Back to Home
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="admin-main-content">
+            @RenderBody()
+        </main>
+    </div>
+</div>

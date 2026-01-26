@@ -8,7 +8,11 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
@@ -19,4 +23,157 @@ html {
 
 body {
   margin-bottom: 60px;
+}
+
+/* ===========================
+   Admin Dashboard Styles 
+   =========================== */
+:root {
+  --admin-sidebar-width: 250px;
+  --admin-primary-color: #2c3e50;
+  /* Dark Blue-Grey */
+  --admin-active-color: #3498db;
+  /* Bright Blue */
+  --admin-hover-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-wrapper {
+  display: flex;
+  width: 100%;
+}
+
+.admin-sidebar {
+  min-width: var(--admin-sidebar-width);
+  max-width: var(--admin-sidebar-width);
+  background-color: var(--admin-primary-color);
+  color: #ecf0f1;
+  transition: all 0.3s;
+  min-height: calc(100vh - 56px);
+  /* Full height minus navbar */
+}
+
+.admin-sidebar .sidebar-header {
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-sidebar .nav-link {
+  color: #aeb6bf;
+  padding: 12px 20px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border-left: 4px solid transparent;
+  display: flex;
+  align-items: center;
+}
+
+.admin-sidebar .nav-link:hover {
+  color: #fff;
+  background: var(--admin-hover-color);
+  text-decoration: none;
+}
+
+.admin-sidebar .nav-link.active {
+  color: #fff;
+  background: rgba(52, 152, 219, 0.15);
+  border-left-color: var(--admin-active-color);
+}
+
+.admin-sidebar .nav-link i {
+  margin-right: 12px;
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+}
+
+.admin-main-content {
+  flex: 1;
+  padding: 30px;
+  background-color: #f4f6f9;
+  /* Light grey background for content */
+  width: 100%;
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-title {
+  font-weight: 300;
+  color: #2c3e50;
+  margin: 0;
+}
+
+/* Admin Cards */
+.card-admin {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  background: #fff;
+  margin-bottom: 1.5rem;
+}
+
+.card-admin .card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.card-admin .card-body {
+  padding: 1.5rem;
+}
+
+/* Admin Table */
+.table-admin {
+  margin-bottom: 0;
+}
+
+.table-admin th {
+  background-color: #f8f9fa;
+  border-top: none;
+  border-bottom: 2px solid #e9ecef;
+  color: #7f8c8d;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+}
+
+.table-admin td {
+  vertical-align: middle;
+  color: #555;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.table-admin tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.badge-soft-success {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.badge-soft-warning {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.badge-soft-danger {
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+.badge-soft-info {
+  background-color: #cff4fc;
+  color: #055160;
 }
