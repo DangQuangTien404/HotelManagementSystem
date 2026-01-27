@@ -15,6 +15,27 @@ namespace BLL.Service
         // 1. Thêm Repository của Room để cập nhật trạng thái phòng
         private readonly IGenericRepository<Room> _roomRepository;
 
+        public async Task CreatePendingCleaningAsync(int roomId)
+        {
+            // 1. Create the Pending Task
+            var cleaning = new RoomCleaning
+            {
+                RoomId = roomId,
+                CleanedBy = null, // No one assigned yet
+                CleaningDate = DateTime.Now,
+                Status = "Pending"
+            };
+            await _repository.AddAsync(cleaning);
+
+            // 2. Automatically mark Room as "Cleaning" (Dirty)
+            var room = await _roomRepository.GetByIdAsync(roomId);
+            if (room != null)
+            {
+                room.Status = DTOs.Enums.RoomStatus.Cleaning; // or RoomStatus.Dirty if you have that
+                await _roomRepository.UpdateAsync(room);
+            }
+        }
+
         // Cập nhật Constructor để nhận thêm IGenericRepository<Room>
         public RoomCleaningService(IRoomCleaningRepository repository, IGenericRepository<Room> roomRepository)
         {
@@ -56,20 +77,24 @@ namespace BLL.Service
             }
         }
 
-        public async Task UpdateStatusAsync(int cleaningId, string status)
+        public async Task UpdateTaskAsync(int cleaningId, string status, int? staffId)
         {
             var cleaning = await _repository.GetByIdAsync(cleaningId);
             if (cleaning != null)
             {
+                // 1. Update Status
                 cleaning.Status = status;
 
-                // Cập nhật thời gian nếu hoàn thành
+                // 2. Update Assigned Staff (NEW)
+                if (staffId.HasValue)
+                {
+                    cleaning.CleanedBy = staffId.Value;
+                }
+
+                // 3. Handle Completion Logic (Same as before)
                 if (status == "Completed")
                 {
                     cleaning.CleaningDate = DateTime.Now;
-
-                    // 3. TỰ ĐỘNG TRẢ VỀ TRẠNG THÁI "AVAILABLE" KHI DỌN XONG
-                    // Tìm phòng tương ứng để cập nhật lại
                     var room = await _roomRepository.GetByIdAsync(cleaning.RoomId);
                     if (room != null)
                     {

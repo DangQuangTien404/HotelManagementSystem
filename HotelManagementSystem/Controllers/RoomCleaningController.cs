@@ -51,17 +51,24 @@ namespace HotelManagementSystem.Controllers
             var cleaning = await _cleaningService.GetCleaningByIdAsync(id);
             if (cleaning == null) return NotFound();
 
+            // Load Statuses
             ViewBag.Statuses = new SelectList(new[] { "Pending", "In Progress", "Completed" }, cleaning.Status);
+
+            // NEW: Load Staff List
+            var staff = await _userService.GetStaffUsersAsync();
+            // The last parameter 'cleaning.CleanedById' pre-selects the current cleaner if assigned
+            ViewBag.Staff = new SelectList(staff, "Id", "FullName", cleaning.CleanedById);
 
             return View(cleaning);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, string status)
+        // Add staffUserId to the parameters
+        public async Task<IActionResult> Edit(int id, string status, int? staffUserId)
         {
-            // Hàm này giữ nguyên, chỉ update status
-            await _cleaningService.UpdateStatusAsync(id, status);
+            // Call the updated service method
+            await _cleaningService.UpdateTaskAsync(id, status, staffUserId);
             return RedirectToAction(nameof(Index));
         }
     }

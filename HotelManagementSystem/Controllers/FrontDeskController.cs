@@ -1,4 +1,5 @@
-﻿using BLL.Service;
+﻿using BLL.Interfaces; 
+using BLL.Service;
 using DAL.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,18 @@ namespace HotelManagementSystem.Controllers
     {
         private readonly FrontDeskService _frontDeskService;
         private readonly IReservationRepository _reservationRepo;
+        // 1. Add Cleaning Service Interface
+        private readonly IRoomCleaningService _cleaningService;
 
-        public FrontDeskController(FrontDeskService service, IReservationRepository repo)
+        // 2. Inject it in Constructor
+        public FrontDeskController(
+            FrontDeskService service,
+            IReservationRepository repo,
+            IRoomCleaningService cleaningService) // <--- Add parameter
         {
             _frontDeskService = service;
             _reservationRepo = repo;
+            _cleaningService = cleaningService; // <--- Assign it
         }
 
         // Dashboard: Shows Arrivals & In-House Guests
@@ -56,7 +64,7 @@ namespace HotelManagementSystem.Controllers
         }
 
         [HttpPost]
-        public IActionResult CheckOut(int id)
+        public async Task<IActionResult> CheckOut(int id) // Changed to async Task
         {
             try
             {
@@ -70,7 +78,21 @@ namespace HotelManagementSystem.Controllers
 
                 int staffId = int.Parse(userIdString);
 
+                // Perform the standard Checkout logic
                 _frontDeskService.CheckOutGuest(id, staffId);
+
+                // --- NEW AUTOMATION LOGIC ---
+                // 2. Get the reservation to find the RoomId
+                // We fetch it again briefly or you can modify FrontDeskService to return the RoomId
+                var reservation = await _reservationRepo.GetReservationWithDetailsAsync(id);
+
+                if (reservation != null)
+                {
+                    // 3. Create the cleaning task & mark room dirty
+                    await _cleaningService.CreatePendingCleaningAsync(reservation.RoomId);
+                }
+                // -----------------------------
+
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -79,6 +101,7 @@ namespace HotelManagementSystem.Controllers
                 return RedirectToAction("Index");
             }
         }
+
         [HttpGet]
         public async Task<IActionResult> CheckoutPreview(int id)
         {
@@ -113,6 +136,7 @@ namespace HotelManagementSystem.Controllers
 
             return View(reservation);
         }
+
         [HttpGet]
         public IActionResult History(string? search, DateTime? start, DateTime? end)
         {
@@ -148,7 +172,5 @@ namespace HotelManagementSystem.Controllers
 
             return View(reservation);
         }
-
     }
-
 }
