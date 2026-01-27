@@ -113,9 +113,17 @@ namespace HotelManagementSystem.Controllers
 
             return View(reservation);
         }
-        public IActionResult History()
+        [HttpGet]
+        public IActionResult History(string? search, DateTime? start, DateTime? end)
         {
-            var history = _reservationRepo.GetCheckedOutReservations();
+            // 1. Call the repo with the new filters
+            var history = _reservationRepo.GetCheckedOutReservations(search, start, end);
+
+            // 2. Save the search terms in ViewBag so the form remembers what you typed
+            ViewBag.CurrentSearch = search;
+            ViewBag.Start = start?.ToString("yyyy-MM-dd");
+            ViewBag.End = end?.ToString("yyyy-MM-dd");
+
             return View(history);
         }
 

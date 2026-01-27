@@ -10,29 +10,63 @@
         <a asp-action="Index" class="btn btn-secondary">Back to Front Desk</a>
     </div>
 
+    <div class="card shadow-sm mb-4">
+        <div class="card-body bg-light">
+            <form method="get" asp-action="History" class="row g-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Guest Name, Phone, or ID..."
+                           value="@ViewBag.CurrentSearch">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="start" class="form-control"
+                           value="@ViewBag.Start">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="end" class="form-control"
+                           value="@ViewBag.End">
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a asp-action="History" class="btn btn-outline-secondary" title="Reset">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
-        <div class="card-body">
-            <table class="table table-hover align-middle">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>ID</th>
+                        <th class="ps-4">ID</th>
                         <th>Guest</th>
                         <th>Room</th>
                         <th>Check-In</th>
                         <th>Check-Out</th>
                         <th class="text-end">Total Paid</th>
-                        <th>Action</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        // Get the actual total from the history record
                         var record = item.CheckInOuts.OrderByDescending(c => c.CheckOutTime).FirstOrDefault();
                         var total = record?.TotalAmount ?? 0;
 
                         <tr>
-                            <td>#@item.Id</td>
+                            <td class="ps-4">#@item.Id</td>
                             <td>
                                 <strong>@item.Customer.FullName</strong><br />
                                 <small class="text-muted">@item.Customer.Phone</small>
@@ -44,7 +78,7 @@
                             <td>@(record?.CheckInTime?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                             <td>@(record?.CheckOutTime?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                             <td class="text-end text-success fw-bold">@total.ToString("N0") &#8363;</td>
-                            <td>
+                            <td class="text-center">
                                 <a asp-action="Invoice" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-receipt"></i> Invoice
                                 </a>
@@ -56,8 +90,9 @@
 
             @if (!Model.Any())
             {
-                <div class="alert alert-info text-center mt-3">
-                    No history found. Checked-out guests will appear here.
+                <div class="p-5 text-center text-muted">
+                    <h5>No history records found.</h5>
+                    <p>Try adjusting your search filters.</p>
                 </div>
             }
         </div>

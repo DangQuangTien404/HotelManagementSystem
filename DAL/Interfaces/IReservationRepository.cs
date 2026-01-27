@@ -22,8 +22,8 @@ namespace DAL.Interfaces
         IEnumerable<Reservation> GetTodayArrivals();
         IEnumerable<Reservation> GetActiveReservations();
         ///invoice
-        IEnumerable<Reservation> GetCheckedOutReservations();
-        
+        IEnumerable<Reservation> GetCheckedOutReservations(string? search, DateTime? start, DateTime? end);
+
         // Methods from Test branch
         Task<IEnumerable<Reservation>> GetAllWithDetailsAsync();
         Task<IEnumerable<Reservation>> GetReservationsByCustomerIdAsync(int customerId);

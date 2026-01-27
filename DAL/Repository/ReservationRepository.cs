@@ -139,16 +139,41 @@ namespace DAL.Repository
                 .OrderBy(r => r.CheckOutDate)
                 .ToList();
         }
-        
-        public IEnumerable<Reservation> GetCheckedOutReservations()
+
+        public IEnumerable<Reservation> GetCheckedOutReservations(string? search, DateTime? start, DateTime? end)
         {
-            return _context.Reservations
+            var query = _context.Reservations
                 .Include(r => r.Customer)
                 .Include(r => r.Room)
                 .Include(r => r.CheckInOuts)
-                .Where(r => r.Status == ReservationStatus.CheckedOut)
-                .OrderByDescending(r => r.CheckOutDate)
-                .ToList();
+                .Where(r => r.Status == ReservationStatus.CheckedOut);
+
+            // 1. Filter by Text (Name, Phone, or ID)
+            if (!string.IsNullOrEmpty(search))
+            {
+                // Convert to lowercase for case-insensitive search
+                string s = search.ToLower();
+                query = query.Where(r =>
+                    r.Customer.FullName.ToLower().Contains(s) ||
+                    r.Customer.Phone.Contains(s) ||
+                    r.Id.ToString() == s);
+            }
+
+            // 2. Filter by Start Date (Check-out Date)
+            if (start.HasValue)
+            {
+                query = query.Where(r => r.CheckOutDate >= start.Value);
+            }
+
+            // 3. Filter by End Date
+            if (end.HasValue)
+            {
+                // Add 1 day to include the end date fully (up to 23:59:59)
+                var nextDay = end.Value.AddDays(1);
+                query = query.Where(r => r.CheckOutDate < nextDay);
+            }
+
+            return query.OrderByDescending(r => r.CheckOutDate).ToList();
         }
 
         // Methods from Test branch
