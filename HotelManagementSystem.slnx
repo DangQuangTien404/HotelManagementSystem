@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="BLL/BLL.csproj" />
-  <Project Path="DAL/DAL.csproj" />
-  <Project Path="DTOs/DTOs.csproj" Id="04a84f66-18e1-4429-a6f0-436f07eb43a3" />
-  <Project Path="HotelManagementSystem/HotelManagementSystem.csproj" />
-</Solution>
