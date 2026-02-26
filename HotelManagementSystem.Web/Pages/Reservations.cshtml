@@ -67,6 +67,10 @@
                                 }
                             </td>
                             <td class="text-end pe-4">
+                                <a asp-page="/Reservations/Services" asp-route-reservationId="@res.Id" class="btn btn-outline-info btn-sm px-3 shadow-sm">
+                                    <i class="bi bi-bag-plus"></i> Dịch vụ
+                                </a>
+
                                 @if (res.Status == "Confirmed")
                                 {
                                     @* Form gọi OnPostCheckInAsync *@

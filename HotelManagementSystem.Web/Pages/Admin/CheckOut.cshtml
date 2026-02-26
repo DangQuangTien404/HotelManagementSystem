@@ -1,4 +1,4 @@
-﻿@page "{id:int}"
+@page "{id:int}"
 @model HotelManagementSystem.Web.Pages.Admin.CheckOutModel
 @{
     ViewData["Title"] = "Thanh toán";
@@ -6,7 +6,7 @@
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-7">
             <div class="card shadow border-0 rounded-3">
                 <div class="card-header bg-dark text-white text-center py-3">
                     <h5 class="mb-0">XÁC NHẬN THANH TOÁN</h5>
@@ -20,6 +20,8 @@
                     <div class="mb-3">
                         <p class="mb-1"><strong>Khách hàng:</strong> @Model.Reservation.Customer?.FullName</p>
                         <p class="mb-1"><strong>Ngày đến:</strong> @Model.Reservation.CheckInDate.ToString("dd/MM/yyyy")</p>
+                        <p class="mb-1"><strong>Tiền phòng:</strong> @Model.RoomTotalPrice.ToString("N0") VND</p>
+                        <p class="mb-1"><strong>Tiền dịch vụ:</strong> @Model.ServiceTotalPrice.ToString("N0") VND</p>
                     </div>
                     <form method="post">
                         <input type="hidden" asp-for="Reservation.Id" />

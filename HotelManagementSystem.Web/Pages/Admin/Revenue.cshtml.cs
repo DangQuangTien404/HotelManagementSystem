@@ -46,8 +46,11 @@ namespace HotelManagementSystem.Web.Pages.Admin
                 RoomRevenue += days * (res.Room?.BasePrice ?? 0);
             }
 
-            // 3. Doanh thu dịch vụ (Nếu chưa có bảng riêng thì tạm để 0)
-            ServiceRevenue = 0;
+            // 3. Doanh thu dịch vụ
+            var completedReservationIds = completedReservations.Select(r => r.Id).ToList();
+            ServiceRevenue = await _context.ReservationServices
+                .Where(s => completedReservationIds.Contains(s.ReservationId))
+                .SumAsync(s => s.Quantity * s.UnitPrice);
 
             TotalRevenue = RoomRevenue + ServiceRevenue;
         }
