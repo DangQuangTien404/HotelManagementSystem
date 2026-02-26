@@ -26,8 +26,15 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<StaffService>();
+builder.Services.AddScoped<DataCleanupService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var cleanupService = scope.ServiceProvider.GetRequiredService<DataCleanupService>();
+    await cleanupService.CleanDuplicateUsersAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
