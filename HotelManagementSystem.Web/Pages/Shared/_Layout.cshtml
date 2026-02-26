@@ -52,6 +52,9 @@
         }
     </style>
 </head>
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@inject HotelManagementSystem.Data.Context.HotelManagementDbContext DbContext
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3 shadow-sm">
@@ -75,12 +78,32 @@
                         }
                         else
                         {
+                            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                            var isUserIdParsed = int.TryParse(userIdValue, out var currentUserId);
+                            var isStaffUser = User.IsInRole("Staff") || User.IsInRole("Technician");
+                            var pendingCleaningTasks = (isStaffUser && isUserIdParsed)
+                                ? await DbContext.RoomCleanings.CountAsync(c => c.CleanedBy == currentUserId && c.Status == "In Progress")
+                                : 0;
+
                             @* 2. DÀNH CHO NHÂN VIÊN/ADMIN ĐÃ ĐĂNG NHẬP *@
                             <li class="nav-item">
                                 <a class="nav-link text-white" asp-page="/Index">
                                     <i class="bi bi-grid-3x3-gap"></i> Sơ đồ phòng
                                 </a>
                             </li>
+
+                            @if (isStaffUser)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-white px-3" asp-page="/Staffs/MyTasks">
+                                        <i class="bi bi-list-check"></i> Việc dọn phòng
+                                        @if (pendingCleaningTasks > 0)
+                                        {
+                                            <span class="badge bg-warning text-dark ms-1">@pendingCleaningTasks</span>
+                                        }
+                                    </a>
+                                </li>
+                            }
 
                             @if (User.IsInRole("Admin"))
                             {
@@ -132,10 +155,6 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow">
                                     <li><a class="dropdown-item" asp-page="/Profile"><i class="bi bi-person-vcard"></i> Hồ sơ cá nhân</a></li>
-                                    @if (!User.IsInRole("Admin"))
-                                    {
-                                        <li><a class="dropdown-item" asp-page="/Staffs/MyTasks"><i class="bi bi-list-check"></i> Công việc dọn phòng</a></li>
-                                    }
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form method="post" asp-page="/Logout" class="px-2">

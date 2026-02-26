@@ -14,7 +14,9 @@ namespace HotelManagementSystem.Web.Pages.Admin
         [BindProperty]
         public Reservation Reservation { get; set; } = null!;
         public int TotalDays { get; set; }
-        public decimal TotalPrice { get; set; }
+        public decimal RoomTotalPrice { get; set; }
+        public decimal ServiceTotalPrice { get; set; }
+        public decimal TotalPrice => RoomTotalPrice + ServiceTotalPrice;
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -28,7 +30,10 @@ namespace HotelManagementSystem.Web.Pages.Admin
             // Tính tiền
             var diff = DateTime.Now - Reservation.CheckInDate;
             TotalDays = diff.Days <= 0 ? 1 : diff.Days;
-            TotalPrice = TotalDays * (Reservation.Room?.BasePrice ?? 0);
+            RoomTotalPrice = TotalDays * (Reservation.Room?.BasePrice ?? 0);
+            ServiceTotalPrice = await _context.ReservationServices
+                .Where(s => s.ReservationId == Reservation.Id)
+                .SumAsync(s => s.Quantity * s.UnitPrice);
 
             return Page();
         }

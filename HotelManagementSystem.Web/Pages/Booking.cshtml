@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model HotelManagementSystem.Web.Pages.BookingModel
 @{
     ViewData["Title"] = "Đặt phòng";
@@ -7,28 +7,55 @@
 <h1>Đặt phòng mới</h1>
 
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="form-group">
+            <div class="form-group mb-2">
                 <label>Mã khách hàng (ID)</label>
                 <input asp-for="RequestData.CustomerId" class="form-control" />
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-2">
                 <label>Mã phòng (ID)</label>
                 <input asp-for="RequestData.RoomId" class="form-control" />
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-2">
                 <label>Ngày nhận phòng</label>
                 <input asp-for="RequestData.CheckInDate" type="date" class="form-control" />
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label>Ngày trả phòng</label>
                 <input asp-for="RequestData.CheckOutDate" type="date" class="form-control" />
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header fw-bold">Chọn dịch vụ đi kèm</div>
+                <div class="card-body">
+                    @if (!Model.AvailableServices.Any())
+                    {
+                        <span class="text-muted">Hiện chưa có dịch vụ đang hoạt động.</span>
+                    }
+                    else
+                    {
+                        @foreach (var service in Model.AvailableServices)
+                        {
+                            <div class="form-check mb-2">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="RequestData.SelectedServiceIds"
+                                       value="@service.Id"
+                                       id="service_@service.Id"
+                                       @(Model.RequestData.SelectedServiceIds.Contains(service.Id) ? "checked" : null) />
+                                <label class="form-check-label" for="service_@service.Id">
+                                    @service.Name - <strong>@service.Price.ToString("N0") VND</strong>
+                                </label>
+                            </div>
+                        }
+                    }
+                </div>
             </div>
 
             <div class="form-group mt-3">

@@ -1,0 +1,99 @@
+@page "{reservationId:int}"
+@model HotelManagementSystem.Web.Pages.Reservations.ServicesModel
+@{
+    ViewData["Title"] = "Dịch vụ đặt phòng";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="mb-0">Dịch vụ cho đặt phòng #@Model.Reservation.Id</h3>
+            <small class="text-muted">Phòng @Model.Reservation.Room.RoomNumber - @Model.Reservation.Customer.FullName</small>
+        </div>
+        <a asp-page="/Reservations" class="btn btn-outline-secondary">Quay lại</a>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header fw-bold">Thêm dịch vụ</div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="Add">
+                        <input type="hidden" name="reservationId" value="@Model.Reservation.Id" />
+                        <div class="mb-2">
+                            <label class="form-label">Dịch vụ</label>
+                            <select asp-for="ServiceId" class="form-select" required>
+                                <option value="">-- Chọn dịch vụ --</option>
+                                @foreach (var service in Model.AvailableServices)
+                                {
+                                    <option value="@service.Id">@service.Name (@service.Price.ToString("N0") VND)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Số lượng</label>
+                            <input asp-for="Quantity" type="number" min="1" class="form-control" />
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Thêm vào hóa đơn</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Dịch vụ đã chọn</span>
+                    <span class="badge bg-success">@Model.ServiceTotal.ToString("N0") VND</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Dịch vụ</th>
+                                <th class="text-center">SL</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.SelectedServices.Any())
+                            {
+                                <tr><td colspan="5" class="text-center text-muted py-4">Chưa có dịch vụ nào.</td></tr>
+                            }
+                            else
+                            {
+                                @foreach (var item in Model.SelectedServices)
+                                {
+                                    <tr>
+                                        <td>@item.HotelService.Name</td>
+                                        <td class="text-center">@item.Quantity</td>
+                                        <td class="text-end">@item.UnitPrice.ToString("N0")</td>
+                                        <td class="text-end fw-bold">@((item.Quantity * item.UnitPrice).ToString("N0"))</td>
+                                        <td class="text-end">
+                                            <form method="post" asp-page-handler="Remove" class="d-inline">
+                                                <input type="hidden" name="reservationId" value="@Model.Reservation.Id" />
+                                                <input type="hidden" name="reservationServiceId" value="@item.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

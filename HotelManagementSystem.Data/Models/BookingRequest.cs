@@ -12,5 +12,6 @@ namespace HotelManagementSystem.Models
         public int RoomId { get; set; }
         public DateTime CheckInDate { get; set; }
         public DateTime CheckOutDate { get; set; }
+        public List<int> SelectedServiceIds { get; set; } = new();
     }
 }

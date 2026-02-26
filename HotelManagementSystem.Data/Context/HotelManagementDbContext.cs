@@ -26,6 +26,8 @@ public partial class HotelManagementDbContext : DbContext
 
     public virtual DbSet<Reservation> Reservations { get; set; }
 
+    public virtual DbSet<ReservationService> ReservationServices { get; set; }
+
     public virtual DbSet<Room> Rooms { get; set; }
 
     public virtual DbSet<RoomCleaning> RoomCleanings { get; set; }
@@ -103,6 +105,23 @@ public partial class HotelManagementDbContext : DbContext
             entity.HasOne(d => d.ReservedByNavigation).WithMany(p => p.Reservations).HasForeignKey(d => d.ReservedBy);
 
             entity.HasOne(d => d.Room).WithMany(p => p.Reservations).HasForeignKey(d => d.RoomId);
+        });
+
+        modelBuilder.Entity<ReservationService>(entity =>
+        {
+            entity.HasIndex(e => e.HotelServiceId, "IX_ReservationServices_HotelServiceId");
+
+            entity.HasIndex(e => e.ReservationId, "IX_ReservationServices_ReservationId");
+
+            entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)");
+
+            entity.HasOne(d => d.HotelService)
+                .WithMany(p => p.ReservationServices)
+                .HasForeignKey(d => d.HotelServiceId);
+
+            entity.HasOne(d => d.Reservation)
+                .WithMany(p => p.ReservationServices)
+                .HasForeignKey(d => d.ReservationId);
         });
 
         modelBuilder.Entity<Room>(entity =>
