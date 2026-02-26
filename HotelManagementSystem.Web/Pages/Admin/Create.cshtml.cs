@@ -16,11 +16,19 @@ namespace HotelManagementSystem.Web.Pages.Admin
 
         public Room? SelectedRoom { get; set; }
         public List<Customer> CustomerList { get; set; } = new();
+        public List<HotelService> ActiveServices { get; set; } = new();
+
+        [BindProperty]
+        public List<int> SelectedServiceIds { get; set; } = new();
 
         public async Task OnGetAsync(int? roomId)
         {
             // Load danh sách khách hàng để chọn từ Dropdown
             CustomerList = await _context.Customers.ToListAsync();
+            ActiveServices = await _context.HotelServices
+                .Where(s => s.IsActive)
+                .OrderBy(s => s.Name)
+                .ToListAsync();
 
             if (roomId.HasValue)
             {
@@ -34,10 +42,37 @@ namespace HotelManagementSystem.Web.Pages.Admin
 
         public async Task<IActionResult> OnPostAsync()
         {
+            CustomerList = await _context.Customers.ToListAsync();
+            ActiveServices = await _context.HotelServices
+                .Where(s => s.IsActive)
+                .OrderBy(s => s.Name)
+                .ToListAsync();
+
             // Gán các giá trị mặc định
             Reservation.Status = "Booked";
+            Reservation.CreatedAt = DateTime.Now;
 
             _context.Reservations.Add(Reservation);
+            await _context.SaveChangesAsync();
+
+            if (SelectedServiceIds.Any())
+            {
+                var selectedServices = await _context.HotelServices
+                    .Where(s => s.IsActive && SelectedServiceIds.Contains(s.Id))
+                    .ToListAsync();
+
+                foreach (var service in selectedServices)
+                {
+                    _context.ReservationServices.Add(new ReservationService
+                    {
+                        ReservationId = Reservation.Id,
+                        HotelServiceId = service.Id,
+                        Quantity = 1,
+                        UnitPrice = service.Price,
+                        AddedAt = DateTime.Now
+                    });
+                }
+            }
 
             // Cập nhật trạng thái phòng sang 'Occupied'
             var room = await _context.Rooms.FindAsync(Reservation.RoomId);

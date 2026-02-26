@@ -28,4 +28,6 @@ public partial class Reservation
     public virtual User? ReservedByNavigation { get; set; }
 
     public virtual Room Room { get; set; } = null!;
+
+    public virtual ICollection<ReservationService> ReservationServices { get; set; } = new List<ReservationService>();
 }

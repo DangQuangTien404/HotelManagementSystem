@@ -49,6 +49,33 @@
                         <input type="date" asp-for="Reservation.CheckOutDate" class="form-control" required
                                value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" />
                     </div>
+
+                    <div class="col-12 mb-3">
+                        <label class="fw-bold mb-2">Dịch vụ đi kèm (tùy chọn)</label>
+                        <div class="border rounded p-3 bg-light">
+                            @if (!Model.ActiveServices.Any())
+                            {
+                                <span class="text-muted">Hiện chưa có dịch vụ đang hoạt động.</span>
+                            }
+                            else
+                            {
+                                <div class="row g-2">
+                                    @foreach (var service in Model.ActiveServices)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="SelectedServiceIds" value="@service.Id" id="service_@service.Id"
+                                                       @(Model.SelectedServiceIds.Contains(service.Id) ? "checked" : null) />
+                                                <label class="form-check-label" for="service_@service.Id">
+                                                    @service.Name - <strong>@service.Price.ToString("N0") VND</strong>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">

@@ -27,22 +27,64 @@
                             <span class="text-muted">Email:</span>
                             <span class="small">@Model.StaffInfo?.User.Email</span>
                         </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Công việc chưa hoàn thành:</span>
+                            <span class="badge bg-danger">@Model.TotalPendingTasks</span>
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
 
         <div class="col-md-8">
-            <div class="card shadow border-0">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-list-task text-primary"></i> Công việc đang được giao</h5>
+            <div class="card shadow border-0 mb-3">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-stars text-primary"></i> Công việc dọn phòng chưa xong</h5>
+                    <span class="badge bg-warning text-dark">@Model.PendingCleaningTasks.Count</span>
                 </div>
                 <div class="card-body">
-                    @if (!Model.MyTasks.Any())
+                    @if (!Model.PendingCleaningTasks.Any())
+                    {
+                        <p class="text-muted mb-0">Bạn không còn việc dọn phòng đang thực hiện.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Phòng</th>
+                                        <th>Ngày giao</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var task in Model.PendingCleaningTasks)
+                                    {
+                                        <tr>
+                                            <td><span class="badge bg-secondary">@task.Room?.RoomNumber</span></td>
+                                            <td>@task.CleaningDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td><span class="badge bg-info text-dark">@task.Status</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-tools text-primary"></i> Công việc bảo trì chưa xong</h5>
+                    <span class="badge bg-danger">@Model.PendingMaintenanceTasks.Count</span>
+                </div>
+                <div class="card-body">
+                    @if (!Model.PendingMaintenanceTasks.Any())
                     {
                         <div class="text-center py-4">
                             <i class="bi bi-emoji-smile text-muted fs-1"></i>
-                            <p class="text-muted">Bạn không có công việc nào đang chờ xử lý!</p>
+                            <p class="text-muted">Bạn không có công việc bảo trì nào đang chờ xử lý!</p>
                         </div>
                     }
                     else
@@ -54,20 +96,16 @@
                                         <th>Phòng</th>
                                         <th>Mô tả</th>
                                         <th>Ưu tiên</th>
-                                        <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var task in Model.MyTasks)
+                                    @foreach (var task in Model.PendingMaintenanceTasks)
                                     {
                                         <tr>
                                             <td><span class="badge bg-secondary">@task.Room.RoomNumber</span></td>
                                             <td class="small">@task.Description</td>
                                             <td>
                                                 <span class="badge @(task.Priority == "High" ? "bg-danger" : "bg-info")">@task.Priority</span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-success">Hoàn thành</button>
                                             </td>
                                         </tr>
                                     }

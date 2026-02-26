@@ -26,7 +26,7 @@ namespace HotelManagementSystem.Web.Pages.Staffs
             MyCleaningTasks = await _context.RoomCleanings
                 .Include(c => c.Room)
                 .Where(c => c.CleanedBy == userId.Value && c.Status == "In Progress")
-                .OrderBy(c => c.ScheduledAt)
+                .OrderBy(c => c.CleaningDate)
                 .ToListAsync();
 
             return Page();

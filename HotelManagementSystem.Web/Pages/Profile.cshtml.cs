@@ -23,7 +23,9 @@ namespace HotelManagementSystem.Web.Pages
 
         // Thay vì public Staff? StaffInfo { get; set; }
         public HotelManagementSystem.Data.Models.Staff? StaffInfo { get; set; }
-        public List<MaintenanceTask> MyTasks { get; set; } = new();
+        public List<MaintenanceTask> PendingMaintenanceTasks { get; set; } = new();
+        public List<RoomCleaning> PendingCleaningTasks { get; set; } = new();
+        public int TotalPendingTasks => PendingMaintenanceTasks.Count + PendingCleaningTasks.Count;
 
         public async Task OnGetAsync()
         {
@@ -37,9 +39,15 @@ namespace HotelManagementSystem.Web.Pages
             StaffInfo = await _staffService.GetStaffByUserId(userId);
 
             // 2. Lấy danh sách việc được giao (Maintenance)
-            MyTasks = await _context.MaintenanceTasks
+            PendingMaintenanceTasks = await _context.MaintenanceTasks
                 .Include(t => t.Room)
                 .Where(t => t.AssignedTo == userId && t.Status != "Completed")
+                .ToListAsync();
+
+            PendingCleaningTasks = await _context.RoomCleanings
+                .Include(c => c.Room)
+                .Where(c => c.CleanedBy == userId && c.Status == "In Progress")
+                .OrderBy(c => c.CleaningDate)
                 .ToListAsync();
         }
     }
