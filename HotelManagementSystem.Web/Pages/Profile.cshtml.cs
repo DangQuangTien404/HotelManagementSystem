@@ -27,7 +27,11 @@ namespace HotelManagementSystem.Web.Pages
 
         public async Task OnGetAsync()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(userIdValue, out var userId))
+            {
+                return;
+            }
 
             // 1. Lấy thông tin từ bảng Staff
             StaffInfo = await _staffService.GetStaffByUserId(userId);

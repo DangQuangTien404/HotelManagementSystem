@@ -1,6 +1,5 @@
 ﻿@page
-@using System.Security.Claims
-@model HotelManagementSystem.Web.Pages.Staff.MyTasksModel
+@model HotelManagementSystem.Web.Pages.Staffs.MyTasksModel
 @{
     ViewData["Title"] = "Công việc của tôi";
 }
@@ -11,15 +10,15 @@
             <h5 class="mb-0 fw-bold"><i class="bi bi-list-check"></i> DANH SÁCH PHÒNG CẦN DỌN</h5>
         </div>
         <div class="card-body">
-            @* Sửa lỗi FindFirstValue ở đây *@
-            @{
-                var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                var currentId = userClaim != null ? userClaim.Value : "N/A";
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-success">@TempData["Message"]</div>
             }
-            <div class="alert alert-light border small mb-3">
-                ID nhân viên: <strong>@currentId</strong>
-            </div>
-
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+            
             @if (Model.MyCleaningTasks == null || !Model.MyCleaningTasks.Any())
             {
                 <div class="text-center py-5">

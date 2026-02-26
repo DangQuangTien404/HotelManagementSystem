@@ -41,7 +41,7 @@ namespace HotelManagementSystem.Web.Pages
         public async Task<IActionResult> OnPostCheckInAsync(int id)
         {
             // Lấy ID của nhân viên đang thao tác từ Cookie
-            var staffIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var staffIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(staffIdClaim)) return RedirectToPage("/Login");
 
             int staffId = int.Parse(staffIdClaim);
@@ -58,7 +58,7 @@ namespace HotelManagementSystem.Web.Pages
         public async Task<IActionResult> OnPostCheckOutAsync(int id)
         {
             // Lấy ID của nhân viên đang thao tác
-            var staffIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var staffIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(staffIdClaim)) return RedirectToPage("/Login");
 
             int staffId = int.Parse(staffIdClaim);

@@ -38,7 +38,11 @@ namespace HotelManagementSystem.Web.Pages.Maintenance
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var creatorId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var creatorIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(creatorIdValue, out var creatorId))
+            {
+                return RedirectToPage("/Login");
+            }
 
             var success = await _service.CreateMaintenanceTask(
                 SelectedRoomId, SelectedStaffUserId, Description, Priority, creatorId);

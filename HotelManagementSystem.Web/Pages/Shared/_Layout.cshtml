@@ -132,6 +132,10 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow">
                                     <li><a class="dropdown-item" asp-page="/Profile"><i class="bi bi-person-vcard"></i> Hồ sơ cá nhân</a></li>
+                                    @if (!User.IsInRole("Admin"))
+                                    {
+                                        <li><a class="dropdown-item" asp-page="/Staffs/MyTasks"><i class="bi bi-list-check"></i> Công việc dọn phòng</a></li>
+                                    }
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form method="post" asp-page="/Logout" class="px-2">
