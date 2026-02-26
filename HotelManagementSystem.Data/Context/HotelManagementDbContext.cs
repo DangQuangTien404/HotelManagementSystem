@@ -35,7 +35,12 @@ public partial class HotelManagementDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -127,6 +132,10 @@ public partial class HotelManagementDbContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Staff).HasForeignKey(d => d.UserId);
         });
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
 
         OnModelCreatingPartial(modelBuilder);
     }

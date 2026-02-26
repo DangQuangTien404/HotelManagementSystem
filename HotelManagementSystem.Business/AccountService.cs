@@ -9,7 +9,7 @@ namespace HotelManagementSystem.Business
         private readonly HotelManagementDbContext _context;
         public AccountService(HotelManagementDbContext context) => _context = context;
 
-        public async Task<bool> RegisterStaff(User newUser, string position, string shift)
+        public async Task<bool> RegisterStaff(User newUser, string position, string shift, DateTime? hireDate = null)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -29,7 +29,7 @@ namespace HotelManagementSystem.Business
                     UserId = newUser.Id,
                     Position = position,
                     Shift = shift,
-                    HireDate = DateTime.Now
+                    HireDate = hireDate ?? DateTime.Now
                 };
                 _context.Staffs.Add(staffEntry);
 

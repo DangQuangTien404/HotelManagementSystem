@@ -1,15 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using HotelManagementSystem.Data.Context;
+using HotelManagementSystem.Business;
 using HotelManagementSystem.Data.Models;
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Threading.Tasks;
 
 namespace HotelManagementSystem.Web.Pages.Admin
 {
     public class AddStaffModel : PageModel
     {
-        private readonly HotelManagementDbContext _context;
-        public AddStaffModel(HotelManagementDbContext context) => _context = context;
+        private readonly AccountService _accountService;
+
+        public AddStaffModel(AccountService accountService)
+        {
+            _accountService = accountService;
+        }
 
         [BindProperty]
         public StaffInput Input { get; set; } = new();
@@ -20,46 +25,25 @@ namespace HotelManagementSystem.Web.Pages.Admin
         {
             if (!ModelState.IsValid) return Page();
 
-            // Sử dụng Transaction để đảm bảo tạo đủ cả User và Staff
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            var user = new User
             {
-                // 1. Tạo đối tượng User
-                var user = new User
-                {
-                    Username = Input.UserName,
-                    // THAY 'PasswordHash' BẰNG TÊN CỘT TRONG FILE User.cs CỦA BẠN
-                    PasswordHash = Input.Password,
-                    Email = Input.Email,
-                    Role = Input.IsAdmin ? "Admin" : "Staff",
-                    FullName = Input.FullName,
-                    CreatedAt = DateTime.Now
-                };
+                Username = Input.UserName,
+                PasswordHash = Input.Password,
+                Email = Input.Email,
+                Role = Input.IsAdmin ? "Admin" : "Staff",
+                FullName = Input.FullName,
+                // CreatedAt will be set by AccountService
+            };
 
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync(); // Lưu để lấy Id của User
+            bool success = await _accountService.RegisterStaff(user, Input.Position, Input.Shift, Input.HireDate);
 
-                // 2. Tạo đối tượng Staff liên kết với User vừa tạo
-                var staff = new HotelManagementSystem.Data.Models.Staff
-                {
-                    UserId = user.Id, // Lấy ID từ User vừa tạo ở trên
-                    Position = Input.Position,
-                    Shift = Input.Shift,
-                    HireDate = Input.HireDate,
-                    // Đảm bảo không truyền User object nếu DB đã tự handle
-                };
-
-                _context.Staffs.Add(staff);
-                await _context.SaveChangesAsync();
-
-                await transaction.CommitAsync();
+            if (success)
+            {
                 return RedirectToPage("/Index");
             }
-            catch (Exception ex)
+            else
             {
-                await transaction.RollbackAsync();
-                // Hiển thị lỗi ra màn hình để bạn dễ debug
-                ModelState.AddModelError("", "Lỗi DB: " + ex.Message);
+                ModelState.AddModelError("", "Thêm nhân viên thất bại. Có thể tên đăng nhập đã tồn tại hoặc có lỗi hệ thống.");
                 return Page();
             }
         }
