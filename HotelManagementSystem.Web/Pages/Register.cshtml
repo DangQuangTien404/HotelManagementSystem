@@ -43,6 +43,24 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label fw-bold small">Tên đăng nhập <span class="text-danger">*</span></label>
+                            <input asp-for="Input.Username" class="form-control" placeholder="Nhập tên đăng nhập" required />
+                            <span asp-validation-for="Input.Username" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mật khẩu <span class="text-danger">*</span></label>
+                            <input asp-for="Input.Password" type="password" class="form-control" placeholder="Tối thiểu 6 ký tự" required />
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                            <input asp-for="Input.ConfirmPassword" type="password" class="form-control" placeholder="Nhập lại mật khẩu" required />
+                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label fw-bold small">Địa chỉ thường trú <span class="text-danger">*</span></label>
                             <textarea asp-for="Customer.Address" class="form-control" rows="2" placeholder="Tỉnh/Thành phố..." required></textarea>
                         </div>
@@ -75,3 +93,7 @@
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
     }
 </style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
