@@ -9,8 +9,7 @@ namespace HotelManagementSystem.Business
         private readonly HotelManagementDbContext _context;
         public CheckInService(HotelManagementDbContext context) => _context = context;
 
-        // Thêm tham số staffId vào đây
-        public async Task<bool> ExecuteCheckIn(int reservationId, int staffId)
+        public async Task<bool> ExecuteCheckIn(int reservationId, int? operatorUserId = null)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -22,7 +21,7 @@ namespace HotelManagementSystem.Business
                 {
                     ReservationId = reservationId,
                     CheckInTime = DateTime.Now,
-                    CheckInBy = staffId, // Lưu ID người thực hiện check-in
+                    CheckInBy = operatorUserId,
                     TotalAmount = 0
                 };
                 _context.CheckInOuts.Add(checkInEntry);

@@ -1,0 +1,34 @@
+@page "{id:int}"
+@model HotelManagementSystem.Web.Pages.CheckOutModel
+@{
+    ViewData["Title"] = "Check-out";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow border-0 rounded-3">
+                <div class="card-header bg-dark text-white text-center py-3">
+                    <h5 class="mb-0">XÁC NHẬN CHECK-OUT</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="text-danger fw-bold">@Model.TotalPrice.ToString("N0") VND</h2>
+                        <p class="text-muted">Phòng @Model.Reservation.Room?.RoomNumber | @Model.TotalDays ngày</p>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Khách hàng:</strong> @Model.Reservation.Customer?.FullName</p>
+                        <p class="mb-1"><strong>Ngày nhận phòng:</strong> @Model.Reservation.CheckInDate.ToString("dd/MM/yyyy")</p>
+                        <p class="mb-1"><strong>Tiền phòng:</strong> @Model.RoomTotalPrice.ToString("N0") VND</p>
+                        <p class="mb-1"><strong>Tiền dịch vụ:</strong> @Model.ServiceTotalPrice.ToString("N0") VND</p>
+                    </div>
+                    <form method="post">
+                        <button type="submit" class="btn btn-success w-100 btn-lg shadow">HOÀN TẤT TRẢ PHÒNG</button>
+                        <a asp-page="/MyBookings" class="btn btn-link w-100 text-muted mt-2">Quay lại đặt phòng của tôi</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
