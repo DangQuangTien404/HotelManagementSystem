@@ -72,7 +72,14 @@
                                 }
                                 else
                                 {
-                                     <button class="btn btn-sm btn-danger rounded-pill fw-bold disabled">ĐÃ CÓ KHÁCH</button>
+                                    @if (item.IsMyRoom)
+                                    {
+                                        <a asp-page="/Payment/Checkout" asp-route-reservationId="@item.CurrentReservationId" class="btn btn-sm btn-danger rounded-pill fw-bold">TRẢ PHÒNG</a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-sm btn-danger rounded-pill fw-bold disabled">ĐÃ CÓ KHÁCH</button>
+                                    }
                                 }
                             }
                             else if (item.Status == "Dirty")

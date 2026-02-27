@@ -1,0 +1,92 @@
+@page
+@model HotelManagementSystem.Web.Pages.Payment.CheckoutModel
+@{
+    ViewData["Title"] = "Thanh toán & Trả phòng";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0"><i class="bi bi-credit-card-2-front"></i> THANH TOÁN & TRẢ PHÒNG</h3>
+                </div>
+                <div class="card-body p-5">
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["Error"]</div>
+                    }
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 border-end">
+                            <h5 class="fw-bold mb-3 text-secondary">Thông tin phòng</h5>
+                            <p><strong>Phòng:</strong> @Model.Reservation?.Room?.RoomNumber (@Model.Reservation?.Room?.RoomType)</p>
+                            <p><strong>Ngày đến:</strong> @Model.CheckInOutInfo?.CheckInTime?.ToString("dd/MM/yyyy HH:mm")</p>
+                            <p><strong>Ngày đi (Hiện tại):</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                        <div class="col-md-6 ps-md-4">
+                            <h5 class="fw-bold mb-3 text-secondary">Chi tiết thanh toán</h5>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Tiền phòng:</span>
+                                <span>@((Model.Reservation?.Room?.Price ?? 0).ToString("N0")) đ / đêm</span>
+                            </div>
+                             <div class="d-flex justify-content-between mb-2">
+                                <span>Số ngày ở:</span>
+                                <span>@((DateTime.Now - (Model.CheckInOutInfo?.CheckInTime ?? DateTime.Now)).Days <= 0 ? 1 : (DateTime.Now - (Model.CheckInOutInfo?.CheckInTime ?? DateTime.Now)).Days)</span>
+                            </div>
+                            <hr />
+                            <div class="d-flex justify-content-between fs-4 fw-bold text-success">
+                                <span>TỔNG CỘNG:</span>
+                                <span>@Model.TotalAmount.ToString("N0") đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-3 mt-4 text-primary">Thông tin thẻ thanh toán (Sandbox)</h5>
+                    <form method="post">
+                        <input type="hidden" asp-for="ReservationId" />
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tên chủ thẻ</label>
+                            <input asp-for="PaymentInput.CardHolderName" class="form-control" placeholder="NGUYEN VAN A" />
+                            <span asp-validation-for="PaymentInput.CardHolderName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Số thẻ (Visa/MasterCard)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                                <input asp-for="PaymentInput.CardNumber" class="form-control" placeholder="xxxx xxxx xxxx xxxx" />
+                            </div>
+                            <span asp-validation-for="PaymentInput.CardNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Ngày hết hạn (MM/YY)</label>
+                                <input asp-for="PaymentInput.ExpiryDate" class="form-control" placeholder="12/25" />
+                                <span asp-validation-for="PaymentInput.ExpiryDate" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">CVV</label>
+                                <input asp-for="PaymentInput.CVV" class="form-control" placeholder="123" type="password" maxlength="4" />
+                                <span asp-validation-for="PaymentInput.CVV" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success btn-lg fw-bold shadow-sm" onclick="return confirm('Xác nhận thanh toán và trả phòng?')">
+                                <i class="bi bi-check-circle-fill"></i> THANH TOÁN NGAY
+                            </button>
+                            <a asp-page="/Index" class="btn btn-outline-secondary mt-2">Quay lại</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
