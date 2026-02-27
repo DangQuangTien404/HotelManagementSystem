@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HotelManagementSystem.Web.Pages.Admin
 {
+    [Authorize(Roles = "Admin")]
     public class AddStaffModel : PageModel
     {
         private readonly HotelManagementDbContext _context;

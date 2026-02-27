@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HotelManagementSystem.Web.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly HotelManagementDbContext _context;

@@ -1,4 +1,4 @@
-﻿using HotelManagementSystem.Data.Context;
+using HotelManagementSystem.Data.Context;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace HotelManagementSystem.Web.Pages.Staffs
 {
-    [Authorize]
+    [Authorize(Roles = "Staff,Admin")]
     public class MyTasksModel : PageModel
     {
         private readonly HotelManagementDbContext _context;
