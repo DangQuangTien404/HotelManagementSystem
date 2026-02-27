@@ -26,9 +26,6 @@ namespace HotelManagementSystem.Web.Pages.Admin
         // Danh sách tác vụ bảo trì và cảnh báo trễ hạn
         public List<MaintenanceTask> PendingTasks { get; set; } = new();
 
-        // Danh sách đặt phòng chờ duyệt
-        public List<Reservation> PendingReservations { get; set; } = new();
-
         // Giả sử bạn có bảng Reservation để kiểm tra Check-out trễ
         // Nếu chưa có bảng này, bạn có thể tạm comment phần OverdueCheckouts
         // public List<Reservation> OverdueCheckouts { get; set; } = new();
@@ -49,55 +46,11 @@ namespace HotelManagementSystem.Web.Pages.Admin
                 .OrderByDescending(m => m.Priority) // Ưu tiên hàng High lên đầu
                 .ToListAsync();
 
-            // 3. Lấy danh sách đặt phòng chờ duyệt
-            PendingReservations = await _context.Reservations
-                .Include(r => r.Room)
-                .Include(r => r.Customer)
-                .Where(r => r.Status == "Pending")
-                .OrderBy(r => r.CheckInDate)
-                .ToListAsync();
-
-            // 4. Logic cảnh báo trễ (Ví dụ)
+            // 3. Logic cảnh báo trễ (Ví dụ)
             // OverdueCheckouts = await _context.Reservations
             //    .Include(r => r.Room).Include(r => r.Customer)
             //    .Where(r => r.CheckOutDate.Date == DateTime.Today && DateTime.Now.Hour >= 12)
             //    .ToListAsync();
-        }
-
-        // Hàm xử lý khi Admin duyệt đặt phòng
-        public async Task<IActionResult> OnPostApproveBookingAsync(int id)
-        {
-            var reservation = await _context.Reservations.FindAsync(id);
-            if (reservation != null)
-            {
-                reservation.Status = "Confirmed";
-                await _context.SaveChangesAsync();
-                TempData["Message"] = "Đã duyệt đặt phòng thành công.";
-            }
-            return RedirectToPage();
-        }
-
-        // Hàm xử lý khi Admin từ chối đặt phòng
-        public async Task<IActionResult> OnPostRejectBookingAsync(int id)
-        {
-            var reservation = await _context.Reservations
-                .Include(r => r.Room)
-                .FirstOrDefaultAsync(r => r.Id == id);
-
-            if (reservation != null)
-            {
-                reservation.Status = "Cancelled";
-
-                // Trả lại trạng thái phòng về Available
-                if (reservation.Room != null)
-                {
-                    reservation.Room.Status = "Available";
-                }
-
-                await _context.SaveChangesAsync();
-                TempData["Message"] = "Đã từ chối đặt phòng.";
-            }
-            return RedirectToPage();
         }
 
         // Hàm xử lý khi Admin bấm nút "Duyệt Hoàn Thành"

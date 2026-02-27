@@ -48,65 +48,6 @@
     </div>
 
     <div class="row">
-        <!-- Section: Pending Bookings -->
-        <div class="col-12 mb-4">
-            <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-calendar-check"></i> Đặt phòng chờ duyệt</h5>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr class="small text-uppercase">
-                                <th class="ps-3">Phòng</th>
-                                <th>Khách hàng</th>
-                                <th>Ngày nhận</th>
-                                <th>Ngày trả</th>
-                                <th class="text-end pe-3">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var res in Model.PendingReservations)
-                            {
-                                <tr>
-                                    <td class="fw-bold text-primary ps-3">@res.Room?.RoomNumber</td>
-                                    <td>
-                                        <div class="fw-bold">@res.Customer?.FullName</div>
-                                        <small class="text-muted">@res.Customer?.Phone</small>
-                                    </td>
-                                    <td>@res.CheckInDate.ToString("dd/MM/yyyy")</td>
-                                    <td>@res.CheckOutDate.ToString("dd/MM/yyyy")</td>
-                                    <td class="text-end pe-3">
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <form method="post" asp-page-handler="ApproveBooking" asp-route-id="@res.Id">
-                                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
-                                                    Duyệt <i class="bi bi-check-lg"></i>
-                                                </button>
-                                            </form>
-                                            <form method="post" asp-page-handler="RejectBooking" asp-route-id="@res.Id">
-                                                <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm">
-                                                    Hủy <i class="bi bi-x-lg"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                            @if (!Model.PendingReservations.Any())
-                            {
-                                <tr>
-                                    <td colspan="5" class="text-center py-5 text-muted small">
-                                        <i class="bi bi-calendar-check d-block fs-2 mb-2"></i>
-                                        Hiện không có yêu cầu đặt phòng nào chờ duyệt.
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
         <div class="col-lg-8">
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-white py-3">
