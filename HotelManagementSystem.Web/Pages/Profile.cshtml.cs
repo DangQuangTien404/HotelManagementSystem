@@ -1,20 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using HotelManagementSystem.Data.Context;
-using HotelManagementSystem.Data.Models;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using System.ComponentModel.DataAnnotations;
+using HotelManagementSystem.Business;
+using HotelManagementSystem.Data.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HotelManagementSystem.Web.Pages
 {
     public class ProfileModel : PageModel
     {
-        private readonly HotelManagementDbContext _context;
+        private readonly HotelManagementService _hotelService;
 
-        public ProfileModel(HotelManagementDbContext context)
+        public ProfileModel(HotelManagementService hotelService)
         {
-            _context = context;
+            _hotelService = hotelService;
         }
 
         [BindProperty]
@@ -44,41 +43,38 @@ namespace HotelManagementSystem.Web.Pages
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdStr)) return RedirectToPage("/Login");
 
-            UserProfile = await _context.Users.FindAsync(int.Parse(userIdStr));
-
+            UserProfile = await _hotelService.GetUserByIdAsync(int.Parse(userIdStr));
             if (UserProfile == null) return NotFound();
             return Page();
         }
 
-        // Xử lý cập nhật thông tin cơ bản
         public async Task<IActionResult> OnPostUpdateInfoAsync()
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userToUpdate = await _context.Users.FindAsync(int.Parse(userIdStr));
+            if (string.IsNullOrEmpty(userIdStr)) return RedirectToPage("/Login");
 
+            var userToUpdate = await _hotelService.GetUserByIdAsync(int.Parse(userIdStr));
             if (userToUpdate != null)
             {
                 userToUpdate.FullName = UserProfile.FullName;
                 userToUpdate.Email = UserProfile.Email;
-
-                await _context.SaveChangesAsync();
+                await _hotelService.UpdateUserProfileAsync(userToUpdate);
                 TempData["Message"] = "Cập nhật thông tin thành công!";
             }
 
             return RedirectToPage();
         }
 
-        // Xử lý đổi mật khẩu
         public async Task<IActionResult> OnPostChangePasswordAsync()
         {
             if (!ModelState.IsValid) return Page();
 
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _context.Users.FindAsync(int.Parse(userIdStr));
+            if (string.IsNullOrEmpty(userIdStr)) return RedirectToPage("/Login");
+            var user = await _hotelService.GetUserByIdAsync(int.Parse(userIdStr));
 
             if (user != null)
             {
-                // Trong thực tế, bạn nên dùng BCrypt hoặc Identity để Verify mật khẩu
                 if (user.PasswordHash != PasswordInput.OldPassword)
                 {
                     ModelState.AddModelError("PasswordInput.OldPassword", "Mật khẩu cũ không chính xác");
@@ -86,7 +82,7 @@ namespace HotelManagementSystem.Web.Pages
                 }
 
                 user.PasswordHash = PasswordInput.NewPassword;
-                await _context.SaveChangesAsync();
+                await _hotelService.UpdateUserProfileAsync(user);
                 TempData["Message"] = "Đổi mật khẩu thành công!";
             }
 
