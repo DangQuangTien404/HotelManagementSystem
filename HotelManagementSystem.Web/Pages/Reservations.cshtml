@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model HotelManagementSystem.Web.Pages.ReservationsModel
 @{
     ViewData["Title"] = "Quản lý lưu trú";
@@ -37,61 +37,77 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (!Model.Reservations.Any())
+                    @if (Model.Reservations == null || !Model.Reservations.Any())
                     {
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">Không có khách nào cần xử lý hiện tại.</td>
                         </tr>
                     }
-                    @foreach (var res in Model.Reservations)
+                    else
                     {
-                        <tr>
-                            <td class="ps-4">
-                                <span class="fw-bold text-primary">@res.Room.RoomNumber</span><br />
-                                <small class="text-muted">@res.Room.RoomType</small>
-                            </td>
-                            <td>
-                                <div>@res.Customer.FullName</div>
-                                <small class="text-muted"><i class="bi bi-phone"></i> @res.Customer.Phone</small>
-                            </td>
-                            <td>@res.CheckInDate.ToString("dd/MM/yyyy")</td>
-                            <td>@res.CheckOutDate.ToString("dd/MM/yyyy")</td>
-                            <td>
-                                @if (res.Status == "Confirmed")
-                                {
-                                    <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Chờ Check-in</span>
-                                }
-                                else if (res.Status == "CheckedIn")
-                                {
-                                    <span class="badge bg-success"><i class="bi bi-door-open"></i> Đang ở</span>
-                                }
-                            </td>
-                            <td class="text-end pe-4">
-                                <a asp-page="/Reservations/Services" asp-route-reservationId="@res.Id" class="btn btn-outline-info btn-sm px-3 shadow-sm">
-                                    <i class="bi bi-bag-plus"></i> Dịch vụ
-                                </a>
+                        @foreach (var res in Model.Reservations)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-bold text-primary">@res.Room.RoomNumber</span><br />
+                                    <small class="text-muted">@res.Room.RoomType</small>
+                                </td>
+                                <td>
+                                    <div>@res.Customer.FullName</div>
+                                    <small class="text-muted"><i class="bi bi-phone"></i> @res.Customer.Phone</small>
+                                </td>
+                                <td>@res.CheckInDate.ToString("dd/MM/yyyy")</td>
+                                <td>@res.CheckOutDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @if (res.Status == "Pending")
+                                    {
+                                        <span class="badge bg-info text-white"><i class="bi bi-hourglass-split"></i> Chờ duyệt</span>
+                                    }
+                                    else if (res.Status == "Confirmed")
+                                    {
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Chờ Check-in</span>
+                                    }
+                                    else if (res.Status == "CheckedIn")
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-door-open"></i> Đang ở</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a asp-page="/Reservations/Services" asp-route-reservationId="@res.Id" class="btn btn-outline-info btn-sm px-3 shadow-sm">
+                                        <i class="bi bi-bag-plus"></i> Dịch vụ
+                                    </a>
 
-                                @if (res.Status == "Confirmed")
-                                {
-                                    @* Form gọi OnPostCheckInAsync *@
-                                    <form method="post" asp-page-handler="CheckIn" asp-route-id="@res.Id" class="d-inline">
-                                        <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm">
-                                            <i class="bi bi-box-arrow-in-right"></i> Check-in
-                                        </button>
-                                    </form>
-                                }
-                                else if (res.Status == "CheckedIn")
-                                {
-                                    @* Form gọi OnPostCheckOutAsync *@
-                                    <form method="post" asp-page-handler="CheckOut" asp-route-id="@res.Id" class="d-inline">
-                                        <button type="submit" class="btn btn-danger btn-sm px-3 shadow-sm"
-                                                onclick="return confirm('Bạn có chắc muốn thanh toán và trả phòng?')">
-                                            <i class="bi bi-cash-stack"></i> Check-out
-                                        </button>
-                                    </form>
-                                }
-                            </td>
-                        </tr>
+                                    @if (res.Status == "Pending")
+                                    {
+                                        @* Form Confirm *@
+                                        <form method="post" asp-page-handler="Confirm" asp-route-id="@res.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm">
+                                                <i class="bi bi-check-lg"></i> Xác nhận
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (res.Status == "Confirmed")
+                                    {
+                                        @* Form gọi OnPostCheckInAsync *@
+                                        <form method="post" asp-page-handler="CheckIn" asp-route-id="@res.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm">
+                                                <i class="bi bi-box-arrow-in-right"></i> Check-in
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (res.Status == "CheckedIn")
+                                    {
+                                        @* Form gọi OnPostCheckOutAsync *@
+                                        <form method="post" asp-page-handler="CheckOut" asp-route-id="@res.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-danger btn-sm px-3 shadow-sm"
+                                                    onclick="return confirm('Bạn có chắc muốn thanh toán và trả phòng?')">
+                                                <i class="bi bi-cash-stack"></i> Check-out
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>

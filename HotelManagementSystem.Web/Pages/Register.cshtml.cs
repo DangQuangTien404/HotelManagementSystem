@@ -1,32 +1,50 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
+using HotelManagementSystem.Business;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace HotelManagementSystem.Web.Pages
 {
     public class RegisterModel : PageModel
     {
-        private readonly HotelManagementDbContext _context;
+        private readonly AccountService _accountService;
 
-        public RegisterModel(HotelManagementDbContext context)
+        public RegisterModel(AccountService accountService)
         {
-            _context = context;
+            _accountService = accountService;
         }
 
         [BindProperty]
-        public Customer Customer { get; set; } = new();
+        public InputModel Input { get; set; } = new();
+
+        public class InputModel
+        {
+            [Required]
+            public string Username { get; set; } = string.Empty;
+            [Required]
+            public string Password { get; set; } = string.Empty;
+            [Required]
+            public string FullName { get; set; } = string.Empty;
+            [Required]
+            public string Phone { get; set; } = string.Empty;
+            [Required]
+            public string Email { get; set; } = string.Empty;
+            [Required]
+            public string IdentityNumber { get; set; } = string.Empty;
+            [Required]
+            public string Address { get; set; } = string.Empty;
+        }
 
         public void OnGet()
         {
-            // Reset form khi truy cập mới
             ModelState.Clear();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Kiểm tra tính hợp lệ của dữ liệu
             if (!ModelState.IsValid)
             {
                 return Page();
@@ -34,24 +52,39 @@ namespace HotelManagementSystem.Web.Pages
 
             try
             {
-                // Gán các giá trị bắt buộc theo Model Customer.cs của bạn
-                Customer.CreatedAt = DateTime.Now;
+                var newUser = new User
+                {
+                    Username = Input.Username,
+                    PasswordHash = Input.Password, // In real app, hash this!
+                    FullName = Input.FullName,
+                    Email = Input.Email,
+                    Role = "Consumer"
+                };
 
-                // Xử lý chuỗi rỗng để tránh lỗi null! trong DB
-                if (string.IsNullOrWhiteSpace(Customer.Address)) Customer.Address = "N/A";
-                if (string.IsNullOrWhiteSpace(Customer.IdentityNumber)) Customer.IdentityNumber = "N/A";
-                if (string.IsNullOrWhiteSpace(Customer.Email)) Customer.Email = "none@hotel.com";
+                var newCustomer = new Customer
+                {
+                    FullName = Input.FullName,
+                    Phone = Input.Phone,
+                    Email = Input.Email,
+                    IdentityNumber = Input.IdentityNumber,
+                    Address = Input.Address
+                };
 
-                _context.Customers.Add(Customer);
-                await _context.SaveChangesAsync();
+                var result = await _accountService.RegisterConsumer(newUser, newCustomer);
 
-                // Đăng ký xong quay về trang chủ
-                return RedirectToPage("/Index");
+                if (result)
+                {
+                    return RedirectToPage("/Login", new { Message = "Đăng ký thành công! Vui lòng đăng nhập." });
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Tên đăng nhập đã tồn tại hoặc lỗi hệ thống.");
+                    return Page();
+                }
             }
             catch (Exception ex)
             {
-                // Hiển thị lỗi cụ thể nếu lưu thất bại
-                ModelState.AddModelError(string.Empty, "Lỗi: " + ex.InnerException?.Message ?? ex.Message);
+                ModelState.AddModelError(string.Empty, "Lỗi: " + ex.Message);
                 return Page();
             }
         }

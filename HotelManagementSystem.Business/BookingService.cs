@@ -14,13 +14,19 @@ namespace HotelManagementSystem.Business
             _context = context;
         }
 
-        public async Task<bool> ProcessBooking(BookingRequest request)
+        public async Task<bool> ProcessBooking(BookingRequest request, bool isConsumer = false)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var room = await _context.Rooms.FindAsync(request.RoomId);
+                // If it's a consumer, we might still want to check availability,
+                // but the room status change might be different or pending.
+                // For simplicity, let's keep checking "Available".
                 if (room == null || room.Status != "Available") return false;
+
+                // Determine Status
+                string status = isConsumer ? "Pending" : "Confirmed";
 
                 var reservation = new Reservation
                 {
@@ -28,7 +34,7 @@ namespace HotelManagementSystem.Business
                     CustomerId = request.CustomerId,
                     CheckInDate = request.CheckInDate,
                     CheckOutDate = request.CheckOutDate,
-                    Status = "Confirmed",
+                    Status = status,
                     CreatedAt = DateTime.Now
                 };
 
@@ -54,6 +60,11 @@ namespace HotelManagementSystem.Business
                     }
                 }
 
+                // If confirmed immediately (Staff/Admin), mark room as Reserved.
+                // If Pending (Consumer), we might want to mark it as Reserved or keep it Available but maybe "Pending"?
+                // Standard logic: If I book, no one else should take it. So let's mark it Reserved.
+                // However, if admin rejects, we'll need to free it up.
+                // Let's assume Pending bookings also reserve the room to prevent double booking.
                 room.Status = "Reserved";
                 _context.Rooms.Update(room);
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace HotelManagementSystem.Data.Models;
@@ -25,4 +25,9 @@ public partial class User
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     public virtual ICollection<RoomCleaning> RoomCleanings { get; set; } = new List<RoomCleaning>();
     public virtual ICollection<Staff> Staff { get; set; } = new List<Staff>();
+
+    // Navigation property for Customer (Consumer role)
+    // Note: A user might not have a Customer profile if they are purely Staff/Admin, but Consumers will have one.
+    // However, since UserId is on Customer table, this is the inverse navigation.
+    public virtual ICollection<Customer> Customers { get; set; } = new List<Customer>();
 }

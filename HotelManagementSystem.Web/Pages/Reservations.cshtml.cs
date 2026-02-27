@@ -33,9 +33,24 @@ namespace HotelManagementSystem.Web.Pages
             Reservations = await _context.Reservations
                 .Include(r => r.Room)
                 .Include(r => r.Customer)
-                .Where(r => r.Status == "Confirmed" || r.Status == "CheckedIn")
-                .OrderBy(r => r.CheckInDate)
+                .Where(r => r.Status == "Confirmed" || r.Status == "CheckedIn" || r.Status == "Pending")
+                .OrderByDescending(r => r.Status == "Pending") // Pending first
+                .ThenBy(r => r.CheckInDate)
                 .ToListAsync();
+        }
+
+        public async Task<IActionResult> OnPostConfirmAsync(int id)
+        {
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation == null) return NotFound();
+
+            if (reservation.Status == "Pending")
+            {
+                reservation.Status = "Confirmed";
+                await _context.SaveChangesAsync();
+                TempData["Message"] = "Đã xác nhận đặt phòng!";
+            }
+            return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostCheckInAsync(int id)

@@ -1,7 +1,9 @@
-﻿@page
+@page
 @model IndexModel
 @{
     ViewData["Title"] = "Sơ đồ phòng";
+    // Check if user is Consumer
+    bool isConsumer = User.IsInRole("Consumer");
 }
 
 <div class="container-fluid mt-4">
@@ -49,25 +51,42 @@
                         <div class="d-grid gap-2 mt-auto">
                             @if (item.Status == "Available")
                             {
-                                <a asp-page="/Admin/Create" asp-route-roomId="@item.Id" class="btn btn-sm btn-outline-success rounded-pill fw-bold">ĐẶT PHÒNG</a>
-                                @* Thêm nút chuyển sang bảo trì khi phòng đang trống *@
-                                <a asp-page="/Admin/AssignMaintenance" asp-route-roomId="@item.Id" class="btn btn-sm btn-outline-secondary rounded-pill fw-bold border-0">
-                                    <i class="bi bi-tools"></i> BẢO TRÌ
-                                </a>
+                                @if (isConsumer)
+                                {
+                                     <a asp-page="/Booking" asp-route-roomId="@item.Id" class="btn btn-sm btn-outline-success rounded-pill fw-bold">ĐẶT PHÒNG</a>
+                                }
+                                else
+                                {
+                                    <a asp-page="/Admin/Create" asp-route-roomId="@item.Id" class="btn btn-sm btn-outline-success rounded-pill fw-bold">ĐẶT PHÒNG</a>
+                                    @* Thêm nút chuyển sang bảo trì khi phòng đang trống *@
+                                    <a asp-page="/Admin/AssignMaintenance" asp-route-roomId="@item.Id" class="btn btn-sm btn-outline-secondary rounded-pill fw-bold border-0">
+                                        <i class="bi bi-tools"></i> BẢO TRÌ
+                                    </a>
+                                }
                             }
                             else if (item.Status == "Occupied")
                             {
-                                <a asp-page="/Admin/CheckOut" asp-route-id="@item.CurrentReservationId" class="btn btn-sm btn-danger rounded-pill fw-bold">TRẢ PHÒNG</a>
+                                @if (!isConsumer)
+                                {
+                                    <a asp-page="/Admin/CheckOut" asp-route-id="@item.CurrentReservationId" class="btn btn-sm btn-danger rounded-pill fw-bold">TRẢ PHÒNG</a>
+                                }
+                                else
+                                {
+                                     <button class="btn btn-sm btn-danger rounded-pill fw-bold disabled">ĐÃ CÓ KHÁCH</button>
+                                }
                             }
                             else if (item.Status == "Dirty")
                             {
-                                <a asp-page="/Admin/AssignCleaning" asp-route-roomId="@item.Id" class="btn btn-sm btn-warning rounded-pill text-dark fw-bold">
-                                    <i class="bi bi-person-plus"></i> PHÂN CÔNG DỌN
-                                </a>
-                                @* Thêm nút bảo trì nếu phòng bẩn nhưng phát hiện hỏng hóc *@
-                                <a asp-page="/Admin/AssignMaintenance" asp-route-roomId="@item.Id" class="btn btn-sm btn-outline-secondary rounded-pill fw-bold border-0">
-                                    <i class="bi bi-tools"></i> BẢO TRÌ
-                                </a>
+                                @if (!isConsumer)
+                                {
+                                    <a asp-page="/Admin/AssignCleaning" asp-route-roomId="@item.Id" class="btn btn-sm btn-warning rounded-pill text-dark fw-bold">
+                                        <i class="bi bi-person-plus"></i> PHÂN CÔNG DỌN
+                                    </a>
+                                    @* Thêm nút bảo trì nếu phòng bẩn nhưng phát hiện hỏng hóc *@
+                                    <a asp-page="/Admin/AssignMaintenance" asp-route-roomId="@item.Id" class="btn btn-sm btn-outline-secondary rounded-pill fw-bold border-0">
+                                        <i class="bi bi-tools"></i> BẢO TRÌ
+                                    </a>
+                                }
                             }
                             else if (item.Status == "Cleaning")
                             {

@@ -2,9 +2,15 @@
 @model HotelManagementSystem.Web.Pages.BookingModel
 @{
     ViewData["Title"] = "Đặt phòng";
+    bool isConsumer = User.IsInRole("Consumer");
 }
 
 <h1>Đặt phòng mới</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
 
 <div class="row">
     <div class="col-md-6">
@@ -13,12 +19,20 @@
 
             <div class="form-group mb-2">
                 <label>Mã khách hàng (ID)</label>
-                <input asp-for="RequestData.CustomerId" class="form-control" />
+                @if (isConsumer)
+                {
+                     <input asp-for="RequestData.CustomerId" class="form-control" readonly />
+                     <small class="text-muted">Mã khách hàng của bạn được điền tự động.</small>
+                }
+                else
+                {
+                    <input asp-for="RequestData.CustomerId" class="form-control" />
+                }
             </div>
 
             <div class="form-group mb-2">
                 <label>Mã phòng (ID)</label>
-                <input asp-for="RequestData.RoomId" class="form-control" />
+                <input asp-for="RequestData.RoomId" class="form-control" readonly />
             </div>
 
             <div class="form-group mb-2">

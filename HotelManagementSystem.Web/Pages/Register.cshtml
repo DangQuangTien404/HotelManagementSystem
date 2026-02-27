@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model HotelManagementSystem.Web.Pages.RegisterModel
 @{
     ViewData["Title"] = "Đăng ký Khách hàng";
@@ -9,7 +9,7 @@
         <div class="col-md-6 col-lg-5">
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-header bg-primary text-white text-center py-3 rounded-top-4">
-                    <h4 class="mb-0 fw-bold text-uppercase">Đăng ký thông tin</h4>
+                    <h4 class="mb-0 fw-bold text-uppercase">Đăng ký thành viên</h4>
                     <small>Dành cho khách hàng lưu trú</small>
                 </div>
                 <div class="card-body p-4">
@@ -24,27 +24,37 @@
                     <form method="post">
                         <div class="mb-3">
                             <label class="form-label fw-bold small">Họ và Tên <span class="text-danger">*</span></label>
-                            <input asp-for="Customer.FullName" class="form-control" placeholder="Nguyễn Văn A" required />
+                            <input asp-for="Input.FullName" class="form-control" placeholder="Nguyễn Văn A" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Tên đăng nhập <span class="text-danger">*</span></label>
+                            <input asp-for="Input.Username" class="form-control" placeholder="username123" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Mật khẩu <span class="text-danger">*</span></label>
+                            <input asp-for="Input.Password" type="password" class="form-control" placeholder="••••••••" required />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold small">Số điện thoại <span class="text-danger">*</span></label>
-                            <input asp-for="Customer.Phone" class="form-control" placeholder="09xxxxxxxx" required />
+                            <input asp-for="Input.Phone" class="form-control" placeholder="09xxxxxxxx" required />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold small">Số CCCD / Passport <span class="text-danger">*</span></label>
-                            <input asp-for="Customer.IdentityNumber" class="form-control" placeholder="Nhập số giấy tờ" required />
+                            <input asp-for="Input.IdentityNumber" class="form-control" placeholder="Nhập số giấy tờ" required />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold small">Địa chỉ Email <span class="text-danger">*</span></label>
-                            <input asp-for="Customer.Email" type="email" class="form-control" placeholder="email@vi-du.com" required />
+                            <input asp-for="Input.Email" type="email" class="form-control" placeholder="email@vi-du.com" required />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold small">Địa chỉ thường trú <span class="text-danger">*</span></label>
-                            <textarea asp-for="Customer.Address" class="form-control" rows="2" placeholder="Tỉnh/Thành phố..." required></textarea>
+                            <textarea asp-for="Input.Address" class="form-control" rows="2" placeholder="Tỉnh/Thành phố..." required></textarea>
                         </div>
 
                         <div class="d-grid gap-2 mt-4">

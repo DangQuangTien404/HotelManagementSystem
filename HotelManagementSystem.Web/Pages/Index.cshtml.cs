@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace HotelManagementSystem.Web.Pages
 {
-    [Authorize(Roles = "Admin")]
+    // Allow Consumers to view the Index page to see rooms
+    [Authorize(Roles = "Admin,Staff,Consumer")]
     public class IndexModel : PageModel
     {
         private readonly HotelManagementDbContext _context;

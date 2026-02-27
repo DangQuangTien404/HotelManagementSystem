@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using HotelManagementSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
@@ -95,6 +95,15 @@ public partial class HotelManagementDbContext : DbContext
                 .WithMany(p => p.CheckInOutCheckOutByNavigations)
                 .HasForeignKey(d => d.CheckOutBy)
                 .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        // 7. Cấu hình Customer - User (One-to-Many logic, practically One-to-One for consumer)
+        modelBuilder.Entity<Customer>(entity =>
+        {
+            entity.HasOne(d => d.User)
+                  .WithMany(p => p.Customers)
+                  .HasForeignKey(d => d.UserId)
+                  .OnDelete(DeleteBehavior.SetNull); // If user is deleted, customer record remains (or can be cascade)
         });
 
         OnModelCreatingPartial(modelBuilder);
