@@ -31,6 +31,10 @@ public partial class HotelManagementDbContext : DbContext
             .HasIndex(u => u.Username)
             .IsUnique();
 
+        modelBuilder.Entity<Customer>()
+            .HasIndex(c => c.Username)
+            .IsUnique();
+
         // 2. Cấu hình kiểu dữ liệu Decimal cho tiền tệ
         modelBuilder.Entity<Room>(entity => {
             entity.Property(e => e.BasePrice).HasColumnType("decimal(18,2)");

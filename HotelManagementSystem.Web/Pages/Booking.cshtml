@@ -11,10 +11,11 @@
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="form-group mb-2">
-                <label>Mã khách hàng (ID)</label>
-                <input asp-for="RequestData.CustomerId" class="form-control" />
+            <div class="alert alert-info">
+                Bạn đang đặt phòng bằng tài khoản của chính mình. Yêu cầu sẽ ở trạng thái <strong>Pending</strong> cho đến khi Admin xác nhận.
             </div>
+
+            <input asp-for="RequestData.CustomerId" type="hidden" />
 
             <div class="form-group mb-2">
                 <label>Mã phòng (ID)</label>
