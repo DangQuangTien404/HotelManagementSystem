@@ -44,6 +44,7 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<HotelManagementSystem.Data.Context.HotelManagementDbContext>();
+    var config = services.GetRequiredService<IConfiguration>();
 
     // Ensure DB Created
     context.Database.EnsureCreated();
@@ -53,10 +54,12 @@ using (var scope = app.Services.CreateScope())
     // B. TẠO TÀI KHOẢN ADMIN MẪU
     if (!context.Users.Any(u => u.Username == "admin"))
     {
+        // Use configuration for sensitive data or default to safe dev values
+        var adminPass = config["Seed:AdminPassword"] ?? "admin_password_placeholder"; // Changed from explicit "admin123"
         context.Users.Add(new HotelManagementSystem.Data.Models.User
         {
             Username = "admin",
-            PasswordHash = "admin123",
+            PasswordHash = adminPass,
             FullName = "Quản trị viên",
             Role = "Admin",
             Email = "admin@luxuryhotel.com" // THÊM DÒNG NÀY (Hoặc email bất kỳ)
@@ -68,11 +71,12 @@ using (var scope = app.Services.CreateScope())
     var userA = context.Users.FirstOrDefault(u => u.Username == "a");
     if (userA == null)
     {
+        var staffPass = config["Seed:StaffPassword"] ?? "staff_password_placeholder"; // Changed from explicit "123"
         // Nếu chưa có user 'a', tạo mới luôn và nhớ thêm Email
         userA = new HotelManagementSystem.Data.Models.User
         {
             Username = "a",
-            PasswordHash = "123",
+            PasswordHash = staffPass,
             FullName = "Nhân viên A",
             Role = "Staff",
             Email = "staff_a@luxuryhotel.com" // THÊM DÒNG NÀY
