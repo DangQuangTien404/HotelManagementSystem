@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using HotelManagementSystem.Data.Context;
-using HotelManagementSystem.Data.Models;
+using HotelManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 
@@ -42,7 +42,7 @@ namespace HotelManagementSystem.Web.Pages.Admin
                 await _context.SaveChangesAsync(); // Lưu để lấy Id của User
 
                 // 2. Tạo đối tượng Staff liên kết với User vừa tạo
-                var staff = new HotelManagementSystem.Data.Models.Staff
+                var staff = new HotelManagementSystem.Models.Staff
                 {
                     UserId = user.Id, // Lấy ID từ User vừa tạo ở trên
                     Position = Input.Position,

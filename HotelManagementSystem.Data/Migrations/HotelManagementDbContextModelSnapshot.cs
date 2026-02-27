@@ -22,7 +22,7 @@ namespace HotelManagementSystem.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.CheckInOut", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.CheckInOut", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -59,7 +59,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("CheckInOuts");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Customer", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Customer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,7 +95,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("Customers");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.HotelService", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.HotelService", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -118,7 +118,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("HotelServices");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.MaintenanceTask", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.MaintenanceTask", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -167,7 +167,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("MaintenanceTasks");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Notification", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -215,7 +215,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Reservation", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Reservation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -259,7 +259,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("Reservations");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.ReservationService", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.ReservationService", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -294,7 +294,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("ReservationServices");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Room", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Room", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -328,7 +328,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("Rooms");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.RoomCleaning", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.RoomCleaning", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -358,7 +358,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("RoomCleanings");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Staff", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Staff", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -387,7 +387,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("Staffs");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.User", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -426,17 +426,17 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.CheckInOut", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.CheckInOut", b =>
                 {
-                    b.HasOne("HotelManagementSystem.Data.Models.User", "CheckInByNavigation")
+                    b.HasOne("HotelManagementSystem.Models.User", "CheckInByNavigation")
                         .WithMany("CheckInOutCheckInByNavigations")
                         .HasForeignKey("CheckInBy");
 
-                    b.HasOne("HotelManagementSystem.Data.Models.User", "CheckOutByNavigation")
+                    b.HasOne("HotelManagementSystem.Models.User", "CheckOutByNavigation")
                         .WithMany("CheckInOutCheckOutByNavigations")
                         .HasForeignKey("CheckOutBy");
 
-                    b.HasOne("HotelManagementSystem.Data.Models.Reservation", "Reservation")
+                    b.HasOne("HotelManagementSystem.Models.Reservation", "Reservation")
                         .WithMany("CheckInOuts")
                         .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -449,19 +449,19 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Navigation("Reservation");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.MaintenanceTask", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.MaintenanceTask", b =>
                 {
-                    b.HasOne("HotelManagementSystem.Data.Models.User", "Staff")
+                    b.HasOne("HotelManagementSystem.Models.User", "Staff")
                         .WithMany("MaintenanceTaskAssignedToNavigations")
                         .HasForeignKey("AssignedTo");
 
-                    b.HasOne("HotelManagementSystem.Data.Models.Room", "Room")
+                    b.HasOne("HotelManagementSystem.Models.Room", "Room")
                         .WithMany("MaintenanceTasks")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HotelManagementSystem.Data.Models.User", null)
+                    b.HasOne("HotelManagementSystem.Models.User", null)
                         .WithMany("MaintenanceTaskApprovedByNavigations")
                         .HasForeignKey("UserId");
 
@@ -470,13 +470,13 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Navigation("Staff");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Notification", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Notification", b =>
                 {
-                    b.HasOne("HotelManagementSystem.Data.Models.User", "Recipient")
+                    b.HasOne("HotelManagementSystem.Models.User", "Recipient")
                         .WithMany("NotificationRecipients")
                         .HasForeignKey("RecipientId");
 
-                    b.HasOne("HotelManagementSystem.Data.Models.User", "Sender")
+                    b.HasOne("HotelManagementSystem.Models.User", "Sender")
                         .WithMany("NotificationSenders")
                         .HasForeignKey("SenderId");
 
@@ -485,19 +485,19 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Reservation", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Reservation", b =>
                 {
-                    b.HasOne("HotelManagementSystem.Data.Models.Customer", "Customer")
+                    b.HasOne("HotelManagementSystem.Models.Customer", "Customer")
                         .WithMany("Reservations")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HotelManagementSystem.Data.Models.User", "ReservedByNavigation")
+                    b.HasOne("HotelManagementSystem.Models.User", "ReservedByNavigation")
                         .WithMany("Reservations")
                         .HasForeignKey("ReservedByNavigationId");
 
-                    b.HasOne("HotelManagementSystem.Data.Models.Room", "Room")
+                    b.HasOne("HotelManagementSystem.Models.Room", "Room")
                         .WithMany("Reservations")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -510,15 +510,15 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Navigation("Room");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.ReservationService", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.ReservationService", b =>
                 {
-                    b.HasOne("HotelManagementSystem.Data.Models.HotelService", "HotelService")
+                    b.HasOne("HotelManagementSystem.Models.HotelService", "HotelService")
                         .WithMany("ReservationServices")
                         .HasForeignKey("HotelServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HotelManagementSystem.Data.Models.Reservation", "Reservation")
+                    b.HasOne("HotelManagementSystem.Models.Reservation", "Reservation")
                         .WithMany("ReservationServices")
                         .HasForeignKey("ReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -529,13 +529,13 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Navigation("Reservation");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.RoomCleaning", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.RoomCleaning", b =>
                 {
-                    b.HasOne("HotelManagementSystem.Data.Models.User", "CleanedByNavigation")
+                    b.HasOne("HotelManagementSystem.Models.User", "CleanedByNavigation")
                         .WithMany("RoomCleanings")
                         .HasForeignKey("CleanedBy");
 
-                    b.HasOne("HotelManagementSystem.Data.Models.Room", "Room")
+                    b.HasOne("HotelManagementSystem.Models.Room", "Room")
                         .WithMany("RoomCleanings")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -546,9 +546,9 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Navigation("Room");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Staff", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Staff", b =>
                 {
-                    b.HasOne("HotelManagementSystem.Data.Models.User", "User")
+                    b.HasOne("HotelManagementSystem.Models.User", "User")
                         .WithMany("Staff")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -557,24 +557,24 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Customer", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Customer", b =>
                 {
                     b.Navigation("Reservations");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.HotelService", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.HotelService", b =>
                 {
                     b.Navigation("ReservationServices");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Reservation", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Reservation", b =>
                 {
                     b.Navigation("CheckInOuts");
 
                     b.Navigation("ReservationServices");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Room", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.Room", b =>
                 {
                     b.Navigation("MaintenanceTasks");
 
@@ -583,7 +583,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Navigation("RoomCleanings");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.User", b =>
+            modelBuilder.Entity("HotelManagementSystem.Models.User", b =>
                 {
                     b.Navigation("CheckInOutCheckInByNavigations");
 

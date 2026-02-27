@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HotelManagementSystem.Data.Models
+namespace HotelManagementSystem.Models
 {
     public partial class MaintenanceTask
     {

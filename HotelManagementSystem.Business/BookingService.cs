@@ -1,5 +1,5 @@
 using HotelManagementSystem.Data.Context;
-using HotelManagementSystem.Data.Models;
+using HotelManagementSystem.Models;
 using HotelManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using HotelManagementSystem.Data.Models;
+using HotelManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelManagementSystem.Data.Context;

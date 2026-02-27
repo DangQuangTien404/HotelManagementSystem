@@ -1,5 +1,5 @@
 using HotelManagementSystem.Data.Context;
-using HotelManagementSystem.Data.Models;
+using HotelManagementSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

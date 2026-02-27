@@ -28,7 +28,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<StaffService>();
-builder.Services.AddScoped<MaintenanceService>();
+builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 
 var app = builder.Build();
 
@@ -44,7 +44,7 @@ using (var scope = app.Services.CreateScope())
     // B. TẠO TÀI KHOẢN ADMIN MẪU
     if (!context.Users.Any(u => u.Username == "admin"))
     {
-        context.Users.Add(new HotelManagementSystem.Data.Models.User
+        context.Users.Add(new HotelManagementSystem.Models.User
         {
             Username = "admin",
             PasswordHash = "admin123",
@@ -60,7 +60,7 @@ using (var scope = app.Services.CreateScope())
     if (userA == null)
     {
         // Nếu chưa có user 'a', tạo mới luôn và nhớ thêm Email
-        userA = new HotelManagementSystem.Data.Models.User
+        userA = new HotelManagementSystem.Models.User
         {
             Username = "a",
             PasswordHash = "123",
@@ -76,7 +76,7 @@ using (var scope = app.Services.CreateScope())
     var isStaffExist = context.Staffs.Any(s => s.UserId == userA.Id);
     if (!isStaffExist)
     {
-        context.Staffs.Add(new HotelManagementSystem.Data.Models.Staff
+        context.Staffs.Add(new HotelManagementSystem.Models.Staff
         {
             UserId = userA.Id,
             Position = "Dọn dẹp",

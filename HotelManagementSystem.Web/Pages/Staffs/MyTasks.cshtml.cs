@@ -13,7 +13,7 @@ namespace HotelManagementSystem.Web.Pages.Staffs
         private readonly HotelManagementDbContext _context;
         public MyTasksModel(HotelManagementDbContext context) => _context = context;
 
-        public List<HotelManagementSystem.Data.Models.RoomCleaning> MyCleaningTasks { get; set; } = new();
+        public List<HotelManagementSystem.Models.RoomCleaning> MyCleaningTasks { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync()
         {
