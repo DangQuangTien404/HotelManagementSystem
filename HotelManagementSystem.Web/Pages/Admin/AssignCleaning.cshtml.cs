@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using HotelManagementSystem.Data.Context;
-using HotelManagementSystem.Data.Models;
+using HotelManagementSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 
 namespace HotelManagementSystem.Web.Pages.Admin
@@ -19,7 +19,7 @@ namespace HotelManagementSystem.Web.Pages.Admin
 
         // Khai báo các thuộc tính hiển thị
         public Room Room { get; set; } = default!;
-        public List<HotelManagementSystem.Data.Models.Staff> StaffList { get; set; } = new();
+        public List<HotelManagementSystem.Models.Staff> StaffList { get; set; } = new();
 
         // Thuộc tính nhận dữ liệu từ Form
         [BindProperty]
