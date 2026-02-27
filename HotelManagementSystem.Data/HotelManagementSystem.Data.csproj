@@ -18,8 +18,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\HotelManagementSystem.Models\HotelManagementSystem.Models.csproj" />
-  </ItemGroup>
-
 </Project>
