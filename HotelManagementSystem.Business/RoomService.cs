@@ -1,4 +1,4 @@
-﻿using HotelManagementSystem.Data.Context;
+using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +14,22 @@ namespace HotelManagementSystem.Business
         public async Task<List<Room>> GetAllRooms()
         {
             return await _context.Rooms.ToListAsync();
+        }
+
+        // Thêm hoặc Cập nhật phòng
+        public async Task SaveRoomAsync(Room room)
+        {
+            if (room.Id == 0)
+            {
+                room.Status = "Available"; // Mặc định phòng mới là Trống
+                _context.Rooms.Add(room);
+            }
+            else
+            {
+                _context.Attach(room).State = EntityState.Modified;
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

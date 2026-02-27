@@ -29,6 +29,7 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<MaintenanceService>();
+builder.Services.AddScoped<CleaningService>();
 
 var app = builder.Build();
 

@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using HotelManagementSystem.Data.Context;
+using HotelManagementSystem.Business;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 
@@ -10,8 +9,12 @@ namespace HotelManagementSystem.Web.Pages.Admin
     [Authorize(Roles = "Admin")]
     public class RoomsModel : PageModel
     {
-        private readonly HotelManagementDbContext _context;
-        public RoomsModel(HotelManagementDbContext context) => _context = context;
+        private readonly RoomService _roomService;
+
+        public RoomsModel(RoomService roomService)
+        {
+            _roomService = roomService;
+        }
 
         public IList<Room> Rooms { get; set; } = default!;
 
@@ -20,23 +23,20 @@ namespace HotelManagementSystem.Web.Pages.Admin
 
         public async Task OnGetAsync()
         {
-            Rooms = await _context.Rooms.OrderBy(r => r.RoomNumber).ToListAsync();
+            Rooms = await _roomService.GetAllRooms();
         }
 
         // Thêm hoặc Cập nhật phòng
         public async Task<IActionResult> OnPostSaveRoomAsync()
         {
-            if (NewRoom.Id == 0)
+            if (!ModelState.IsValid)
             {
-                NewRoom.Status = "Available"; // Mặc định phòng mới là Trống
-                _context.Rooms.Add(NewRoom);
-            }
-            else
-            {
-                _context.Attach(NewRoom).State = EntityState.Modified;
+                // In case of validation errors, reload the room list and return the page
+                Rooms = await _roomService.GetAllRooms();
+                return Page();
             }
 
-            await _context.SaveChangesAsync();
+            await _roomService.SaveRoomAsync(NewRoom);
             return RedirectToPage();
         }
     }
