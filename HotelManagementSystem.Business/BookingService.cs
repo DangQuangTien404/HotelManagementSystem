@@ -14,6 +14,14 @@ namespace HotelManagementSystem.Business
             _context = context;
         }
 
+        public async Task<List<HotelService>> GetAvailableServicesAsync()
+        {
+            return await _context.HotelServices
+                .Where(s => s.IsActive)
+                .OrderBy(s => s.Name)
+                .ToListAsync();
+        }
+
         public async Task<bool> ProcessBooking(BookingRequest request)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
