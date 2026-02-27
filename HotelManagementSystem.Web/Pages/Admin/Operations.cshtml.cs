@@ -25,6 +25,8 @@ namespace HotelManagementSystem.Web.Pages.Admin
 
         // Danh sách tác vụ bảo trì và cảnh báo trễ hạn
         public List<MaintenanceTask> PendingTasks { get; set; } = new();
+        public List<Reservation> PendingReservations { get; set; } = new();
+        public List<Reservation> ActiveStayReservations { get; set; } = new();
 
         // Giả sử bạn có bảng Reservation để kiểm tra Check-out trễ
         // Nếu chưa có bảng này, bạn có thể tạm comment phần OverdueCheckouts
@@ -44,6 +46,22 @@ namespace HotelManagementSystem.Web.Pages.Admin
                 .Include(m => m.Room)
                 .Where(m => m.Status != "Completed")
                 .OrderByDescending(m => m.Priority) // Ưu tiên hàng High lên đầu
+                .ToListAsync();
+
+            PendingReservations = await _context.Reservations
+                .Include(r => r.Room)
+                .Include(r => r.Customer)
+                .Where(r => r.Status == "Pending")
+                .OrderBy(r => r.CreatedAt)
+                .Take(5)
+                .ToListAsync();
+
+            ActiveStayReservations = await _context.Reservations
+                .Include(r => r.Room)
+                .Include(r => r.Customer)
+                .Where(r => r.Status == "CheckedIn")
+                .OrderBy(r => r.CheckOutDate)
+                .Take(5)
                 .ToListAsync();
 
             // 3. Logic cảnh báo trễ (Ví dụ)

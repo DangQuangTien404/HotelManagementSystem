@@ -47,6 +47,68 @@
         </div>
     </div>
 
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-calendar-plus"></i> Yêu cầu đặt phòng mới</h6>
+                    <a asp-page="/Reservations" class="btn btn-sm btn-outline-primary">Mở trang xử lý</a>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        @if (Model.PendingReservations.Any())
+                        {
+                            @foreach (var reservation in Model.PendingReservations)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="fw-semibold">@reservation.Customer?.FullName - Phòng @reservation.Room?.RoomNumber</div>
+                                        <small class="text-muted">@reservation.CheckInDate.ToString("dd/MM/yyyy") - @reservation.CheckOutDate.ToString("dd/MM/yyyy")</small>
+                                    </div>
+                                    <span class="badge bg-secondary">Pending</span>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item text-muted small">Không có yêu cầu đặt phòng mới.</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-door-open"></i> Khách đang lưu trú</h6>
+                    <a asp-page="/Reservations" class="btn btn-sm btn-outline-danger">Check-out nhanh</a>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        @if (Model.ActiveStayReservations.Any())
+                        {
+                            @foreach (var reservation in Model.ActiveStayReservations)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="fw-semibold">@reservation.Customer?.FullName - Phòng @reservation.Room?.RoomNumber</div>
+                                        <small class="text-muted">Dự kiến trả: @reservation.CheckOutDate.ToString("dd/MM/yyyy")</small>
+                                    </div>
+                                    <span class="badge bg-success">CheckedIn</span>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item text-muted small">Không có khách đang ở.</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow-sm border-0 rounded-3">
