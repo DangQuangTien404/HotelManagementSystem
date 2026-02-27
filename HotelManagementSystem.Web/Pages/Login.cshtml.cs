@@ -1,16 +1,17 @@
 ﻿using System.Security.Claims;
-using HotelManagementSystem.Business;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using HotelManagementSystem.Data.Context;
 
 namespace HotelManagementSystem.Web.Pages
 {
     public class LoginModel : PageModel
     {
-        private readonly AuthService _authService;
-        public LoginModel(AuthService authService) => _authService = authService;
+        private readonly HotelManagementDbContext _context;
+        public LoginModel(HotelManagementDbContext context) => _context = context;
 
         [BindProperty]
         public LoginInput LoginData { get; set; } = new();
@@ -23,7 +24,8 @@ namespace HotelManagementSystem.Web.Pages
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _authService.Login(LoginData.Username, LoginData.Password);
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == LoginData.Username && u.PasswordHash == LoginData.Password);
 
             if (user == null)
             {
@@ -34,6 +36,7 @@ namespace HotelManagementSystem.Web.Pages
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
+                // Dòng quan trọng để trang MyTasks lọc đúng việc:
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Role, user.Role)
             };
@@ -41,8 +44,15 @@ namespace HotelManagementSystem.Web.Pages
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
-            if (user.Role == "Staff") return RedirectToPage("/Staffs/MyTasks");
-            if (user.Role == "Technician") return RedirectToPage("/Staffs/MaintenanceTasks");
+            if (user.Role == "Staff")
+            {
+                return RedirectToPage("/Staffs/MyTasks");
+            }
+
+            if (user.Role == "Technician")
+            {
+                return RedirectToPage("/Staffs/MaintenanceTasks");
+            }
 
             return RedirectToPage("/Index");
         }

@@ -1,27 +1,42 @@
-﻿using HotelManagementSystem.Business;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HotelManagementSystem.Web.Pages.Admin
 {
     [Authorize(Roles = "Admin")]
     public class RoomsModel : PageModel
     {
-        private readonly HotelManagementService _hotelService;
-        public RoomsModel(HotelManagementService hotelService) => _hotelService = hotelService;
+        private readonly HotelManagementDbContext _context;
+        public RoomsModel(HotelManagementDbContext context) => _context = context;
 
         public IList<Room> Rooms { get; set; } = default!;
 
         [BindProperty]
         public Room NewRoom { get; set; } = new();
 
-        public async Task OnGetAsync() => Rooms = await _hotelService.GetAllRoomsAsync();
+        public async Task OnGetAsync()
+        {
+            Rooms = await _context.Rooms.OrderBy(r => r.RoomNumber).ToListAsync();
+        }
 
+        // Thêm hoặc Cập nhật phòng
         public async Task<IActionResult> OnPostSaveRoomAsync()
         {
-            await _hotelService.SaveRoomAsync(NewRoom);
+            if (NewRoom.Id == 0)
+            {
+                NewRoom.Status = "Available"; // Mặc định phòng mới là Trống
+                _context.Rooms.Add(NewRoom);
+            }
+            else
+            {
+                _context.Attach(NewRoom).State = EntityState.Modified;
+            }
+
+            await _context.SaveChangesAsync();
             return RedirectToPage();
         }
     }

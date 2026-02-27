@@ -1,25 +1,27 @@
 using HotelManagementSystem.Business;
+using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using HotelManagementSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelManagementSystem.Web.Pages
 {
     public class BookingModel : PageModel
     {
         private readonly BookingService _service;
-        private readonly HotelManagementService _hotelService;
+        private readonly HotelManagementDbContext _context;
 
         [BindProperty]
         public BookingRequest RequestData { get; set; } = new();
 
         public List<HotelService> AvailableServices { get; set; } = new();
 
-        public BookingModel(BookingService service, HotelManagementService hotelService)
+        public BookingModel(BookingService service, HotelManagementDbContext context)
         {
             _service = service;
-            _hotelService = hotelService;
+            _context = context;
         }
 
         public async Task OnGetAsync(int? roomId)
@@ -49,7 +51,10 @@ namespace HotelManagementSystem.Web.Pages
 
         private async Task LoadServicesAsync()
         {
-            AvailableServices = await _hotelService.GetActiveServicesAsync();
+            AvailableServices = await _context.HotelServices
+                .Where(s => s.IsActive)
+                .OrderBy(s => s.Name)
+                .ToListAsync();
         }
     }
 }

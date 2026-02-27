@@ -1,16 +1,17 @@
-using HotelManagementSystem.Business;
-using HotelManagementSystem.Data.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using HotelManagementSystem.Data.Context;
+using HotelManagementSystem.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HotelManagementSystem.Web.Pages.Admin
 {
     [Authorize(Roles = "Admin")]
     public class CheckOutModel : PageModel
     {
-        private readonly HotelManagementService _hotelService;
-        public CheckOutModel(HotelManagementService hotelService) => _hotelService = hotelService;
+        private readonly HotelManagementDbContext _context;
+        public CheckOutModel(HotelManagementDbContext context) => _context = context;
 
         [BindProperty]
         public Reservation Reservation { get; set; } = null!;
@@ -21,20 +22,35 @@ namespace HotelManagementSystem.Web.Pages.Admin
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            Reservation = await _hotelService.GetCheckoutReservationAsync(id);
+            Reservation = await _context.Reservations
+                .Include(r => r.Room)
+                .Include(r => r.Customer)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (Reservation == null) return RedirectToPage("/Index");
 
+            // Tính tiền
             var diff = DateTime.Now - Reservation.CheckInDate;
             TotalDays = diff.Days <= 0 ? 1 : diff.Days;
             RoomTotalPrice = TotalDays * (Reservation.Room?.BasePrice ?? 0);
-            ServiceTotalPrice = await _hotelService.GetServiceTotalPriceAsync(Reservation.Id);
+            ServiceTotalPrice = await _context.ReservationServices
+                .Where(s => s.ReservationId == Reservation.Id)
+                .SumAsync(s => s.Quantity * s.UnitPrice);
 
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(int id)
         {
-            await _hotelService.CheckoutAsync(id);
+            var res = await _context.Reservations.Include(r => r.Room).FirstOrDefaultAsync(r => r.Id == id);
+            if (res != null)
+            {
+                res.Status = "CheckedOut";
+                res.CheckOutDate = DateTime.Now;
+                if (res.Room != null) res.Room.Status = "Dirty"; // Trả phòng xong thì phòng bẩn
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToPage("/Index");
         }
     }

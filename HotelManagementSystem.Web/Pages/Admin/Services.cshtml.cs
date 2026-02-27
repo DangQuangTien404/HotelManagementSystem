@@ -1,27 +1,32 @@
-using HotelManagementSystem.Business;
-using HotelManagementSystem.Data.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using HotelManagementSystem.Data.Context;
+using HotelManagementSystem.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HotelManagementSystem.Web.Pages.Admin
 {
     [Authorize(Roles = "Admin")]
     public class ServicesModel : PageModel
     {
-        private readonly HotelManagementService _hotelService;
-        public ServicesModel(HotelManagementService hotelService) => _hotelService = hotelService;
+        private readonly HotelManagementDbContext _context;
+        public ServicesModel(HotelManagementDbContext context) => _context = context;
 
         public IList<HotelService> HotelServices { get; set; } = default!;
 
         [BindProperty]
         public HotelService NewService { get; set; } = new();
 
-        public async Task OnGetAsync() => HotelServices = await _hotelService.GetAllHotelServicesAsync();
+        public async Task OnGetAsync()
+        {
+            HotelServices = await _context.HotelServices.ToListAsync();
+        }
 
         public async Task<IActionResult> OnPostAddServiceAsync()
         {
-            await _hotelService.AddHotelServiceAsync(NewService);
+            _context.HotelServices.Add(NewService);
+            await _context.SaveChangesAsync();
             return RedirectToPage();
         }
     }
