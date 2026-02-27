@@ -29,13 +29,6 @@ namespace HotelManagementSystem.Business
 
                 res.Status = "CheckedIn";
 
-                // Update Room status
-                var room = await _context.Rooms.FindAsync(res.RoomId);
-                if (room != null)
-                {
-                    room.Status = "Occupied";
-                }
-
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 return true;
