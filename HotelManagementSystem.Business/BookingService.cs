@@ -28,7 +28,7 @@ namespace HotelManagementSystem.Business
                     CustomerId = request.CustomerId,
                     CheckInDate = request.CheckInDate,
                     CheckOutDate = request.CheckOutDate,
-                    Status = "Pending",
+                    Status = "Confirmed",
                     CreatedAt = DateTime.Now
                 };
 
@@ -53,6 +53,9 @@ namespace HotelManagementSystem.Business
                         });
                     }
                 }
+
+                room.Status = "Reserved";
+                _context.Rooms.Update(room);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

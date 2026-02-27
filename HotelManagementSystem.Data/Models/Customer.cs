@@ -11,10 +11,6 @@ public partial class Customer
 
     public string Email { get; set; } = null!;
 
-    public string Username { get; set; } = null!;
-
-    public string PasswordHash { get; set; } = null!;
-
     public string Phone { get; set; } = null!;
 
     public string IdentityNumber { get; set; } = null!;

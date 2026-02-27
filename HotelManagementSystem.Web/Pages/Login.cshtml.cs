@@ -27,50 +27,34 @@ namespace HotelManagementSystem.Web.Pages
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == LoginData.Username && u.PasswordHash == LoginData.Password);
 
-            if (user != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Role, user.Role)
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-
-                if (user.Role == "Staff")
-                {
-                    return RedirectToPage("/Staffs/MyTasks");
-                }
-
-                if (user.Role == "Technician")
-                {
-                    return RedirectToPage("/Staffs/MaintenanceTasks");
-                }
-
-                return RedirectToPage("/Index");
-            }
-
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.Username == LoginData.Username && c.PasswordHash == LoginData.Password);
-
-            if (customer == null)
+            if (user == null)
             {
                 ModelState.AddModelError(string.Empty, "Sai tài khoản hoặc mật khẩu.");
                 return Page();
             }
 
-            var customerClaims = new List<Claim>
+            var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, customer.Username),
-                new Claim(ClaimTypes.NameIdentifier, customer.Id.ToString()),
-                new Claim(ClaimTypes.Role, "Consumer")
+                new Claim(ClaimTypes.Name, user.Username),
+                // Dòng quan trọng để trang MyTasks lọc đúng việc:
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
-            var customerClaimsIdentity = new ClaimsIdentity(customerClaims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(customerClaimsIdentity));
-            return RedirectToPage("/MyBookings");
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+            if (user.Role == "Staff")
+            {
+                return RedirectToPage("/Staffs/MyTasks");
+            }
+
+            if (user.Role == "Technician")
+            {
+                return RedirectToPage("/Staffs/MaintenanceTasks");
+            }
+
+            return RedirectToPage("/Index");
         }
     }
 }
