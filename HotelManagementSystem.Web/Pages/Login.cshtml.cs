@@ -44,6 +44,16 @@ namespace HotelManagementSystem.Web.Pages
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
+            if (user.Role == "Staff")
+            {
+                return RedirectToPage("/Staffs/MyTasks");
+            }
+
+            if (user.Role == "Technician")
+            {
+                return RedirectToPage("/Staffs/MaintenanceTasks");
+            }
+
             return RedirectToPage("/Index");
         }
     }

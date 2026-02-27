@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +9,7 @@ using HotelManagementSystem.Business;
 
 namespace HotelManagementSystem.Web.Pages
 {
-    [Authorize] // Chỉ những người đã đăng nhập mới vào được trang này
+    [Authorize(Roles = "Admin")]
     public class ReservationsModel : PageModel
     {
         private readonly HotelManagementDbContext _context;

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelManagementSystem.Web.Pages.Reservations
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class ServicesModel : PageModel
     {
         private readonly HotelManagementDbContext _context;
