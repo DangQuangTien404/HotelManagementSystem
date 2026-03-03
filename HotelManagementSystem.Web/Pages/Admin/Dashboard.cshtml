@@ -1,0 +1,420 @@
+@page
+@model HotelManagementSystem.Web.Pages.Admin.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<style>
+    .kpi-card { border-left: 4px solid; }
+    .kpi-card.revenue  { border-color: #198754; }
+    .kpi-card.bookings { border-color: #0d6efd; }
+    .kpi-card.refunds  { border-color: #dc3545; }
+    .kpi-card.guests   { border-color: #fd7e14; }
+    .period-btn.active { background-color: #1a1a2e !important; color: #ffc107 !important; border-color: #1a1a2e !important; }
+    .stat-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .07em; }
+    .chart-wrap { position: relative; }
+</style>
+
+<div class="container-fluid py-4 px-4">
+
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-speedometer2 me-2 text-warning"></i>Dashboard tổng quan
+            </h4>
+            <p class="text-muted small mb-0">Thống kê trong: <strong>@Model.RangeLabel</strong></p>
+        </div>
+
+        <!-- Period Selector -->
+        <form method="get" class="d-flex flex-wrap align-items-center gap-2" id="periodForm">
+            <div class="btn-group shadow-sm" role="group">
+                @foreach (var (key, label) in new[] {
+                    ("today","Hôm nay"), ("week","Tuần này"),
+                    ("month","Tháng này"), ("year","Năm nay") })
+                {
+                    <a asp-page="/Admin/Dashboard" asp-route-Period="@key"
+                       class="btn btn-sm btn-outline-dark period-btn @(Model.Period == key ? "active" : "")">
+                        @label
+                    </a>
+                }
+                <button type="button"
+                        class="btn btn-sm btn-outline-dark period-btn @(Model.Period == "custom" ? "active" : "")"
+                        data-bs-toggle="collapse" data-bs-target="#customRange">
+                    <i class="bi bi-calendar-range me-1"></i>Tùy chỉnh
+                </button>
+            </div>
+
+            <div id="customRange" class="collapse @(Model.Period == "custom" ? "show" : "")">
+                <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                    <input type="hidden" name="Period" value="custom" />
+                    <input type="date" name="From" class="form-control form-control-sm"
+                           value="@(Model.From?.ToString("yyyy-MM-dd") ?? "")"
+                           style="width:140px" required />
+                    <span class="text-muted small">–</span>
+                    <input type="date" name="To" class="form-control form-control-sm"
+                           value="@(Model.To?.ToString("yyyy-MM-dd") ?? "")"
+                           style="width:140px" required />
+                    <button type="submit" class="btn btn-sm btn-dark">Áp dụng</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ── KPI Cards ──────────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 kpi-card revenue h-100">
+                <div class="stat-label text-muted mb-2">
+                    <i class="bi bi-cash-coin me-1 text-success"></i>Doanh thu
+                </div>
+                <div class="fw-bold fs-4 text-success mb-1">@Model.TotalRevenue.ToString("N0") ₫</div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:.65rem">
+                        <i class="bi bi-wallet2 me-1"></i>MoMo: @Model.MoMoRevenue.ToString("N0") ₫
+                    </span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size:.65rem">
+                        <i class="bi bi-qr-code me-1"></i>VietQR: @Model.VietQrRevenue.ToString("N0") ₫
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 kpi-card bookings h-100">
+                <div class="stat-label text-muted mb-2">
+                    <i class="bi bi-calendar-check me-1 text-primary"></i>Đặt phòng
+                </div>
+                <div class="fw-bold fs-4 text-primary mb-1">@Model.TotalReservations</div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:.65rem">
+                        ✓ @Model.ConfirmedReservations xác nhận
+                    </span>
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size:.65rem">
+                        ⏳ @Model.PendingReservations chờ
+                    </span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size:.65rem">
+                        ✗ @Model.CancelledReservations hủy
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 kpi-card refunds h-100">
+                <div class="stat-label text-muted mb-2">
+                    <i class="bi bi-arrow-counterclockwise me-1 text-danger"></i>Hoàn tiền
+                </div>
+                <div class="fw-bold fs-4 text-danger mb-1">@Model.TotalRefunds lần</div>
+                <div>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size:.65rem">
+                        Tổng: @Model.TotalRefundAmount.ToString("N0") ₫
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 kpi-card guests h-100">
+                <div class="stat-label text-muted mb-2">
+                    <i class="bi bi-person-check me-1 text-warning"></i>Khách đang lưu trú
+                </div>
+                <div class="fw-bold fs-4 text-warning mb-1">@Model.ActiveGuests</div>
+                <div>
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size:.65rem">
+                        Đang nhận phòng
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Charts ─────────────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+
+        <!-- Revenue Trend -->
+        <div class="col-xl-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 p-4 pb-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold">Xu hướng doanh thu</div>
+                        <div class="text-muted small">@Model.RangeLabel</div>
+                    </div>
+                    <span class="badge bg-success rounded-pill px-3">@Model.TotalRevenue.ToString("N0") ₫</span>
+                </div>
+                <div class="card-body p-4 chart-wrap" style="height:300px">
+                    <canvas id="revenueTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Method Breakdown -->
+        <div class="col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 p-4 pb-0">
+                    <div class="fw-bold">Phương thức thanh toán</div>
+                    <div class="text-muted small">Tỷ lệ doanh thu</div>
+                </div>
+                <div class="card-body p-4 chart-wrap d-flex flex-column align-items-center justify-content-center" style="height:300px">
+                    <canvas id="paymentMethodChart" style="max-height:220px"></canvas>
+                    <div class="d-flex gap-3 mt-3">
+                        <span class="d-flex align-items-center gap-1 small">
+                            <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#a50064"></span>MoMo
+                        </span>
+                        <span class="d-flex align-items-center gap-1 small">
+                            <span class="rounded-circle d-inline-block" style="width:10px;height:10px;background:#0d6efd"></span>VietQR
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Reservation Status Chart -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 p-4 pb-0">
+                    <div class="fw-bold">Trạng thái đặt phòng</div>
+                    <div class="text-muted small">Phân bổ theo trạng thái trong kỳ đã chọn</div>
+                </div>
+                <div class="card-body p-4 chart-wrap" style="height:200px">
+                    <canvas id="reservationStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Tables ─────────────────────────────────────────────────────────── -->
+    <div class="row g-3">
+
+        <!-- Recent Payments -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
+                    <div class="fw-bold"><i class="bi bi-receipt text-success me-2"></i>Giao dịch thành công gần đây</div>
+                    <span class="badge bg-success rounded-pill">@Model.RecentPayments.Count</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light text-uppercase" style="font-size:.65rem">
+                            <tr>
+                                <th class="ps-4">Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Phòng</th>
+                                <th>Phương thức</th>
+                                <th>Thời gian</th>
+                                <th class="text-end pe-4">Số tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.RecentPayments.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        <i class="bi bi-inbox d-block fs-3 mb-1 opacity-50"></i>
+                                        Không có giao dịch trong kỳ này
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var p in Model.RecentPayments)
+                                {
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-muted">#@p.Id</td>
+                                        <td>@(p.Reservation.Customer?.FullName ?? "—")</td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">
+                                                @(p.Reservation.Room?.RoomNumber ?? "—")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (p.PaymentMethod == "MoMo")
+                                            {
+                                                <span class="badge rounded-pill" style="background:#a50064;font-size:.7rem">MoMo</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary rounded-pill" style="font-size:.7rem">VietQR</span>
+                                            }
+                                        </td>
+                                        <td class="text-muted">@(p.CompletedAt?.ToString("HH:mm dd/MM") ?? p.CreatedAt.ToString("HH:mm dd/MM"))</td>
+                                        <td class="text-end pe-4 fw-bold text-success">@p.Amount.ToString("N0") ₫</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Refunds -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
+                    <div class="fw-bold"><i class="bi bi-arrow-counterclockwise text-danger me-2"></i>Hoàn tiền gần đây</div>
+                    <span class="badge bg-danger rounded-pill">@Model.TotalRefunds</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light text-uppercase" style="font-size:.65rem">
+                            <tr>
+                                <th class="ps-4">Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Phương thức</th>
+                                <th>Ngày hoàn</th>
+                                <th class="text-end pe-4">Số tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.RecentRefunds.Any())
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <i class="bi bi-check-circle d-block fs-3 mb-1 text-success opacity-75"></i>
+                                        Không có hoàn tiền trong kỳ này
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var p in Model.RecentRefunds)
+                                {
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-muted">#@p.Id</td>
+                                        <td>@(p.Reservation.Customer?.FullName ?? "—")</td>
+                                        <td>
+                                            @if (p.PaymentMethod == "MoMo")
+                                            {
+                                                <span class="badge rounded-pill" style="background:#a50064;font-size:.7rem">MoMo</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary rounded-pill" style="font-size:.7rem">VietQR</span>
+                                            }
+                                        </td>
+                                        <td class="text-muted">@(p.RefundedAt?.ToString("dd/MM/yyyy") ?? "—")</td>
+                                        <td class="text-end pe-4 fw-bold text-danger">-@p.Amount.ToString("N0") ₫</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+    Chart.defaults.color = '#6c757d';
+
+    // ── Revenue Trend ────────────────────────────────────────────────────────
+    const trendData = @Html.Raw(Model.RevenueTrendJson);
+    new Chart(document.getElementById('revenueTrendChart'), {
+        type: 'bar',
+        data: {
+            labels: trendData.labels,
+            datasets: [{
+                label: 'Doanh thu (₫)',
+                data: trendData.values,
+                backgroundColor: 'rgba(25, 135, 84, 0.15)',
+                borderColor: '#198754',
+                borderWidth: 2,
+                borderRadius: 6,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#198754'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,.05)' },
+                    ticks: {
+                        callback: v => v >= 1e6
+                            ? (v/1e6).toFixed(1) + 'M ₫'
+                            : v >= 1e3 ? (v/1e3).toFixed(0) + 'K ₫' : v + ' ₫'
+                    }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // ── Payment Method Doughnut ───────────────────────────────────────────────
+    const methodData = @Html.Raw(Model.PaymentMethodJson);
+    new Chart(document.getElementById('paymentMethodChart'), {
+        type: 'doughnut',
+        data: {
+            labels: methodData.labels,
+            datasets: [{
+                data: methodData.values,
+                backgroundColor: ['#a50064', '#0d6efd'],
+                borderWidth: 0,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' ' + Number(ctx.raw).toLocaleString('vi-VN') + ' ₫'
+                    }
+                }
+            }
+        }
+    });
+
+    // ── Reservation Status Horizontal Bar ────────────────────────────────────
+    const statusData = @Html.Raw(Model.ReservationStatusJson);
+    new Chart(document.getElementById('reservationStatusChart'), {
+        type: 'bar',
+        data: {
+            labels: statusData.labels,
+            datasets: [{
+                label: 'Số đặt phòng',
+                data: statusData.values,
+                backgroundColor: [
+                    'rgba(25,135,84,.75)',
+                    'rgba(13,110,253,.75)',
+                    'rgba(108,117,125,.75)',
+                    'rgba(220,53,69,.75)',
+                    'rgba(255,193,7,.75)'
+                ],
+                borderRadius: 6,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.05)' }, ticks: { stepSize: 1 } },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+}
