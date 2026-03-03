@@ -15,6 +15,7 @@ namespace HotelManagementSystem.Web.Pages
     public class PaymentModel : PageModel
     {
         private readonly BookingService _service;
+        private readonly MoMoService _momoService;
         private readonly HotelManagementDbContext _context;
         private readonly IConfiguration _configuration;
 
@@ -30,9 +31,14 @@ namespace HotelManagementSystem.Web.Pages
         public int Nights { get; set; }
         public string VietQrUrl { get; set; } = string.Empty;
 
-        public PaymentModel(BookingService service, HotelManagementDbContext context, IConfiguration configuration)
+        public PaymentModel(
+            BookingService service,
+            MoMoService momoService,
+            HotelManagementDbContext context,
+            IConfiguration configuration)
         {
             _service = service;
+            _momoService = momoService;
             _context = context;
             _configuration = configuration;
         }
@@ -66,15 +72,66 @@ namespace HotelManagementSystem.Web.Pages
             var result = await _service.ProcessBooking(RequestData);
             if (result)
             {
+                TempData.Remove("BookingRequest");
                 TempData["SuccessMessage"] = "Đặt phòng thành công! Cảm ơn bạn đã thanh toán.";
                 return RedirectToPage("/Rooms");
             }
 
-            // Re-load for re-display on failure
             await LoadDataAsync();
             CalculateTotal();
             BuildVietQrUrl();
             ModelState.AddModelError("", "Đặt phòng không thành công! Vui lòng kiểm tra lại.");
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostMoMoAsync()
+        {
+            var customer = await GetCurrentCustomerAsync();
+            if (customer != null)
+            {
+                RequestData.CustomerId = customer.Id;
+                CustomerName = customer.FullName;
+            }
+
+            await LoadDataAsync();
+            if (SelectedRoom == null) return RedirectToPage("/Rooms");
+
+            CalculateTotal();
+
+            var pendingResult = await _service.CreatePendingBookingAsync(RequestData, TotalPrice);
+            if (pendingResult == null)
+            {
+                BuildVietQrUrl();
+                ModelState.AddModelError("", "Không thể tạo đặt phòng. Phòng có thể đã được đặt.");
+                return Page();
+            }
+
+            var (reservationId, orderId) = pendingResult.Value;
+
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var returnUrl = _configuration["MoMo:ReturnUrl"] ?? "/PaymentCallback";
+            var ipnPath = _configuration["MoMo:IpnUrl"] ?? "/api/momo-ipn";
+
+            var redirectUrl = $"{baseUrl}{returnUrl}";
+            var ipnUrl = $"{baseUrl}{ipnPath}";
+
+            var orderInfo = $"Thanh toan phong {SelectedRoom!.RoomNumber}";
+            var amount = (long)TotalPrice;
+
+            var momoResponse = await _momoService.CreatePaymentAsync(
+                orderId, orderInfo, amount, redirectUrl, ipnUrl);
+
+            if (momoResponse != null && momoResponse.ResultCode == 0
+                && !string.IsNullOrEmpty(momoResponse.PayUrl))
+            {
+                TempData.Remove("BookingRequest");
+                return Redirect(momoResponse.PayUrl);
+            }
+
+            await _service.FailPaymentAsync(orderId);
+            BuildVietQrUrl();
+            ModelState.AddModelError("",
+                $"Không thể kết nối MoMo: {momoResponse?.Message ?? "Không có phản hồi"}");
             return Page();
         }
 

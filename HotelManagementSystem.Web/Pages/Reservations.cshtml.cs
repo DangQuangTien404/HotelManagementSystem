@@ -33,7 +33,7 @@ namespace HotelManagementSystem.Web.Pages
             Reservations = await _context.Reservations
                 .Include(r => r.Room)
                 .Include(r => r.Customer)
-                .Where(r => r.Status == "Confirmed" || r.Status == "CheckedIn")
+                .Where(r => r.Status == "Confirmed" || r.Status == "CheckedIn" || r.Status == "PendingPayment")
                 .OrderBy(r => r.CheckInDate)
                 .ToListAsync();
         }

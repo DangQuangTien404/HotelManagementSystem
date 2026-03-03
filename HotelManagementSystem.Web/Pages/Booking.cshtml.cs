@@ -48,6 +48,17 @@ namespace HotelManagementSystem.Web.Pages
             return Page();
         }
 
+        public async Task<IActionResult> OnGetReservedDatesAsync(int roomId)
+        {
+            var periods = await _service.GetReservedPeriodsAsync(roomId);
+            var result = periods.Select(p => new
+            {
+                from = p.CheckIn.ToString("yyyy-MM-dd"),
+                to = p.CheckOut.ToString("yyyy-MM-dd")
+            });
+            return new JsonResult(result);
+        }
+
         public async Task<IActionResult> OnPostAsync()
         {
             // Always resolve CustomerId from the logged-in user to prevent tampering

@@ -18,7 +18,7 @@ namespace HotelManagementSystem.Business
 
         public async Task<List<Room>> GetAvailableRoomsAsync(string? search, string? type)
         {
-            var query = _context.Rooms.Where(r => r.Status == "Available");
+            var query = _context.Rooms.Where(r => r.Status == "Available" || r.Status == "Reserved");
 
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(r => r.RoomNumber.Contains(search) || r.RoomType.Contains(search));
@@ -32,7 +32,7 @@ namespace HotelManagementSystem.Business
         public async Task<List<string>> GetRoomTypesAsync()
         {
             return await _context.Rooms
-                .Where(r => r.Status == "Available")
+                .Where(r => r.Status == "Available" || r.Status == "Reserved")
                 .Select(r => r.RoomType)
                 .Distinct()
                 .OrderBy(t => t)

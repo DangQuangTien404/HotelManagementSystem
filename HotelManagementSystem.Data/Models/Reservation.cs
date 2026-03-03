@@ -30,4 +30,6 @@ public partial class Reservation
     public virtual Room Room { get; set; } = null!;
 
     public virtual ICollection<ReservationService> ReservationServices { get; set; } = new List<ReservationService>();
+
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 }

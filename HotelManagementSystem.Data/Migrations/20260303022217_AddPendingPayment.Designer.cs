@@ -4,6 +4,7 @@ using HotelManagementSystem.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelManagementSystem.Data.Migrations
 {
     [DbContext(typeof(HotelManagementDbContext))]
-    partial class HotelManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260303022217_AddPendingPayment")]
+    partial class AddPendingPayment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,7 +223,7 @@ namespace HotelManagementSystem.Data.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Payment", b =>
+            modelBuilder.Entity("HotelManagementSystem.Data.Models.PendingPayment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -231,47 +234,30 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("CompletedAt")
+                    b.Property<string>("BookingDataJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ConfirmedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("OrderId")
+                    b.Property<string>("Reference")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("RefundTransactionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("RefundedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RequestId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ReservationId")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("TransactionId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReservationId");
+                    b.HasIndex("Reference")
+                        .IsUnique();
 
-                    b.ToTable("Payments");
+                    b.ToTable("PendingPayments");
                 });
 
             modelBuilder.Entity("HotelManagementSystem.Data.Models.Reservation", b =>
@@ -555,17 +541,6 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("HotelManagementSystem.Data.Models.Payment", b =>
-                {
-                    b.HasOne("HotelManagementSystem.Data.Models.Reservation", "Reservation")
-                        .WithMany("Payments")
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Reservation");
-                });
-
             modelBuilder.Entity("HotelManagementSystem.Data.Models.Reservation", b =>
                 {
                     b.HasOne("HotelManagementSystem.Data.Models.Customer", "Customer")
@@ -651,8 +626,6 @@ namespace HotelManagementSystem.Data.Migrations
             modelBuilder.Entity("HotelManagementSystem.Data.Models.Reservation", b =>
                 {
                     b.Navigation("CheckInOuts");
-
-                    b.Navigation("Payments");
 
                     b.Navigation("ReservationServices");
                 });

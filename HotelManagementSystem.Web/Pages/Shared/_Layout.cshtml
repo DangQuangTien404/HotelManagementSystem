@@ -58,7 +58,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3 shadow-sm">
             <div class="container-fluid px-4">
-                <a class="navbar-brand text-warning" asp-page="@(User.IsInRole("Admin") ? "/Index" : "/Staffs/MyTasks")">
+                <a class="navbar-brand text-warning" asp-page="@(User.IsInRole("Admin") ? "/Index" : User.IsInRole("Customer") ? "/Rooms" : "/Staffs/MyTasks")">
                     <i class="bi bi-building-fill-check"></i> LUXURY HOTEL
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
@@ -144,6 +144,21 @@
                                     </ul>
                                 </li>
                             }
+
+                            @* 4. MENU KHÁCH HÀNG *@
+                            @if (User.IsInRole("Customer"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-white px-3" asp-page="/Rooms">
+                                        <i class="bi bi-building"></i> Chọn phòng
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white px-3" asp-page="/MyReservations">
+                                        <i class="bi bi-journal-check"></i> Đặt phòng của tôi
+                                    </a>
+                                </li>
+                            }
                         }
                     </ul>
 
@@ -157,8 +172,12 @@
                                     <span class="ms-1 small">@User.Identity.Name</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow">
-                                    <li><a class="dropdown-item" asp-page="/Profile"><i class="bi bi-person-vcard"></i> Hồ sơ cá nhân</a></li>
-                                    <li><hr class="dropdown-divider"></li>
+                                     <li><a class="dropdown-item" asp-page="/Profile"><i class="bi bi-person-vcard"></i> Hồ sơ cá nhân</a></li>
+                                     @if (User.IsInRole("Customer"))
+                                     {
+                                         <li><a class="dropdown-item" asp-page="/MyReservations"><i class="bi bi-journal-check"></i> Đặt phòng của tôi</a></li>
+                                     }
+                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form method="post" asp-page="/Logout" class="px-2">
                                             <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold">

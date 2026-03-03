@@ -4,6 +4,7 @@
     ViewData["Title"] = "Đặt phòng";
 }
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 <style>
     .ls-wide { letter-spacing: .07em; }
     .service-card input:checked + .service-label .svc-badge {
@@ -20,6 +21,14 @@
     .form-control:focus, .form-select:focus {
         border-color: #0d6efd;
         box-shadow: 0 0 0 .2rem rgba(13,110,253,.1);
+    }
+    .flatpickr-day.reserved {
+        background: #fee2e2 !important;
+        color: #dc2626 !important;
+        text-decoration: line-through;
+    }
+    .flatpickr-day.reserved:hover {
+        background: #fecaca !important;
     }
 </style>
 
@@ -104,7 +113,9 @@
                                             </span>
                                             <input asp-for="RequestData.CheckInDate"
                                                    id="checkInInput"
-                                                   type="date"
+                                                   type="text"
+                                                   autocomplete="off"
+                                                   readonly
                                                    class="form-control border-start-0 rounded-end-3" />
                                         </div>
                                     </div>
@@ -116,10 +127,21 @@
                                             </span>
                                             <input asp-for="RequestData.CheckOutDate"
                                                    id="checkOutInput"
-                                                   type="date"
+                                                   type="text"
+                                                   autocomplete="off"
+                                                   readonly
                                                    class="form-control border-start-0 rounded-end-3" />
                                         </div>
                                     </div>
+                                </div>
+                                <!-- Reserved-date legend -->
+                                <div id="reservedLegend" class="mt-3 d-none">
+                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size:.7rem">
+                                            <i class="bi bi-circle-fill me-1" style="font-size:.4rem;vertical-align:middle"></i>Ngày đã có đặt phòng (không thể chọn)
+                                        </span>
+                                    </div>
+                                    <div id="reservedList" class="d-flex flex-wrap gap-1 mt-2"></div>
                                 </div>
                             </div>
                         </div>
@@ -262,14 +284,64 @@
 </div>
 
 @section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
 <script>
-    const checkInInput  = document.getElementById('checkInInput');
-    const checkOutInput = document.getElementById('checkOutInput');
+    const roomId = @Model.RequestData.RoomId;
+    let reservedRanges = [];
 
-    // Set min date to today
-    const today = new Date().toISOString().split('T')[0];
-    if (checkInInput)  checkInInput.min  = today;
-    if (checkOutInput) checkOutInput.min = today;
+    function dateInReserved(date) {
+        return reservedRanges.some(r => date >= r.from && date < r.to);
+    }
+
+    function rangesOverlap(checkIn, checkOut) {
+        return reservedRanges.some(r => checkIn < r.to && checkOut > r.from);
+    }
+
+    let fpIn, fpOut;
+
+    function initPickers() {
+        const disableFn = date => dateInReserved(date);
+        const today = new Date(); today.setHours(0,0,0,0);
+
+        fpIn = flatpickr('#checkInInput', {
+            locale: 'vn',
+            dateFormat: 'Y-m-d',
+            minDate: 'today',
+            disable: [disableFn],
+            onDayCreate(_, __, ___, dayElem) {
+                if (dateInReserved(dayElem.dateObj)) dayElem.classList.add('reserved');
+            },
+            onChange([selected]) {
+                if (!selected) return;
+                const next = new Date(selected); next.setDate(next.getDate() + 1);
+                fpOut.set('minDate', next);
+                if (fpOut.selectedDates[0] && fpOut.selectedDates[0] <= selected) fpOut.clear();
+                updateSummary();
+            }
+        });
+
+        fpOut = flatpickr('#checkOutInput', {
+            locale: 'vn',
+            dateFormat: 'Y-m-d',
+            minDate: 'today',
+            disable: [disableFn],
+            onDayCreate(_, __, ___, dayElem) {
+                if (dateInReserved(dayElem.dateObj)) dayElem.classList.add('reserved');
+            },
+            onChange([selected]) {
+                updateSummary();
+                validateOverlap();
+            }
+        });
+
+        // Restore existing model values
+        const ciVal = '@Model.RequestData.CheckInDate.ToString("yyyy-MM-dd")';
+        const coVal = '@Model.RequestData.CheckOutDate.ToString("yyyy-MM-dd")';
+        if (ciVal && ciVal !== '0001-01-01') fpIn.setDate(ciVal, false);
+        if (coVal && coVal !== '0001-01-01') fpOut.setDate(coVal, false);
+        updateSummary();
+    }
 
     function fmtDate(val) {
         if (!val) return '—';
@@ -278,23 +350,56 @@
     }
 
     function updateSummary() {
-        document.getElementById('summaryCheckIn').textContent  = fmtDate(checkInInput?.value);
-        document.getElementById('summaryCheckOut').textContent = fmtDate(checkOutInput?.value);
-
-        const nights = (checkInInput?.value && checkOutInput?.value)
-            ? Math.max(0, Math.round((new Date(checkOutInput.value) - new Date(checkInInput.value)) / 86400000))
+        const ciVal = document.getElementById('checkInInput').value;
+        const coVal = document.getElementById('checkOutInput').value;
+        document.getElementById('summaryCheckIn').textContent  = fmtDate(ciVal);
+        document.getElementById('summaryCheckOut').textContent = fmtDate(coVal);
+        const nights = (ciVal && coVal)
+            ? Math.max(0, Math.round((new Date(coVal) - new Date(ciVal)) / 86400000))
             : 0;
         document.getElementById('summaryNights').textContent = nights > 0 ? `${nights} đêm` : '—';
+    }
 
-        // Keep check-out min in sync with check-in
-        if (checkInInput?.value && checkOutInput) {
-            checkOutInput.min = checkInInput.value;
+    function validateOverlap() {
+        const ciVal = document.getElementById('checkInInput').value;
+        const coVal = document.getElementById('checkOutInput').value;
+        if (!ciVal || !coVal) return;
+        const ci = new Date(ciVal), co = new Date(coVal);
+        if (rangesOverlap(ci, co)) {
+            document.querySelector('button[type=submit]').disabled = true;
+            document.querySelector('button[type=submit]').title = 'Khoảng thời gian đã bị trùng với đặt phòng khác';
+            alert('Khoảng ngày bạn chọn trùng với một đặt phòng đã có. Vui lòng chọn ngày khác.');
+            fpOut.clear();
+            document.querySelector('button[type=submit]').disabled = false;
         }
     }
 
-    checkInInput?.addEventListener('change', updateSummary);
-    checkOutInput?.addEventListener('change', updateSummary);
+    function renderReservedList() {
+        if (!reservedRanges.length) return;
+        const legend = document.getElementById('reservedLegend');
+        const list   = document.getElementById('reservedList');
+        legend.classList.remove('d-none');
+        reservedRanges.forEach(r => {
+            const fromD = r.from.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit' });
+            const toD   = r.to.toLocaleDateString('vi-VN',   { day:'2-digit', month:'2-digit' });
+            const span = document.createElement('span');
+            span.className = 'badge rounded-pill text-bg-danger';
+            span.style.fontSize = '.7rem';
+            span.textContent = `${fromD} – ${toD}`;
+            list.appendChild(span);
+        });
+    }
 
-    updateSummary();
+    async function loadReservedDates() {
+        try {
+            const resp = await fetch(`/Booking?handler=ReservedDates&roomId=${roomId}`);
+            const data = await resp.json();
+            reservedRanges = data.map(d => ({ from: new Date(d.from), to: new Date(d.to) }));
+        } catch { reservedRanges = []; }
+        initPickers();
+        renderReservedList();
+    }
+
+    loadReservedDates();
 </script>
 }

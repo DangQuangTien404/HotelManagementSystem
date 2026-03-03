@@ -1,5 +1,6 @@
 ﻿using HotelManagementSystem.Business;
 using HotelManagementSystem.Data.Context;
+using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +31,7 @@ builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<StaffService>();
 builder.Services.AddScoped<MaintenanceService>();
 builder.Services.AddScoped<CleaningService>();
+builder.Services.AddHttpClient<MoMoService>();
 
 var app = builder.Build();
 
@@ -104,5 +106,24 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.MapPost("/api/momo-ipn", async (HttpContext context, BookingService bookingService, MoMoService momoService) =>
+{
+    using var reader = new StreamReader(context.Request.Body);
+    var body = await reader.ReadToEndAsync();
+    var data = System.Text.Json.JsonSerializer.Deserialize<MoMoCallbackData>(
+        body, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+    if (data == null) return Results.BadRequest();
+
+    if (!momoService.VerifySignature(data)) return Results.BadRequest();
+
+    if (data.ResultCode == 0)
+        await bookingService.ConfirmPaymentAsync(data.OrderId, data.TransId.ToString());
+    else
+        await bookingService.FailPaymentAsync(data.OrderId);
+
+    return Results.NoContent();
+});
 
 app.Run();

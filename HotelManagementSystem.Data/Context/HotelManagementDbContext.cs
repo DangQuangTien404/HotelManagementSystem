@@ -17,6 +17,7 @@ public partial class HotelManagementDbContext : DbContext
     public virtual DbSet<Customer> Customers { get; set; }
     public virtual DbSet<MaintenanceTask> MaintenanceTasks { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<Payment> Payments { get; set; }
     public virtual DbSet<Reservation> Reservations { get; set; }
     public virtual DbSet<ReservationService> ReservationServices { get; set; }
     public virtual DbSet<Room> Rooms { get; set; }
@@ -103,6 +104,21 @@ public partial class HotelManagementDbContext : DbContext
             entity.HasOne(d => d.User)
                 .WithMany()
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // 8. Cấu hình Payment
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.OrderId).HasMaxLength(100);
+            entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(50);
+
+            entity.HasOne(d => d.Reservation)
+                .WithMany(p => p.Payments)
+                .HasForeignKey(d => d.ReservationId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
