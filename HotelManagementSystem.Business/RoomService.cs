@@ -16,6 +16,29 @@ namespace HotelManagementSystem.Business
             return await _context.Rooms.ToListAsync();
         }
 
+        public async Task<List<Room>> GetAvailableRoomsAsync(string? search, string? type)
+        {
+            var query = _context.Rooms.Where(r => r.Status == "Available");
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(r => r.RoomNumber.Contains(search) || r.RoomType.Contains(search));
+
+            if (!string.IsNullOrWhiteSpace(type))
+                query = query.Where(r => r.RoomType == type);
+
+            return await query.OrderBy(r => r.RoomNumber).ToListAsync();
+        }
+
+        public async Task<List<string>> GetRoomTypesAsync()
+        {
+            return await _context.Rooms
+                .Where(r => r.Status == "Available")
+                .Select(r => r.RoomType)
+                .Distinct()
+                .OrderBy(t => t)
+                .ToListAsync();
+        }
+
         // Thêm hoặc Cập nhật phòng
         public async Task SaveRoomAsync(Room room)
         {

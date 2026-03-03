@@ -1,0 +1,192 @@
+@page
+@model HotelManagementSystem.Web.Pages.RoomsModel
+@{
+    ViewData["Title"] = "Chọn phòng";
+}
+
+<style>
+    .room-card {
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .room-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 2rem rgba(0,0,0,.13) !important;
+    }
+    .card-top-strip {
+        min-height: 95px;
+    }
+    .filter-pill.active {
+        background-color: #0d6efd !important;
+        color: #fff !important;
+        border-color: #0d6efd !important;
+    }
+</style>
+
+<!-- Hero banner -->
+<div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)" class="py-5 mb-4">
+    <div class="container">
+        <div class="row align-items-center gy-3">
+            <div class="col-md-5">
+                <h3 class="fw-bold text-white mb-1">
+                    <i class="bi bi-building me-2 text-warning"></i>Phòng có sẵn
+                </h3>
+                <p class="text-white-50 mb-0 small">Duyệt qua các phòng trống và đặt ngay hôm nay.</p>
+            </div>
+            <div class="col-md-7">
+                <form method="get" asp-page="/Rooms">
+                    @if (!string.IsNullOrEmpty(Model.Type))
+                    {
+                        <input type="hidden" name="Type" value="@Model.Type" />
+                    }
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white border-end-0 rounded-start-pill px-3">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text"
+                               name="Search"
+                               value="@Model.Search"
+                               class="form-control border-start-0 border-end-0 py-2"
+                               placeholder="Tìm theo số phòng hoặc loại phòng..." />
+                        <button class="btn btn-warning fw-semibold px-4 rounded-end-pill" type="submit">
+                            Tìm kiếm
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- Type filter pills -->
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+        <span class="text-muted small fw-semibold me-1">Loại phòng:</span>
+        <a asp-page="/Rooms" asp-route-Search="@Model.Search"
+           class="btn btn-sm btn-outline-secondary rounded-pill filter-pill @(string.IsNullOrEmpty(Model.Type) ? "active" : "")">
+            <i class="bi bi-grid-3x3-gap-fill me-1"></i>Tất cả
+        </a>
+        @foreach (var t in Model.RoomTypes)
+        {
+            <a asp-page="/Rooms" asp-route-Search="@Model.Search" asp-route-Type="@t"
+               class="btn btn-sm btn-outline-secondary rounded-pill filter-pill @(Model.Type == t ? "active" : "")">
+                @t
+            </a>
+        }
+    </div>
+
+    <!-- Results bar -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="text-muted small mb-0">
+            <i class="bi bi-info-circle me-1"></i>
+            Tìm thấy <strong>@Model.AvailableRooms.Count</strong> phòng trống
+            @if (!string.IsNullOrEmpty(Model.Search))
+            {
+                <span>— kết quả cho "<em class="text-dark">@Model.Search</em>"</span>
+            }
+            @if (!string.IsNullOrEmpty(Model.Type))
+            {
+                <span>— loại <em class="text-dark">@Model.Type</em></span>
+            }
+        </p>
+        @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.Type))
+        {
+            <a asp-page="/Rooms" class="btn btn-sm btn-outline-danger rounded-pill">
+                <i class="bi bi-x-circle me-1"></i>Xóa bộ lọc
+            </a>
+        }
+    </div>
+
+    <!-- Empty state -->
+    @if (!Model.AvailableRooms.Any())
+    {
+        <div class="text-center py-5 my-4">
+            <i class="bi bi-building-slash fs-1 text-muted opacity-50 d-block mb-3"></i>
+            <h5 class="text-muted fw-semibold">Không tìm thấy phòng nào</h5>
+            <p class="text-muted small">Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc hiện tại.</p>
+            <a asp-page="/Rooms" class="btn btn-outline-primary rounded-pill px-4 mt-1">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Xem tất cả
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var room in Model.AvailableRooms)
+            {
+                <div class="col-12 col-sm-6 col-xl-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 room-card overflow-hidden">
+
+                        <!-- Colored header strip -->
+                        <div class="card-top-strip @GetHeaderBg(room.RoomType) p-3 d-flex flex-column justify-content-between">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25"
+                                      style="font-size:.65rem; letter-spacing:.06em; text-transform:uppercase">
+                                    <i class="bi @GetIconClass(room.RoomType) me-1"></i>@room.RoomType
+                                </span>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    <i class="bi bi-circle-fill me-1" style="font-size:.4rem; vertical-align:middle"></i>Trống
+                                </span>
+                            </div>
+                            <div class="text-white mt-2">
+                                <div class="fw-bold" style="font-size:1.7rem; letter-spacing:-.02em; line-height:1">
+                                    @room.RoomNumber
+                                </div>
+                                <div class="text-white-50 small">Số phòng</div>
+                            </div>
+                        </div>
+
+                        <!-- Card body -->
+                        <div class="card-body p-3 d-flex flex-column gap-3">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="bg-light rounded-3 p-2 text-center h-100 d-flex flex-column align-items-center justify-content-center gap-1">
+                                        <i class="bi bi-people-fill text-primary fs-5"></i>
+                                        <div class="fw-semibold small">@room.Capacity người</div>
+                                        <div class="text-muted" style="font-size:.65rem">Sức chứa</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-light rounded-3 p-2 text-center h-100 d-flex flex-column align-items-center justify-content-center gap-1">
+                                        <i class="bi bi-moon-stars-fill text-warning fs-5"></i>
+                                        <div class="fw-bold text-primary small">@room.BasePrice.ToString("N0") ₫</div>
+                                        <div class="text-muted" style="font-size:.65rem">Mỗi đêm</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a asp-page="/Booking"
+                               asp-route-roomId="@room.Id"
+                               class="btn btn-primary w-100 rounded-3 fw-semibold mt-auto">
+                                <i class="bi bi-calendar-check me-2"></i>Đặt phòng này
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+</div>
+
+@functions {
+    string GetHeaderBg(string? type) => type?.ToLower() switch
+    {
+        "suite"    => "bg-warning",
+        "deluxe"   => "bg-primary",
+        "family"   => "bg-success",
+        "vip"      => "bg-danger",
+        "standard" => "bg-secondary",
+        _          => "bg-dark"
+    };
+
+    string GetIconClass(string? type) => type?.ToLower() switch
+    {
+        "suite"    => "bi-gem",
+        "deluxe"   => "bi-stars",
+        "family"   => "bi-people-fill",
+        "vip"      => "bi-crown-fill",
+        _          => "bi-door-closed-fill"
+    };
+}

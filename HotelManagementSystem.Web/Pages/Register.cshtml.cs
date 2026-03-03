@@ -69,8 +69,8 @@ namespace HotelManagementSystem.Web.Pages
                     return Page();
                 }
 
-                // Đăng ký xong quay về trang chủ
-                return RedirectToPage("/Index");
+                // Đăng ký xong chuyển đến trang đăng nhập
+                return RedirectToPage("/Login");
             }
             catch (Exception ex)
             {

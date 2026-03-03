@@ -56,7 +56,7 @@ namespace HotelManagementSystem.Web.Pages
 
             if (user.Role == "Customer")
             {
-                return RedirectToPage("/Booking");
+                return RedirectToPage("/Rooms");
             }
 
             return RedirectToPage("/Index");

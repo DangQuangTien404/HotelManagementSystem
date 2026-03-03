@@ -4,63 +4,297 @@
     ViewData["Title"] = "Đặt phòng";
 }
 
-<h1>Đặt phòng mới</h1>
+<style>
+    .ls-wide { letter-spacing: .07em; }
+    .service-card input:checked + .service-label .svc-badge {
+        background-color: rgba(255,255,255,.25) !important;
+        color: #fff !important;
+        border-color: transparent !important;
+    }
+    .summary-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+    .summary-icon {
+        width: 36px; height: 36px; min-width: 36px;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 .2rem rgba(13,110,253,.1);
+    }
+</style>
 
-<div class="row">
-    <div class="col-md-6">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="container py-4">
 
-            <div class="form-group mb-2">
-                <label>Mã khách hàng (ID)</label>
-                <input asp-for="RequestData.CustomerId" class="form-control" />
-            </div>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-            <div class="form-group mb-2">
-                <label>Mã phòng (ID)</label>
-                <input asp-for="RequestData.RoomId" class="form-control" />
-            </div>
+    <!-- Page header -->
+    <div class="mb-4">
+        <h4 class="fw-bold mb-1">
+            <i class="bi bi-calendar2-plus me-2 text-primary"></i>Đặt phòng mới
+        </h4>
+        <p class="text-muted small mb-0">Chọn phòng, ngày lưu trú và các dịch vụ bạn muốn.</p>
+    </div>
 
-            <div class="form-group mb-2">
-                <label>Ngày nhận phòng</label>
-                <input asp-for="RequestData.CheckInDate" type="date" class="form-control" />
-            </div>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div asp-validation-summary="ModelOnly" class="d-inline"></div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-            <div class="form-group mb-3">
-                <label>Ngày trả phòng</label>
-                <input asp-for="RequestData.CheckOutDate" type="date" class="form-control" />
-            </div>
+    <form method="post">
+        <input type="hidden" asp-for="RequestData.CustomerId" />
+        <input type="hidden" asp-for="RequestData.RoomId" />
 
-            <div class="card mb-3">
-                <div class="card-header fw-bold">Chọn dịch vụ đi kèm</div>
-                <div class="card-body">
-                    @if (!Model.AvailableServices.Any())
-                    {
-                        <span class="text-muted">Hiện chưa có dịch vụ đang hoạt động.</span>
-                    }
-                    else
-                    {
-                        @foreach (var service in Model.AvailableServices)
+        <div class="row g-4 align-items-start">
+
+            <!-- ── Left column ── -->
+            <div class="col-lg-7">
+
+                <!-- Room info card (read-only) -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        <div class="bg-primary p-4 d-flex justify-content-between align-items-start">
+                            <div class="text-white">
+                                <div class="text-white-50 small mb-1" style="font-size:.65rem;text-transform:uppercase;letter-spacing:.07em">
+                                    <i class="bi bi-door-open me-1"></i>Phòng đã chọn
+                                </div>
+                                <div class="fw-bold fs-4 lh-1">@Model.SelectedRoom!.RoomNumber</div>
+                                <div class="text-white-50 small mt-1">@Model.SelectedRoom.RoomType</div>
+                            </div>
+                            <a asp-page="/Rooms" class="btn btn-light btn-sm rounded-pill fw-semibold">
+                                <i class="bi bi-arrow-left me-1"></i>Đổi phòng
+                            </a>
+                        </div>
+                        <div class="d-flex border-top">
+                            <div class="flex-fill text-center py-3 border-end">
+                                <i class="bi bi-people-fill text-primary d-block mb-1"></i>
+                                <div class="fw-semibold small">@Model.SelectedRoom.Capacity người</div>
+                                <div class="text-muted" style="font-size:.65rem">Sức chứa</div>
+                            </div>
+                            <div class="flex-fill text-center py-3">
+                                <i class="bi bi-moon-stars-fill text-warning d-block mb-1"></i>
+                                <div class="fw-bold text-primary small">@Model.SelectedRoom.BasePrice.ToString("N0") ₫</div>
+                                <div class="text-muted" style="font-size:.65rem">Mỗi đêm</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                        <!-- Dates card -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+                                <p class="fw-bold text-uppercase text-muted ls-wide mb-3" style="font-size:.7rem">
+                                    <i class="bi bi-calendar3 me-1"></i> Ngày lưu trú
+                                </p>
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-semibold small">Ngày nhận phòng</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0 rounded-start-3">
+                                                <i class="bi bi-calendar-event text-muted"></i>
+                                            </span>
+                                            <input asp-for="RequestData.CheckInDate"
+                                                   id="checkInInput"
+                                                   type="date"
+                                                   class="form-control border-start-0 rounded-end-3" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label fw-semibold small">Ngày trả phòng</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0 rounded-start-3">
+                                                <i class="bi bi-calendar-x text-muted"></i>
+                                            </span>
+                                            <input asp-for="RequestData.CheckOutDate"
+                                                   id="checkOutInput"
+                                                   type="date"
+                                                   class="form-control border-start-0 rounded-end-3" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <p class="fw-bold text-uppercase text-muted ls-wide mb-1" style="font-size:.7rem">
+                            <i class="bi bi-stars me-1"></i> Dịch vụ đi kèm
+                        </p>
+                        <p class="text-muted small mb-3">Tùy chọn — Chọn một hoặc nhiều dịch vụ bổ sung.</p>
+
+                        @if (!Model.AvailableServices.Any())
                         {
-                            <div class="form-check mb-2">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="RequestData.SelectedServiceIds"
-                                       value="@service.Id"
-                                       id="service_@service.Id"
-                                       @(Model.RequestData.SelectedServiceIds.Contains(service.Id) ? "checked" : null) />
-                                <label class="form-check-label" for="service_@service.Id">
-                                    @service.Name - <strong>@service.Price.ToString("N0") VND</strong>
-                                </label>
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                                <span class="small">Hiện chưa có dịch vụ đang hoạt động.</span>
                             </div>
                         }
-                    }
+                        else
+                        {
+                            <div class="row g-2">
+                                @foreach (var service in Model.AvailableServices)
+                                {
+                                    <div class="col-sm-6 service-card">
+                                        <input class="btn-check"
+                                               type="checkbox"
+                                               name="RequestData.SelectedServiceIds"
+                                               value="@service.Id"
+                                               id="svc_@service.Id"
+                                               autocomplete="off"
+                                               @(Model.RequestData.SelectedServiceIds.Contains(service.Id) ? "checked" : null) />
+                                        <label class="btn btn-outline-primary w-100 text-start rounded-3 p-3 service-label" for="svc_@service.Id">
+                                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                                <span class="fw-semibold small">@service.Name</span>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle svc-badge" style="white-space:nowrap">
+                                                    @service.Price.ToString("N0") ₫
+                                                </span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── Right column: sticky summary ── -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow rounded-4 sticky-top" style="top:1.25rem">
+
+                    <div class="card-header summary-header text-white rounded-top-4 border-0 p-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-receipt fs-5"></i>
+                            <span class="fw-bold">Tóm tắt đặt phòng</span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+
+                            <li class="list-group-item px-4 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="summary-icon rounded-circle bg-light d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-person-fill text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted ls-wide" style="font-size:.65rem;text-transform:uppercase">Khách hàng</div>
+                                        <div class="fw-semibold small">@(string.IsNullOrEmpty(Model.CustomerName) ? "—" : Model.CustomerName)</div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="list-group-item px-4 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="summary-icon rounded-circle bg-light d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-door-open-fill text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted ls-wide" style="font-size:.65rem;text-transform:uppercase">Phòng số</div>
+                                        <div class="fw-semibold small">
+                                            @(Model.SelectedRoom != null
+                                                ? $"{Model.SelectedRoom.RoomNumber} — {Model.SelectedRoom.RoomType}"
+                                                : "—")
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="list-group-item px-4 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="summary-icon rounded-circle bg-light d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-calendar2-check-fill text-success"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted ls-wide" style="font-size:.65rem;text-transform:uppercase">Nhận phòng</div>
+                                        <div class="fw-semibold small" id="summaryCheckIn">—</div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="list-group-item px-4 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="summary-icon rounded-circle bg-light d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-calendar2-x-fill text-danger"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted ls-wide" style="font-size:.65rem;text-transform:uppercase">Trả phòng</div>
+                                        <div class="fw-semibold small" id="summaryCheckOut">—</div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="list-group-item px-4 py-3 bg-light rounded-bottom-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="summary-icon rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-moon-stars-fill text-warning"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted ls-wide" style="font-size:.65rem;text-transform:uppercase">Số đêm lưu trú</div>
+                                        <div class="fw-bold" id="summaryNights">—</div>
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                    <div class="card-footer bg-white border-0 p-4 rounded-bottom-4">
+                        <button type="submit" class="btn btn-dark w-100 py-2 fw-bold rounded-3">
+                            <i class="bi bi-check2-circle me-2"></i>Xác nhận đặt phòng
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
-            <div class="form-group mt-3">
-                <button type="submit" class="btn btn-primary">Xác nhận đặt phòng</button>
-            </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
+
+@section Scripts {
+<script>
+    const checkInInput  = document.getElementById('checkInInput');
+    const checkOutInput = document.getElementById('checkOutInput');
+
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    if (checkInInput)  checkInInput.min  = today;
+    if (checkOutInput) checkOutInput.min = today;
+
+    function fmtDate(val) {
+        if (!val) return '—';
+        const [y, m, d] = val.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    function updateSummary() {
+        document.getElementById('summaryCheckIn').textContent  = fmtDate(checkInInput?.value);
+        document.getElementById('summaryCheckOut').textContent = fmtDate(checkOutInput?.value);
+
+        const nights = (checkInInput?.value && checkOutInput?.value)
+            ? Math.max(0, Math.round((new Date(checkOutInput.value) - new Date(checkInInput.value)) / 86400000))
+            : 0;
+        document.getElementById('summaryNights').textContent = nights > 0 ? `${nights} đêm` : '—';
+
+        // Keep check-out min in sync with check-in
+        if (checkInInput?.value && checkOutInput) {
+            checkOutInput.min = checkInInput.value;
+        }
+    }
+
+    checkInInput?.addEventListener('change', updateSummary);
+    checkOutInput?.addEventListener('change', updateSummary);
+
+    updateSummary();
+</script>
+}
