@@ -19,6 +19,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR();
 
 // 3. Đăng ký các Business Services
 builder.Services.AddScoped<BookingService>();
@@ -106,6 +107,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapHub<HotelManagementSystem.Web.Hubs.NotificationHub>("/notificationHub");
 
 app.MapPost("/api/momo-ipn", async (HttpContext context, BookingService bookingService, MoMoService momoService) =>
 {

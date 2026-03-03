@@ -1,5 +1,6 @@
 ﻿using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelManagementSystem.Business
@@ -7,7 +8,32 @@ namespace HotelManagementSystem.Business
     public class NotificationService
     {
         private readonly HotelManagementDbContext _context;
-        public NotificationService(HotelManagementDbContext context) => _context = context;
+        private readonly IHubContext<Hub> _hubContext;
+
+        public NotificationService(HotelManagementDbContext context, IHubContext<Hub> hubContext)
+        {
+            _context = context;
+            _hubContext = hubContext;
+        }
+
+        public async Task CreateAndSendNotificationAsync(Notification notification, bool toAdminGroup = false)
+        {
+            notification.CreatedAt = DateTime.Now;
+            notification.IsRead = false;
+
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+
+            // Broadcast real-time notification
+            if (toAdminGroup)
+            {
+                await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", notification.Message);
+            }
+            else if (notification.RecipientId.HasValue)
+            {
+                await _hubContext.Clients.User(notification.RecipientId.Value.ToString()).SendAsync("ReceiveNotification", notification.Message);
+            }
+        }
 
         // Lấy số lượng thông báo chưa đọc của một User
         public async Task<int> GetUnreadCount(int userId)

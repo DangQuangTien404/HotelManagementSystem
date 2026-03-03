@@ -7,7 +7,13 @@ namespace HotelManagementSystem.Business
     public class MaintenanceService
     {
         private readonly HotelManagementDbContext _context;
-        public MaintenanceService(HotelManagementDbContext context) => _context = context;
+        private readonly NotificationService _notificationService;
+
+        public MaintenanceService(HotelManagementDbContext context, NotificationService notificationService)
+        {
+            _context = context;
+            _notificationService = notificationService;
+        }
 
         // Lấy danh sách nhân viên kỹ thuật từ bảng Staff
         public async Task<List<Staff>> GetTechnicalStaff()
@@ -53,7 +59,7 @@ namespace HotelManagementSystem.Business
                     CreatedAt = DateTime.Now,
                     IsRead = false
                 };
-                _context.Notifications.Add(notification);
+                await _notificationService.CreateAndSendNotificationAsync(notification, toAdminGroup: false);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

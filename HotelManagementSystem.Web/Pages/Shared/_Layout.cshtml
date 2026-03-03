@@ -50,10 +50,12 @@
             color: #000;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 </head>
 @using System.Security.Claims
 @using Microsoft.EntityFrameworkCore
 @inject HotelManagementSystem.Data.Context.HotelManagementDbContext DbContext
+@inject HotelManagementSystem.Business.NotificationService NotificationSvc
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3 shadow-sm">
@@ -167,6 +169,43 @@
                     <div class="navbar-nav align-items-center">
                         @if (User.Identity.IsAuthenticated)
                         {
+                            var userIdValueNav = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                            var isUserIdParsedNav = int.TryParse(userIdValueNav, out var currentUserIdNav);
+                            int unreadCount = isUserIdParsedNav ? await NotificationSvc.GetUnreadCount(currentUserIdNav) : 0;
+                            var latestNotifs = isUserIdParsedNav ? await NotificationSvc.GetLatestNotifications(currentUserIdNav) : new List<HotelManagementSystem.Data.Models.Notification>();
+
+                            @if (User.IsInRole("Admin") || User.IsInRole("Staff") || User.IsInRole("Technician"))
+                            {
+                                <div class="nav-item dropdown ms-2">
+                                    <a class="nav-link text-white position-relative" href="#" id="notificationDropdown" data-bs-toggle="dropdown">
+                                        <i class="bi bi-bell-fill fs-5"></i>
+                                        <span id="notificationBadge" class="position-absolute top-10 start-100 translate-middle badge rounded-pill bg-danger" style="display: @(unreadCount > 0 ? "inline-block" : "none")">
+                                            @unreadCount
+                                        </span>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow" id="notificationList" style="width: 300px;">
+                                        <li><h6 class="dropdown-header">Thông báo gần đây</h6></li>
+                                        @if (latestNotifs.Any())
+                                        {
+                                            @foreach (var notif in latestNotifs)
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item text-wrap @(notif.IsRead ? "" : "fw-bold")" href="#">
+                                                        <small>@notif.Message</small>
+                                                        <br/>
+                                                        <small class="text-muted">@notif.CreatedAt.ToString("g")</small>
+                                                    </a>
+                                                </li>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <li><span class="dropdown-item text-muted">Không có thông báo mới.</span></li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+
                             <div class="nav-item dropdown ms-2">
                                 <a class="nav-link dropdown-toggle text-white px-3 border-start border-secondary" href="#" id="userDropdown" data-bs-toggle="dropdown">
                                     <i class="bi bi-person-circle fs-5"></i>
@@ -214,7 +253,15 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script src="~/js/signalr/dist/browser/signalr.js"></script>
+        <script src="~/js/notifications.js"></script>
+    }
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

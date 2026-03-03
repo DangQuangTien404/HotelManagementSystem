@@ -8,10 +8,12 @@ namespace HotelManagementSystem.Business
     public class BookingService
     {
         private readonly HotelManagementDbContext _context;
+        private readonly NotificationService _notificationService;
 
-        public BookingService(HotelManagementDbContext context)
+        public BookingService(HotelManagementDbContext context, NotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<List<HotelService>> GetAvailableServicesAsync()
@@ -77,6 +79,17 @@ namespace HotelManagementSystem.Business
                 });
 
                 await _context.SaveChangesAsync();
+
+                // Notify Admin
+                await _notificationService.CreateAndSendNotificationAsync(new Notification
+                {
+                    Message = $"Đơn đặt phòng mới (VietQR): Phòng {room.RoomNumber}",
+                    SenderName = "Hệ thống",
+                    SenderType = "System",
+                    RecipientType = "Admin",
+                    IsAnnouncement = true
+                }, toAdminGroup: true);
+
                 await transaction.CommitAsync();
                 return true;
             }
@@ -170,6 +183,20 @@ namespace HotelManagementSystem.Business
             payment.Reservation.Status = "Confirmed";
 
             await _context.SaveChangesAsync();
+
+            var room = await _context.Rooms.FindAsync(payment.Reservation.RoomId);
+            string roomNumber = room?.RoomNumber ?? payment.Reservation.RoomId.ToString();
+
+            // Notify Admin
+            await _notificationService.CreateAndSendNotificationAsync(new Notification
+            {
+                Message = $"Đơn đặt phòng mới đã thanh toán MoMo: Phòng {roomNumber}",
+                SenderName = "Hệ thống",
+                SenderType = "System",
+                RecipientType = "Admin",
+                IsAnnouncement = true
+            }, toAdminGroup: true);
+
             return true;
         }
 
