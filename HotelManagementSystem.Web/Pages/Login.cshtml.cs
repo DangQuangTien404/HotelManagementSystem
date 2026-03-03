@@ -54,6 +54,11 @@ namespace HotelManagementSystem.Web.Pages
                 return RedirectToPage("/Staffs/MaintenanceTasks");
             }
 
+            if (user.Role == "Customer")
+            {
+                return RedirectToPage("/Booking");
+            }
+
             return RedirectToPage("/Index");
         }
     }

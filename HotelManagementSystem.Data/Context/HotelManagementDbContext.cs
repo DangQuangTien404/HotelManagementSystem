@@ -97,6 +97,15 @@ public partial class HotelManagementDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
+        // 7. Cấu hình Customer-User relationship
+        modelBuilder.Entity<Customer>(entity =>
+        {
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 

@@ -43,5 +43,36 @@ namespace HotelManagementSystem.Business
                 return false;
             }
         }
+
+        public async Task<bool> RegisterCustomer(User newUser, Customer customer)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // 1. Kiểm tra username tồn tại chưa
+                if (await _context.Users.AnyAsync(u => u.Username == newUser.Username))
+                    return false;
+
+                // 2. Lưu User với role "Customer"
+                newUser.Role = "Customer";
+                newUser.CreatedAt = DateTime.Now;
+                _context.Users.Add(newUser);
+                await _context.SaveChangesAsync();
+
+                // 3. Lưu thông tin Customer liên kết với User vừa tạo
+                customer.UserId = newUser.Id;
+                customer.CreatedAt = DateTime.Now;
+                _context.Customers.Add(customer);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return true;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return false;
+            }
+        }
     }
 }
