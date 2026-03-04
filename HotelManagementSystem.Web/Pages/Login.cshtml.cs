@@ -59,6 +59,11 @@ namespace HotelManagementSystem.Web.Pages
                 return RedirectToPage("/Rooms");
             }
 
+            if (user.Role == "Admin")
+            {
+                return RedirectToPage("/Admin/DailyCheckins");
+            }
+
             return RedirectToPage("/Index");
         }
     }

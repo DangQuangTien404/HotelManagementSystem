@@ -315,10 +315,7 @@ namespace HotelManagementSystem.Business
         private static decimal CalculateTotal(
             Room room, BookingRequest request, Dictionary<int, decimal> servicePrices)
         {
-            var nights = Math.Max(1, (request.CheckOutDate - request.CheckInDate).Days);
-            var roomTotal = room.BasePrice * nights;
-            var serviceTotal = servicePrices.Values.Sum();
-            return roomTotal + serviceTotal;
+            return room.BasePrice; // deposit: 1 night only
         }
     }
 }

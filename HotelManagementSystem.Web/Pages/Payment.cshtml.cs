@@ -28,6 +28,7 @@ namespace HotelManagementSystem.Web.Pages
         public decimal RoomTotal { get; set; }
         public decimal ServiceTotal { get; set; }
         public decimal TotalPrice { get; set; }
+        public decimal DepositAmount { get; set; }
         public int Nights { get; set; }
         public string VietQrUrl { get; set; } = string.Empty;
 
@@ -98,7 +99,7 @@ namespace HotelManagementSystem.Web.Pages
 
             CalculateTotal();
 
-            var pendingResult = await _service.CreatePendingBookingAsync(RequestData, TotalPrice);
+            var pendingResult = await _service.CreatePendingBookingAsync(RequestData, DepositAmount);
             if (pendingResult == null)
             {
                 BuildVietQrUrl();
@@ -116,7 +117,7 @@ namespace HotelManagementSystem.Web.Pages
             var ipnUrl = $"{baseUrl}{ipnPath}";
 
             var orderInfo = $"Thanh toan phong {SelectedRoom!.RoomNumber}";
-            var amount = (long)TotalPrice;
+            var amount = (long)DepositAmount;
 
             var momoResponse = await _momoService.CreatePaymentAsync(
                 orderId, orderInfo, amount, redirectUrl, ipnUrl);
@@ -158,6 +159,7 @@ namespace HotelManagementSystem.Web.Pages
             RoomTotal = (SelectedRoom?.BasePrice ?? 0) * Nights;
             ServiceTotal = SelectedServices.Sum(s => s.Price);
             TotalPrice = RoomTotal + ServiceTotal;
+            DepositAmount = SelectedRoom?.BasePrice ?? 0; // 1-night deposit charged at booking
         }
 
         private void BuildVietQrUrl()
@@ -168,7 +170,7 @@ namespace HotelManagementSystem.Web.Pages
             var template = _configuration["VietQR:Template"] ?? "compact2";
 
             var description = $"Thanh toan phong {SelectedRoom?.RoomNumber}";
-            var amount = (long)TotalPrice;
+            var amount = (long)DepositAmount;
 
             VietQrUrl = $"https://img.vietqr.io/image/{bankId}-{accountNo}-{template}.png"
                       + $"?amount={amount}&addInfo={Uri.EscapeDataString(description)}&accountName={Uri.EscapeDataString(accountName)}";

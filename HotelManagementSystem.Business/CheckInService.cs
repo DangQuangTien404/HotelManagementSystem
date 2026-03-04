@@ -7,7 +7,13 @@ namespace HotelManagementSystem.Business
     public class CheckInService
     {
         private readonly HotelManagementDbContext _context;
-        public CheckInService(HotelManagementDbContext context) => _context = context;
+        private readonly IRoomUpdateBroadcaster _broadcaster;
+
+        public CheckInService(HotelManagementDbContext context, IRoomUpdateBroadcaster broadcaster)
+        {
+            _context = context;
+            _broadcaster = broadcaster;
+        }
 
         // Thêm tham số staffId vào đây
         public async Task<bool> ExecuteCheckIn(int reservationId, int staffId)
@@ -35,6 +41,10 @@ namespace HotelManagementSystem.Business
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                if (res.Room != null)
+                    await _broadcaster.BroadcastRoomStatusAsync(res.Room.Id, res.Room.RoomNumber, "Occupied");
+
                 return true;
             }
             catch

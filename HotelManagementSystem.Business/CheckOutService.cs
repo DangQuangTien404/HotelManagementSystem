@@ -7,7 +7,13 @@ namespace HotelManagementSystem.Business
     public class CheckOutService
     {
         private readonly HotelManagementDbContext _context;
-        public CheckOutService(HotelManagementDbContext context) => _context = context;
+        private readonly IRoomUpdateBroadcaster _broadcaster;
+
+        public CheckOutService(HotelManagementDbContext context, IRoomUpdateBroadcaster broadcaster)
+        {
+            _context = context;
+            _broadcaster = broadcaster;
+        }
 
         // Thêm tham số staffId vào đây
         public async Task<bool> ExecuteCheckOut(int reservationId, int staffId)
@@ -50,13 +56,39 @@ namespace HotelManagementSystem.Business
                     .Where(s => s.ReservationId == reservationId)
                     .SumAsync(s => s.Quantity * s.UnitPrice);
 
-                checkInfo.TotalAmount = roomAmount + serviceAmount;
+                var totalAmount = roomAmount + serviceAmount;
+                checkInfo.TotalAmount = totalAmount;
+
+                var depositPaid = await _context.Payments
+                    .Where(p => p.ReservationId == reservationId && p.Status == "Completed")
+                    .SumAsync(p => p.Amount);
+
+                var remainingBalance = Math.Max(0, totalAmount - depositPaid);
+                if (remainingBalance > 0)
+                {
+                    _context.Payments.Add(new Payment
+                    {
+                        ReservationId = reservationId,
+                        PaymentMethod = "Cash",
+                        OrderId = $"CHECKOUT_{reservationId}_{DateTime.Now:yyyyMMddHHmmss}",
+                        Amount = remainingBalance,
+                        Status = "Completed",
+                        CreatedAt = DateTime.Now,
+                        CompletedAt = DateTime.Now
+                    });
+                }
 
                 checkInfo.Reservation.Status = "Completed";
                 checkInfo.Reservation.Room.Status = "Available";
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                await _broadcaster.BroadcastRoomStatusAsync(
+                    checkInfo.Reservation.Room.Id,
+                    checkInfo.Reservation.Room.RoomNumber,
+                    "Available");
+
                 return true;
             }
             catch

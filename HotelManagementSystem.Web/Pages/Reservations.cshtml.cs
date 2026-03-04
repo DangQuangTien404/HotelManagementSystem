@@ -33,8 +33,9 @@ namespace HotelManagementSystem.Web.Pages
             Reservations = await _context.Reservations
                 .Include(r => r.Room)
                 .Include(r => r.Customer)
-                .Where(r => r.Status == "Confirmed" || r.Status == "CheckedIn" || r.Status == "PendingPayment")
+                .Where(r => r.Status == "Confirmed" || r.Status == "CheckedIn")
                 .OrderBy(r => r.CheckInDate)
+                .ThenBy(r => r.CheckOutDate)
                 .ToListAsync();
         }
 
@@ -63,12 +64,18 @@ namespace HotelManagementSystem.Web.Pages
 
             int staffId = int.Parse(staffIdClaim);
 
+            var roomId = await _context.Reservations
+                .Where(r => r.Id == id)
+                .Select(r => r.RoomId)
+                .FirstOrDefaultAsync();
+
             // Thực hiện Check-out với ID nhân viên
             var success = await _checkOutService.ExecuteCheckOut(id, staffId);
 
-            if (success) TempData["Message"] = "Check-out và thanh toán thành công!";
-            else TempData["Error"] = "Lỗi trong quá trình thanh toán.";
+            if (success)
+                return RedirectToPage("/Admin/AssignCleaning", new { roomId });
 
+            TempData["Error"] = "Lỗi trong quá trình thanh toán.";
             return RedirectToPage();
         }
     }

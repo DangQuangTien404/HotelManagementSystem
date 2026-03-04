@@ -1,0 +1,290 @@
+@page
+@model HotelManagementSystem.Web.Pages.Admin.DailyCheckinsModel
+@{
+    ViewData["Title"] = "Check-in hàng ngày";
+    var isToday = Model.Date.Date == DateTime.Today;
+    var noShowDeadline = Model.Date.Date.AddDays(1).AddHours(14);
+    var deadlinePassed = DateTime.Now >= noShowDeadline;
+}
+
+<div class="container-fluid py-4 px-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-calendar2-check me-2 text-primary"></i>Danh sách check-in
+                @if (isToday)
+                {
+                    <span class="badge bg-primary ms-2" style="font-size:.6rem;vertical-align:middle">HÔM NAY</span>
+                }
+            </h4>
+            <p class="text-muted small mb-0">
+                Ngày check-in: <strong>@Model.Date.ToString("dd/MM/yyyy")</strong>
+                — No-show sau <strong>14:00 ngày @noShowDeadline.ToString("dd/MM/yyyy")</strong>
+            </p>
+        </div>
+        <a asp-page="/Reservations" class="btn btn-outline-secondary btn-sm rounded-3">
+            <i class="bi bi-list-check me-1"></i>Quản lý lưu trú
+        </a>
+    </div>
+
+    <!-- Alerts -->
+    @if (Model.AutoMarkedCount > 0)
+    {
+        <div class="alert alert-warning border-0 shadow-sm rounded-3 d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="bi bi-clock-history fs-5 text-warning"></i>
+            <div>Hệ thống đã tự động đánh dấu <strong>@Model.AutoMarkedCount đặt phòng</strong> là vắng mặt (no-show) do quá hạn check-in.</div>
+        </div>
+    }
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm rounded-3 d-flex align-items-center gap-2 mb-4 alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            <div>@TempData["Message"]</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger border-0 shadow-sm rounded-3 d-flex align-items-center gap-2 mb-4 alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+            <div>@TempData["Error"]</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Summary cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="border-left:4px solid #0d6efd!important">
+                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.65rem;letter-spacing:.06em">
+                    <i class="bi bi-hourglass-split me-1 text-primary"></i>Chờ check-in
+                </div>
+                <div class="fw-bold fs-3 text-primary">@Model.PendingCount</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="border-left:4px solid #198754!important">
+                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.65rem;letter-spacing:.06em">
+                    <i class="bi bi-door-open me-1 text-success"></i>Đã check-in
+                </div>
+                <div class="fw-bold fs-3 text-success">@Model.CheckedInCount</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 h-100" style="border-left:4px solid #dc3545!important">
+                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.65rem;letter-spacing:.06em">
+                    <i class="bi bi-person-x me-1 text-danger"></i>Vắng mặt (No-show)
+                </div>
+                <div class="fw-bold fs-3 text-danger">@Model.NoShowCount</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-sm-auto">
+                    <label class="form-label small fw-semibold mb-1">Ngày</label>
+                    <input type="date" name="Date" class="form-control form-control-sm rounded-3"
+                           value="@Model.Date.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-sm">
+                    <label class="form-label small fw-semibold mb-1">Tìm kiếm</label>
+                    <input type="text" name="Search" class="form-control form-control-sm rounded-3"
+                           placeholder="Tên khách, số phòng, số điện thoại..."
+                           value="@Model.Search" />
+                </div>
+                <div class="col-sm-auto">
+                    <label class="form-label small fw-semibold mb-1">Trạng thái</label>
+                    <select name="StatusFilter" class="form-select form-select-sm rounded-3">
+                        <option value="All" selected="@((string.IsNullOrEmpty(Model.StatusFilter) || Model.StatusFilter == "All") ? "selected" : null)">Tất cả</option>
+                        <option value="Confirmed" selected="@(Model.StatusFilter == "Confirmed" ? "selected" : null)">Chờ check-in</option>
+                        <option value="CheckedIn" selected="@(Model.StatusFilter == "CheckedIn" ? "selected" : null)">Đã check-in</option>
+                        <option value="NoShow" selected="@(Model.StatusFilter == "NoShow" ? "selected" : null)">Vắng mặt</option>
+                    </select>
+                </div>
+                <div class="col-sm-auto">
+                    <label class="form-label small fw-semibold mb-1">Loại phòng</label>
+                    <select name="RoomTypeFilter" class="form-select form-select-sm rounded-3">
+                        <option value="All" selected="@((string.IsNullOrEmpty(Model.RoomTypeFilter) || Model.RoomTypeFilter == "All") ? "selected" : null)">Tất cả</option>
+                        @foreach (var rt in Model.RoomTypes)
+                        {
+                            <option value="@rt" selected="@(Model.RoomTypeFilter == rt ? "selected" : null)">@rt</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-auto">
+                    <button type="submit" class="btn btn-primary btn-sm rounded-3 px-3">
+                        <i class="bi bi-search me-1"></i>Lọc
+                    </button>
+                    @if (!isToday)
+                    {
+                        <a asp-page="/Admin/DailyCheckins" class="btn btn-outline-primary btn-sm rounded-3 ms-1">
+                            <i class="bi bi-calendar-day me-1"></i>Hôm nay
+                        </a>
+                    }
+                    <a asp-page="/Admin/DailyCheckins" asp-route-Date="@Model.Date.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm rounded-3 ms-1">
+                        <i class="bi bi-x-lg me-1"></i>Xóa lọc
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reservation table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
+            <div class="fw-bold">
+                <i class="bi bi-table me-2 text-primary"></i>Danh sách đặt phòng
+                <span class="badge bg-secondary rounded-pill ms-2">@Model.Reservations.Count</span>
+            </div>
+            @if (deadlinePassed && isToday)
+            {
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2">
+                    <i class="bi bi-clock-fill me-1"></i>Đã qua hạn no-show (14:00 hôm nay)
+                </span>
+            }
+        </div>
+
+        @if (!Model.Reservations.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar-x d-block fs-1 mb-3 opacity-50"></i>
+                <div class="fw-semibold">Không có đặt phòng nào phù hợp</div>
+                <div class="small">Thử thay đổi ngày hoặc xóa bộ lọc</div>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light text-uppercase" style="font-size:.65rem;letter-spacing:.05em">
+                        <tr>
+                            <th class="ps-4">Phòng</th>
+                            <th>Khách hàng</th>
+                            <th>Liên hệ</th>
+                            <th>Nhận phòng</th>
+                            <th>Trả phòng</th>
+                            <th>Giờ check-in</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end pe-4">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var res in Model.Reservations)
+                        {
+                            var rowClass = res.Status switch
+                            {
+                                "NoShow" => "table-danger",
+                                "CheckedIn" => "table-success",
+                                _ => ""
+                            };
+                            var resNoShowDeadline = res.CheckInDate.Date.AddDays(1).AddHours(14);
+                            var isOverdue = DateTime.Now >= resNoShowDeadline && res.Status == "Confirmed";
+
+                            <tr class="@rowClass">
+                                <td class="ps-4">
+                                    <span class="fw-bold text-primary">@res.Room.RoomNumber</span>
+                                    <div class="text-muted" style="font-size:.7rem">@res.Room.RoomType</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@res.Customer.FullName</div>
+                                    <div class="text-muted" style="font-size:.7rem">CCCD: @res.Customer.IdentityNumber</div>
+                                </td>
+                                <td class="text-muted">@res.Customer.Phone</td>
+                                <td>@res.CheckInDate.ToString("dd/MM/yyyy")</td>
+                                <td>@res.CheckOutDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @{
+                                        var checkInEntry = res.CheckInOuts.FirstOrDefault(c => c.CheckInTime.HasValue);
+                                    }
+                                    @if (checkInEntry != null)
+                                    {
+                                        <span class="text-success fw-semibold">@checkInEntry.CheckInTime!.Value.ToString("HH:mm")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (res.Status == "Confirmed")
+                                    {
+                                        if (isOverdue)
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-clock-history me-1"></i>Quá hạn
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-hourglass-split me-1"></i>Chờ check-in
+                                            </span>
+                                        }
+                                    }
+                                    else if (res.Status == "CheckedIn")
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-door-open me-1"></i>Đang ở
+                                        </span>
+                                    }
+                                    else if (res.Status == "NoShow")
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-person-x me-1"></i>Vắng mặt
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@res.Status</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (res.Status == "Confirmed")
+                                    {
+                                        <form method="post" asp-page-handler="CheckIn" asp-route-id="@res.Id"
+                                              asp-route-Date="@Model.Date.ToString("yyyy-MM-dd")"
+                                              asp-route-Search="@Model.Search"
+                                              asp-route-StatusFilter="@Model.StatusFilter"
+                                              asp-route-RoomTypeFilter="@Model.RoomTypeFilter"
+                                              class="d-inline">
+                                            <button type="submit" class="btn btn-primary btn-sm rounded-3 px-3">
+                                                <i class="bi bi-box-arrow-in-right me-1"></i>Check-in
+                                            </button>
+                                        </form>
+                                        <form method="post" asp-page-handler="MarkNoShow" asp-route-id="@res.Id"
+                                              asp-route-Date="@Model.Date.ToString("yyyy-MM-dd")"
+                                              asp-route-Search="@Model.Search"
+                                              asp-route-StatusFilter="@Model.StatusFilter"
+                                              asp-route-RoomTypeFilter="@Model.RoomTypeFilter"
+                                              class="d-inline ms-1"
+                                              onsubmit="return confirm('Đánh dấu khách #@res.Id là vắng mặt (no-show)?\nPhòng @res.Room.RoomNumber sẽ trở về trạng thái trống.')">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-3 px-3">
+                                                <i class="bi bi-person-x me-1"></i>No-show
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (res.Status == "CheckedIn")
+                                    {
+                                        <a asp-page="/Reservations" class="btn btn-outline-success btn-sm rounded-3 px-3">
+                                            <i class="bi bi-box-arrow-right me-1"></i>Check-out
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">—</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+</div>

@@ -139,8 +139,23 @@
                     }
 
                     <div class="total-row">
-                        <span class="fw-bold">Tổng cộng</span>
-                        <span class="fw-bold text-primary fs-5">@Model.TotalPrice.ToString("N0") ₫</span>
+                        <span class="fw-bold">Tổng giá trị đặt phòng</span>
+                        <span class="fw-bold text-secondary fs-5">@Model.TotalPrice.ToString("N0") ₫</span>
+                    </div>
+
+                    <div class="mt-3 p-3 rounded-3" style="background:#fff8e1;border:1px solid #ffe082">
+                        <div class="price-row">
+                            <span class="fw-semibold small">
+                                <i class="bi bi-lock-fill text-warning me-1"></i>Thanh toán ngay (1 đêm đặt cọ)
+                            </span>
+                            <span class="fw-bold text-warning-emphasis">@Model.DepositAmount.ToString("N0") ₫</span>
+                        </div>
+                        <div class="price-row mb-0">
+                            <span class="text-muted small">
+                                <i class="bi bi-clock me-1"></i>Thanh toán khi trả phòng
+                            </span>
+                            <span class="text-muted small">@((Model.TotalPrice - Model.DepositAmount).ToString("N0")) ₫</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -206,8 +221,8 @@
                             </div>
 
                             <div class="bg-light rounded-3 p-3 mb-3">
-                                <div class="text-muted ls-wide" style="font-size:.6rem;text-transform:uppercase">Số tiền thanh toán</div>
-                                <div class="fw-bold text-primary fs-4">@Model.TotalPrice.ToString("N0") ₫</div>
+                                <div class="text-muted ls-wide" style="font-size:.6rem;text-transform:uppercase">Số tiền đặt cọ (1 đêm)</div>
+                                <div class="fw-bold text-primary fs-4">@Model.DepositAmount.ToString("N0") ₫</div>
                             </div>
                         </div>
 
@@ -253,8 +268,8 @@
                             </div>
 
                             <div class="bg-light rounded-3 p-3 mb-3">
-                                <div class="text-muted ls-wide" style="font-size:.6rem;text-transform:uppercase">Số tiền thanh toán</div>
-                                <div class="fw-bold text-danger fs-4">@Model.TotalPrice.ToString("N0") ₫</div>
+                                <div class="text-muted ls-wide" style="font-size:.6rem;text-transform:uppercase">Số tiền đặt cọ (1 đêm)</div>
+                                <div class="fw-bold text-danger fs-4">@Model.DepositAmount.ToString("N0") ₫</div>
                             </div>
 
                             <div class="bg-info-subtle border border-info-subtle rounded-3 p-3 mb-3 text-start">

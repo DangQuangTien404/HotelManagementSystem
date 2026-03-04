@@ -7,8 +7,13 @@ namespace HotelManagementSystem.Business
     public class RoomService
     {
         private readonly HotelManagementDbContext _context;
+        private readonly IRoomUpdateBroadcaster _broadcaster;
 
-        public RoomService(HotelManagementDbContext context) => _context = context;
+        public RoomService(HotelManagementDbContext context, IRoomUpdateBroadcaster broadcaster)
+        {
+            _context = context;
+            _broadcaster = broadcaster;
+        }
 
         // Lấy toàn bộ danh sách phòng để hiển thị lên Dashboard
         public async Task<List<Room>> GetAllRooms()
@@ -53,6 +58,7 @@ namespace HotelManagementSystem.Business
             }
 
             await _context.SaveChangesAsync();
+            await _broadcaster.BroadcastRoomStatusAsync(room.Id, room.RoomNumber, room.Status ?? "Available");
         }
     }
 }

@@ -114,7 +114,7 @@
         <div class="row g-4">
             @foreach (var room in Model.AvailableRooms)
             {
-                <div class="col-12 col-sm-6 col-xl-4">
+                <div class="col-12 col-sm-6 col-xl-4" data-room-id="@room.Id">
                     <div class="card border-0 shadow-sm rounded-4 h-100 room-card overflow-hidden">
 
                         <!-- Colored header strip -->
@@ -210,4 +210,38 @@
         "vip"      => "bi-crown-fill",
         _          => "bi-door-closed-fill"
     };
+}
+
+@section Scripts {
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script>
+"use strict";
+(function () {
+    const roomConnection = new signalR.HubConnectionBuilder()
+        .withUrl("/roomHub")
+        .withAutomaticReconnect()
+        .build();
+
+    roomConnection.on("RoomStatusUpdated", function (room) {
+        const card = document.querySelector(`[data-room-id="${room.id}"]`);
+        if (room.status !== "Available") {
+            if (card) {
+                card.remove();
+                const countEl = document.querySelector("strong");
+                if (countEl) {
+                    const current = parseInt(countEl.textContent) || 0;
+                    if (current > 0) countEl.textContent = current - 1;
+                }
+                toastr.warning(`Phòng ${room.roomNumber} vừa được đặt.`, "Cập nhật phòng");
+            }
+        } else {
+            if (!card) {
+                toastr.info(`Phòng ${room.roomNumber} vừa trở thành trống. Làm mới trang để xem.`, "Cập nhật phòng");
+            }
+        }
+    });
+
+    roomConnection.start().catch(err => console.error("RoomHub error:", err));
+}());
+</script>
 }

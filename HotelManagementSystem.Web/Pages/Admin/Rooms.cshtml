@@ -27,7 +27,7 @@
                 <tbody>
                     @foreach (var room in Model.Rooms)
                     {
-                        <tr>
+                        <tr data-room-id="@room.Id">
                             <td class="fw-bold fs-5">@room.RoomNumber</td>
                             <td><span class="badge bg-info text-dark">@room.RoomType</span></td>
                             <td class="text-primary fw-bold">@room.BasePrice.ToString("N0")</td>
@@ -78,3 +78,31 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script>
+"use strict";
+(function () {
+    const roomConnection = new signalR.HubConnectionBuilder()
+        .withUrl("/roomHub")
+        .withAutomaticReconnect()
+        .build();
+
+    roomConnection.on("RoomStatusUpdated", function (room) {
+        const row = document.querySelector(`tr[data-room-id="${room.id}"]`);
+        if (!row) return;
+        const badge = row.querySelector("td:nth-child(4) .badge");
+        if (!badge) return;
+        if (room.status === "Available") {
+            badge.className = "badge bg-success";
+        } else {
+            badge.className = "badge bg-danger";
+        }
+        badge.textContent = room.status;
+    });
+
+    roomConnection.start().catch(err => console.error("RoomHub error:", err));
+}());
+</script>
+}
