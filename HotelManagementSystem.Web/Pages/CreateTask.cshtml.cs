@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using HotelManagementSystem.Business;
 using HotelManagementSystem.Data.Models;
 using System.Security.Claims;
+using HotelManagementSystem.Business.service;
 
 namespace HotelManagementSystem.Web.Pages.Maintenance
 {

@@ -2,7 +2,7 @@ using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace HotelManagementSystem.Business
+namespace HotelManagementSystem.Business.service
 {
     public class CleaningService
     {

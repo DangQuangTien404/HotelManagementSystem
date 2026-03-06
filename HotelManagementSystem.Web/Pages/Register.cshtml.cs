@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
-using HotelManagementSystem.Business;
+using HotelManagementSystem.Business.service;
 
 namespace HotelManagementSystem.Web.Pages
 {

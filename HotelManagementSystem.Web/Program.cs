@@ -1,4 +1,4 @@
-﻿using HotelManagementSystem.Business;
+﻿using HotelManagementSystem.Business.service;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -20,7 +20,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<HotelManagementSystem.Business.IRoomUpdateBroadcaster, HotelManagementSystem.Web.Services.RoomUpdateBroadcaster>();
+builder.Services.AddSingleton<IRoomUpdateBroadcaster, HotelManagementSystem.Web.Services.RoomUpdateBroadcaster>();
 
 // 3. Đăng ký các Business Services
 builder.Services.AddScoped<BookingService>();

@@ -1,4 +1,4 @@
-namespace HotelManagementSystem.Business
+namespace HotelManagementSystem.Business.service
 {
     public interface IRoomUpdateBroadcaster
     {

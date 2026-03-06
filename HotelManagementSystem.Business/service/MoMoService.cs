@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 
-namespace HotelManagementSystem.Business
+namespace HotelManagementSystem.Business.service
 {
     public class MoMoService
     {

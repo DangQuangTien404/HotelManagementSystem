@@ -1,4 +1,4 @@
-using HotelManagementSystem.Business;
+using HotelManagementSystem.Business.service;
 using HotelManagementSystem.Web.Hubs;
 using Microsoft.AspNetCore.SignalR;
 

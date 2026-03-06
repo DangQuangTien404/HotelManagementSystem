@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using HotelManagementSystem.Business;
 using System.Security.Claims;
+using HotelManagementSystem.Business.service;
 
 public class NotificationViewComponent : ViewComponent
 {

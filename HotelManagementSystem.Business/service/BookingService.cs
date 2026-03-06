@@ -3,7 +3,7 @@ using HotelManagementSystem.Data.Models;
 using HotelManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace HotelManagementSystem.Business
+namespace HotelManagementSystem.Business.service
 {
     public class BookingService
     {

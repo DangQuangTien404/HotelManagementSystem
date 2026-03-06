@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using HotelManagementSystem.Business;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using HotelManagementSystem.Business.service;
 
 namespace HotelManagementSystem.Web.Pages.Admin
 {

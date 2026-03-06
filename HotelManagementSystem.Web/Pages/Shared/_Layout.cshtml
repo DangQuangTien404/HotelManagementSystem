@@ -53,9 +53,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 </head>
 @using System.Security.Claims
+@using HotelManagementSystem.Business.service
 @using Microsoft.EntityFrameworkCore
 @inject HotelManagementSystem.Data.Context.HotelManagementDbContext DbContext
-@inject HotelManagementSystem.Business.NotificationService NotificationSvc
+@inject NotificationService NotificationSvc
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3 shadow-sm">

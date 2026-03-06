@@ -1,4 +1,4 @@
-using HotelManagementSystem.Business;
+using HotelManagementSystem.Business.service;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authorization;

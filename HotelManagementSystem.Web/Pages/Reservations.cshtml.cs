@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
-using HotelManagementSystem.Business;
+using HotelManagementSystem.Business.service;
 
 namespace HotelManagementSystem.Web.Pages
 {
