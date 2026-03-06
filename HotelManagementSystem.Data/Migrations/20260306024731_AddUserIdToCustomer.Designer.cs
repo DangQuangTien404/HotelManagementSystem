@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelManagementSystem.Data.Migrations
 {
     [DbContext(typeof(HotelManagementDbContext))]
-    [Migration("20260302091729_LoginInfoForUsers")]
-    partial class LoginInfoForUsers
+    [Migration("20260306024731_AddUserIdToCustomer")]
+    partial class AddUserIdToCustomer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -221,6 +221,60 @@ namespace HotelManagementSystem.Data.Migrations
                     b.HasIndex("SenderId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("HotelManagementSystem.Data.Models.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("RefundTransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefundedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RequestId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReservationId");
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("HotelManagementSystem.Data.Models.Reservation", b =>
@@ -504,6 +558,17 @@ namespace HotelManagementSystem.Data.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("HotelManagementSystem.Data.Models.Payment", b =>
+                {
+                    b.HasOne("HotelManagementSystem.Data.Models.Reservation", "Reservation")
+                        .WithMany("Payments")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reservation");
+                });
+
             modelBuilder.Entity("HotelManagementSystem.Data.Models.Reservation", b =>
                 {
                     b.HasOne("HotelManagementSystem.Data.Models.Customer", "Customer")
@@ -589,6 +654,8 @@ namespace HotelManagementSystem.Data.Migrations
             modelBuilder.Entity("HotelManagementSystem.Data.Models.Reservation", b =>
                 {
                     b.Navigation("CheckInOuts");
+
+                    b.Navigation("Payments");
 
                     b.Navigation("ReservationServices");
                 });
