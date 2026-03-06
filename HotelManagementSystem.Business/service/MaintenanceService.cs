@@ -9,11 +9,13 @@ namespace HotelManagementSystem.Business.service
     {
         private readonly HotelManagementDbContext _context;
         private readonly INotificationService _notificationService;
+        private readonly IRoomUpdateBroadcaster _roomUpdateBroadcaster;
 
-        public MaintenanceService(HotelManagementDbContext context, INotificationService notificationService)
+        public MaintenanceService(HotelManagementDbContext context, INotificationService notificationService, IRoomUpdateBroadcaster roomUpdateBroadcaster)
         {
             _context = context;
             _notificationService = notificationService;
+            _roomUpdateBroadcaster = roomUpdateBroadcaster;
         }
 
         // Lấy danh sách nhân viên kỹ thuật từ bảng Staff
@@ -64,6 +66,12 @@ namespace HotelManagementSystem.Business.service
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                if (room != null)
+                {
+                    await _roomUpdateBroadcaster.BroadcastRoomStatusAsync(room.Id, room.RoomNumber, room.Status);
+                }
+
                 return true;
             }
             catch

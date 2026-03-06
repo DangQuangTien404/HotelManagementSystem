@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using HotelManagementSystem.Business.interfaces;
 
 namespace HotelManagementSystem.Web.Pages.Admin
 {
@@ -11,10 +12,14 @@ namespace HotelManagementSystem.Web.Pages.Admin
     public class AssignCleaningModel : PageModel
     {
         private readonly HotelManagementDbContext _context;
+        private readonly INotificationService _notificationService;
+        private readonly IRoomUpdateBroadcaster _roomUpdateBroadcaster;
 
-        public AssignCleaningModel(HotelManagementDbContext context)
+        public AssignCleaningModel(HotelManagementDbContext context, INotificationService notificationService, IRoomUpdateBroadcaster roomUpdateBroadcaster)
         {
             _context = context;
+            _notificationService = notificationService;
+            _roomUpdateBroadcaster = roomUpdateBroadcaster;
         }
 
         // Khai báo các thuộc tính hiển thị
@@ -63,6 +68,22 @@ namespace HotelManagementSystem.Web.Pages.Admin
             try
             {
                 await _context.SaveChangesAsync();
+
+                // Send notification to the assigned staff
+                var notification = new Notification
+                {
+                    RecipientId = SelectedStaffUserId,
+                    SenderName = "Hệ thống quản lý",
+                    SenderType = "System",
+                    RecipientType = "Staff",
+                    Message = $"Bạn có nhiệm vụ dọn dẹp mới tại phòng {room.RoomNumber}",
+                    CreatedAt = DateTime.Now,
+                    IsRead = false
+                };
+                await _notificationService.CreateAndSendNotificationAsync(notification, toAdminGroup: false);
+
+                // Broadcast room status change
+                await _roomUpdateBroadcaster.BroadcastRoomStatusAsync(room.Id, room.RoomNumber, room.Status);
             }
             catch (Exception ex)
             {
