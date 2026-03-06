@@ -1,4 +1,5 @@
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using HotelManagementSystem.Models;
@@ -14,8 +15,8 @@ namespace HotelManagementSystem.Web.Pages
     [Authorize(Roles = "Customer")]
     public class PaymentModel : PageModel
     {
-        private readonly BookingService _service;
-        private readonly MoMoService _momoService;
+        private readonly IBookingService _service;
+        private readonly IMoMoService _momoService;
         private readonly HotelManagementDbContext _context;
         private readonly IConfiguration _configuration;
 
@@ -33,8 +34,8 @@ namespace HotelManagementSystem.Web.Pages
         public string VietQrUrl { get; set; } = string.Empty;
 
         public PaymentModel(
-            BookingService service,
-            MoMoService momoService,
+            IBookingService service,
+            IMoMoService momoService,
             HotelManagementDbContext context,
             IConfiguration configuration)
         {

@@ -2,17 +2,19 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
+using HotelManagementSystem.Business;
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 
 namespace HotelManagementSystem.Web.Pages
 {
     public class RegisterModel : PageModel
     {
-        private readonly AccountService _accountService;
+        private readonly IAccountService _accountService;
 
-        public RegisterModel(HotelManagementDbContext context)
+        public RegisterModel(IAccountService accountService)
         {
-            _accountService = new AccountService(context);
+            _accountService = accountService;
         }
 
         [BindProperty]

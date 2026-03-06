@@ -2,15 +2,16 @@ using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using HotelManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
+using HotelManagementSystem.Business.interfaces;
 
 namespace HotelManagementSystem.Business.service
 {
-    public class BookingService
+    public class BookingService : IBookingService
     {
         private readonly HotelManagementDbContext _context;
-        private readonly NotificationService _notificationService;
+        private readonly INotificationService _notificationService;
 
-        public BookingService(HotelManagementDbContext context, NotificationService notificationService)
+        public BookingService(HotelManagementDbContext context, INotificationService notificationService)
         {
             _context = context;
             _notificationService = notificationService;
@@ -228,7 +229,7 @@ namespace HotelManagementSystem.Business.service
         }
 
         public async Task<(bool Success, string Message)> ProcessRefundAsync(
-            int reservationId, int customerId, MoMoService momoService)
+            int reservationId, int customerId, IMoMoService momoService)
         {
             var reservation = await _context.Reservations
                 .Include(r => r.Room)

@@ -1,4 +1,5 @@
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -9,9 +10,9 @@ namespace HotelManagementSystem.Web.Pages.Staffs
     [Authorize(Roles = "Staff,Admin")]
     public class MyTasksModel : PageModel
     {
-        private readonly CleaningService _cleaningService;
+        private readonly ICleaningService _cleaningService;
 
-        public MyTasksModel(CleaningService cleaningService)
+        public MyTasksModel(ICleaningService cleaningService)
         {
             _cleaningService = cleaningService;
         }

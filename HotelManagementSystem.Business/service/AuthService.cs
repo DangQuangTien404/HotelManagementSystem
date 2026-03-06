@@ -2,9 +2,11 @@
 using HotelManagementSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
+using HotelManagementSystem.Business.interfaces;
+
 namespace HotelManagementSystem.Business.service
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly HotelManagementDbContext _context;
         public AuthService(HotelManagementDbContext context) => _context = context;

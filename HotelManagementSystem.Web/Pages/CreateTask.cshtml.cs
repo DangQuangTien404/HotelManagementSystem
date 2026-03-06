@@ -4,15 +4,16 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using HotelManagementSystem.Data.Models;
 using System.Security.Claims;
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 
 namespace HotelManagementSystem.Web.Pages.Maintenance
 {
     public class CreateTaskModel : PageModel
     {
-        private readonly MaintenanceService _service;
-        private readonly RoomService _roomService;
+        private readonly IMaintenanceService _service;
+        private readonly IRoomService _roomService;
 
-        public CreateTaskModel(MaintenanceService service, RoomService roomService)
+        public CreateTaskModel(IMaintenanceService service, IRoomService roomService)
         {
             _service = service;
             _roomService = roomService;

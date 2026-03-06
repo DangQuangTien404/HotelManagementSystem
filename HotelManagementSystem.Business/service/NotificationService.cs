@@ -2,10 +2,11 @@
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using HotelManagementSystem.Business.interfaces;
 
 namespace HotelManagementSystem.Business.service
 {
-    public class NotificationService
+    public class NotificationService : INotificationService
     {
         private readonly HotelManagementDbContext _context;
         private readonly IHubContext<Hub> _hubContext;

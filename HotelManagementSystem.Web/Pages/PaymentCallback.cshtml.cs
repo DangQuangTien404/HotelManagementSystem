@@ -1,4 +1,5 @@
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -8,14 +9,14 @@ namespace HotelManagementSystem.Web.Pages
     [Authorize(Roles = "Customer")]
     public class PaymentCallbackModel : PageModel
     {
-        private readonly BookingService _bookingService;
-        private readonly MoMoService _momoService;
+        private readonly IBookingService _bookingService;
+        private readonly IMoMoService _momoService;
 
         public bool IsSuccess { get; set; }
         public string ResultMessage { get; set; } = string.Empty;
         public string? OrderId { get; set; }
 
-        public PaymentCallbackModel(BookingService bookingService, MoMoService momoService)
+        public PaymentCallbackModel(IBookingService bookingService, IMoMoService momoService)
         {
             _bookingService = bookingService;
             _momoService = momoService;

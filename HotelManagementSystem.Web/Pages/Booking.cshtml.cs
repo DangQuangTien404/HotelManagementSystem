@@ -1,4 +1,5 @@
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using HotelManagementSystem.Models;
@@ -12,7 +13,7 @@ namespace HotelManagementSystem.Web.Pages
 {
     public class BookingModel : PageModel
     {
-        private readonly BookingService _service;
+        private readonly IBookingService _service;
         private readonly HotelManagementDbContext _context;
 
         [BindProperty]
@@ -22,7 +23,7 @@ namespace HotelManagementSystem.Web.Pages
         public string CustomerName { get; set; } = string.Empty;
         public Room? SelectedRoom { get; set; }
 
-        public BookingModel(BookingService service, HotelManagementDbContext context)
+        public BookingModel(IBookingService service, HotelManagementDbContext context)
         {
             _service = service;
             _context = context;

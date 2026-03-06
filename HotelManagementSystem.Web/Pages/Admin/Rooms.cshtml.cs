@@ -3,15 +3,16 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 
 namespace HotelManagementSystem.Web.Pages.Admin
 {
     [Authorize(Roles = "Admin")]
     public class RoomsModel : PageModel
     {
-        private readonly RoomService _roomService;
+        private readonly IRoomService _roomService;
 
-        public RoomsModel(RoomService roomService)
+        public RoomsModel(IRoomService roomService)
         {
             _roomService = roomService;
         }

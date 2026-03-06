@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 
 public class NotificationViewComponent : ViewComponent
 {
-    private readonly NotificationService _service;
-    public NotificationViewComponent(NotificationService service) => _service = service;
+    private readonly INotificationService _service;
+    public NotificationViewComponent(INotificationService service) => _service = service;
 
     public async Task<IViewComponentResult> InvokeAsync()
     {
