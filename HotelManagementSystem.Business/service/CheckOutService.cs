@@ -53,7 +53,7 @@ namespace HotelManagementSystem.Business.service
                 var stayDuration = (checkInfo.CheckOutTime.Value - checkInfo.CheckInTime!.Value).Days;
                 if (stayDuration <= 0) stayDuration = 1;
 
-                var roomAmount = stayDuration * checkInfo.Reservation.Room.Price;
+                var roomAmount = stayDuration * checkInfo.Reservation.Room.BasePrice;
                 var serviceAmount = await _context.ReservationServices
                     .Where(s => s.ReservationId == reservationId)
                     .SumAsync(s => s.Quantity * s.UnitPrice);

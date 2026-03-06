@@ -30,6 +30,11 @@ namespace HotelManagementSystem.Web.Pages.Admin
         // Thêm hoặc Cập nhật phòng
         public async Task<IActionResult> OnPostSaveRoomAsync()
         {
+            // Ignore properties not present in the form to pass validation
+            ModelState.Remove("NewRoom.Price");
+            ModelState.Remove("NewRoom.Capacity");
+            ModelState.Remove("NewRoom.Status");
+
             if (!ModelState.IsValid)
             {
                 // In case of validation errors, reload the room list and return the page
