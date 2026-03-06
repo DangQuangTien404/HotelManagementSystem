@@ -42,11 +42,22 @@ namespace HotelManagementSystem.Business.service
                     CustomerId = request.CustomerId,
                     CheckInDate = request.CheckInDate,
                     CheckOutDate = request.CheckOutDate,
-                    Status = "Confirmed",
+                    Status = "CheckedIn",
                     CreatedAt = DateTime.Now
                 };
 
                 _context.Reservations.Add(reservation);
+                await _context.SaveChangesAsync();
+
+                room.Status = "Occupied";
+
+                _context.CheckInOuts.Add(new CheckInOut
+                {
+                    ReservationId = reservation.Id,
+                    CheckInTime = DateTime.Now,
+                    TotalAmount = 0
+                });
+
                 await _context.SaveChangesAsync();
 
                 if (request.SelectedServiceIds.Any())
@@ -181,11 +192,29 @@ namespace HotelManagementSystem.Business.service
             payment.TransactionId = transactionId;
             payment.CompletedAt = DateTime.Now;
 
-            payment.Reservation.Status = "Confirmed";
+            payment.Reservation.Status = "CheckedIn";
+
+            var room = await _context.Rooms.FindAsync(payment.Reservation.RoomId);
+            if (room != null)
+            {
+                room.Status = "Occupied";
+            }
+
+            var existingCheckIn = await _context.CheckInOuts
+                .FirstOrDefaultAsync(c => c.ReservationId == payment.Reservation.Id);
+
+            if (existingCheckIn == null)
+            {
+                _context.CheckInOuts.Add(new CheckInOut
+                {
+                    ReservationId = payment.Reservation.Id,
+                    CheckInTime = DateTime.Now,
+                    TotalAmount = 0
+                });
+            }
 
             await _context.SaveChangesAsync();
 
-            var room = await _context.Rooms.FindAsync(payment.Reservation.RoomId);
             string roomNumber = room?.RoomNumber ?? payment.Reservation.RoomId.ToString();
 
             // Notify Admin
