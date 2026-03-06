@@ -1,4 +1,5 @@
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,7 @@ namespace HotelManagementSystem.Web.Pages
     [Authorize(Roles = "Customer")]
     public class RoomsModel : PageModel
     {
-        private readonly RoomService _roomService;
+        private readonly IRoomService _roomService;
         private readonly HotelManagementDbContext _context;
 
         public List<Room> AvailableRooms { get; set; } = new();
@@ -24,7 +25,7 @@ namespace HotelManagementSystem.Web.Pages
         [BindProperty(SupportsGet = true)]
         public string? Type { get; set; }
 
-        public RoomsModel(RoomService roomService, HotelManagementDbContext context)
+        public RoomsModel(IRoomService roomService, HotelManagementDbContext context)
         {
             _roomService = roomService;
             _context = context;

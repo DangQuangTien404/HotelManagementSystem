@@ -1,4 +1,6 @@
-﻿using HotelManagementSystem.Business.service;
+﻿using HotelManagementSystem.Business;
+using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -23,17 +25,17 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<IRoomUpdateBroadcaster, HotelManagementSystem.Web.Services.RoomUpdateBroadcaster>();
 
 // 3. Đăng ký các Business Services
-builder.Services.AddScoped<BookingService>();
-builder.Services.AddScoped<RoomService>();
-builder.Services.AddScoped<CheckOutService>();
-builder.Services.AddScoped<CheckInService>();
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<AccountService>();
-builder.Services.AddScoped<StaffService>();
-builder.Services.AddScoped<MaintenanceService>();
-builder.Services.AddScoped<CleaningService>();
-builder.Services.AddHttpClient<MoMoService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<ICheckOutService, CheckOutService>();
+builder.Services.AddScoped<ICheckInService, CheckInService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IStaffService, StaffService>();
+builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
+builder.Services.AddScoped<ICleaningService, CleaningService>();
+builder.Services.AddHttpClient<IMoMoService, MoMoService>();
 builder.Services.AddHostedService<NoShowSweepService>();
 
 var app = builder.Build();
@@ -112,7 +114,7 @@ app.MapRazorPages();
 app.MapHub<HotelManagementSystem.Web.Hubs.NotificationHub>("/notificationHub");
 app.MapHub<HotelManagementSystem.Web.Hubs.RoomHub>("/roomHub");
 
-app.MapPost("/api/momo-ipn", async (HttpContext context, BookingService bookingService, MoMoService momoService) =>
+app.MapPost("/api/momo-ipn", async (HttpContext context, IBookingService bookingService, IMoMoService momoService) =>
 {
     using var reader = new StreamReader(context.Request.Body);
     var body = await reader.ReadToEndAsync();

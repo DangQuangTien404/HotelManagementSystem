@@ -1,4 +1,5 @@
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +14,7 @@ namespace HotelManagementSystem.Web.Pages.Admin
     public class DailyCheckinsModel : PageModel
     {
         private readonly HotelManagementDbContext _context;
-        private readonly CheckInService _checkInService;
+        private readonly ICheckInService _checkInService;
 
         [BindProperty(SupportsGet = true)]
         public DateTime Date { get; set; } = DateTime.Today;
@@ -35,7 +36,7 @@ namespace HotelManagementSystem.Web.Pages.Admin
         public int NoShowCount { get; set; }
         public int AutoMarkedCount { get; set; }
 
-        public DailyCheckinsModel(HotelManagementDbContext context, CheckInService checkInService)
+        public DailyCheckinsModel(HotelManagementDbContext context, ICheckInService checkInService)
         {
             _context = context;
             _checkInService = checkInService;

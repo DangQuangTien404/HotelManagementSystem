@@ -2,9 +2,11 @@
 using HotelManagementSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
+using HotelManagementSystem.Business.interfaces;
+
 namespace HotelManagementSystem.Business.service
 {
-    public class StaffService
+    public class StaffService : IStaffService
     {
         private readonly HotelManagementDbContext _context;
         public StaffService(HotelManagementDbContext context) => _context = context;

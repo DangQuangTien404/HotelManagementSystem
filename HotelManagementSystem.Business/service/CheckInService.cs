@@ -2,9 +2,11 @@
 using HotelManagementSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
+using HotelManagementSystem.Business.interfaces;
+
 namespace HotelManagementSystem.Business.service
 {
-    public class CheckInService
+    public class CheckInService : ICheckInService
     {
         private readonly HotelManagementDbContext _context;
         private readonly IRoomUpdateBroadcaster _broadcaster;

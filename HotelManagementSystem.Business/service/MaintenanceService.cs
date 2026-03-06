@@ -1,15 +1,16 @@
 ﻿using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using HotelManagementSystem.Business.interfaces;
 
 namespace HotelManagementSystem.Business.service
 {
-    public class MaintenanceService
+    public class MaintenanceService : IMaintenanceService
     {
         private readonly HotelManagementDbContext _context;
-        private readonly NotificationService _notificationService;
+        private readonly INotificationService _notificationService;
 
-        public MaintenanceService(HotelManagementDbContext context, NotificationService notificationService)
+        public MaintenanceService(HotelManagementDbContext context, INotificationService notificationService)
         {
             _context = context;
             _notificationService = notificationService;

@@ -2,10 +2,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using HotelManagementSystem.Business.interfaces;
 
 namespace HotelManagementSystem.Business.service
 {
-    public class MoMoService
+    public class MoMoService : IMoMoService
     {
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;

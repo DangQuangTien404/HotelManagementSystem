@@ -56,7 +56,8 @@
 @using HotelManagementSystem.Business.service
 @using Microsoft.EntityFrameworkCore
 @inject HotelManagementSystem.Data.Context.HotelManagementDbContext DbContext
-@inject NotificationService NotificationSvc
+@using HotelManagementSystem.Business.interfaces
+@inject INotificationService NotificationSvc
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3 shadow-sm">

@@ -2,9 +2,11 @@
 using HotelManagementSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
+using HotelManagementSystem.Business.interfaces;
+
 namespace HotelManagementSystem.Business
 {
-    public class AccountService
+    public class AccountService : IAccountService
     {
         private readonly HotelManagementDbContext _context;
         public AccountService(HotelManagementDbContext context) => _context = context;

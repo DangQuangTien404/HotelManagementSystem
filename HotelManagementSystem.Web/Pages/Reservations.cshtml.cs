@@ -6,6 +6,7 @@ using System.Security.Claims;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 
 namespace HotelManagementSystem.Web.Pages
 {
@@ -13,15 +14,15 @@ namespace HotelManagementSystem.Web.Pages
     public class ReservationsModel : PageModel
     {
         private readonly HotelManagementDbContext _context;
-        private readonly CheckInService _checkInService;
-        private readonly CheckOutService _checkOutService;
+        private readonly ICheckInService _checkInService;
+        private readonly ICheckOutService _checkOutService;
 
         public List<Reservation> Reservations { get; set; } = new();
 
         public ReservationsModel(
             HotelManagementDbContext context,
-            CheckInService checkInService,
-            CheckOutService checkOutService)
+            ICheckInService checkInService,
+            ICheckOutService checkOutService)
         {
             _context = context;
             _checkInService = checkInService;

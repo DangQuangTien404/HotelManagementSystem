@@ -1,4 +1,5 @@
 using HotelManagementSystem.Business.service;
+using HotelManagementSystem.Business.interfaces;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -12,15 +13,15 @@ namespace HotelManagementSystem.Web.Pages
     [Authorize(Roles = "Customer")]
     public class MyReservationsModel : PageModel
     {
-        private readonly BookingService _bookingService;
-        private readonly MoMoService _momoService;
+        private readonly IBookingService _bookingService;
+        private readonly IMoMoService _momoService;
         private readonly HotelManagementDbContext _context;
 
         public List<Reservation> Reservations { get; set; } = new();
 
         public MyReservationsModel(
-            BookingService bookingService,
-            MoMoService momoService,
+            IBookingService bookingService,
+            IMoMoService momoService,
             HotelManagementDbContext context)
         {
             _bookingService = bookingService;
