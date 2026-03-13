@@ -65,6 +65,7 @@ builder.Services.AddScoped<Kernel>(sp =>
 });
 // -------------------------
 
+builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.AddHostedService<NoShowSweepService>();
 
 var app = builder.Build();

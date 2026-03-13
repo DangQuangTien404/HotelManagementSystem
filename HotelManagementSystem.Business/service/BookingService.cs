@@ -117,7 +117,10 @@ namespace HotelManagementSystem.Business.service
         }
 
         public async Task<(int ReservationId, string OrderId)?> CreatePendingBookingAsync(
-            BookingRequest request, decimal amount)
+            BookingRequest request,
+            decimal amount,
+            string paymentMethod = "MoMo",
+            string orderPrefix = "MOMO")
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -160,12 +163,12 @@ namespace HotelManagementSystem.Business.service
                     }
                 }
 
-                var orderId = $"MOMO_{reservation.Id}_{DateTime.Now:yyyyMMddHHmmss}";
+                var orderId = $"{orderPrefix}_{reservation.Id}_{DateTime.Now:yyyyMMddHHmmss}";
 
                 _context.Payments.Add(new Payment
                 {
                     ReservationId = reservation.Id,
-                    PaymentMethod = "MoMo",
+                    PaymentMethod = paymentMethod,
                     OrderId = orderId,
                     Amount = amount,
                     Status = "Pending",
@@ -224,7 +227,7 @@ namespace HotelManagementSystem.Business.service
             // Notify Admin
             await _notificationService.CreateAndSendNotificationAsync(new Notification
             {
-                Message = $"Đơn đặt phòng mới đã thanh toán MoMo: Phòng {roomNumber}",
+                Message = $"Đơn đặt phòng mới đã thanh toán {payment.PaymentMethod}: Phòng {roomNumber}",
                 SenderName = "Hệ thống",
                 SenderType = "System",
                 RecipientType = "Admin",

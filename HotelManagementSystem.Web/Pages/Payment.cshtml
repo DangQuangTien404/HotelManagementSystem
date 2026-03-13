@@ -181,6 +181,12 @@
                                 <i class="bi bi-wallet2 me-1"></i>MoMo
                             </button>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="vnpay-tab" data-bs-toggle="tab"
+                                    data-bs-target="#vnpay-pane" type="button" role="tab">
+                                <i class="bi bi-bank me-1"></i>VNPay
+                            </button>
+                        </li>
                     </ul>
                 </div>
 
@@ -300,6 +306,68 @@
                                 <button type="submit" class="btn w-100 py-2 fw-bold rounded-3 mb-2 text-white"
                                         style="background: linear-gradient(135deg, #a50064 0%, #d82d8b 100%);">
                                     <i class="bi bi-wallet2 me-2"></i>Thanh toán qua MoMo
+                                </button>
+                            </form>
+                            <a asp-page="/Booking" asp-route-roomId="@Model.RequestData.RoomId"
+                               class="btn btn-outline-secondary w-100 rounded-3 btn-sm">
+                                <i class="bi bi-arrow-left me-1"></i>Quay lại
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- VNPay tab -->
+                    <div class="tab-pane fade" id="vnpay-pane" role="tabpanel">
+                        <div class="text-white border-0 p-4" style="background: linear-gradient(135deg, #005baa 0%, #00a2ff 100%);">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-bank fs-5"></i>
+                                <span class="fw-bold">Thanh toán qua VNPay</span>
+                            </div>
+                            <p class="text-white-50 small mb-0 mt-1">Bạn sẽ được chuyển sang cổng VNPay để hoàn tất thanh toán.</p>
+                        </div>
+
+                        <div class="card-body p-4 text-center">
+                            <div class="mb-4">
+                                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3"
+                                     style="width:80px;height:80px">
+                                    <i class="bi bi-bank text-primary" style="font-size:2rem"></i>
+                                </div>
+                                <h5 class="fw-bold">Cổng VNPay</h5>
+                                <p class="text-muted small">Thanh toán bằng thẻ ATM nội địa, Internet Banking hoặc QR VNPay</p>
+                            </div>
+
+                            <div class="bg-light rounded-3 p-3 mb-3">
+                                <div class="text-muted ls-wide" style="font-size:.6rem;text-transform:uppercase">Số tiền đặt cọ (1 đêm)</div>
+                                <div class="fw-bold text-primary fs-4">@Model.DepositAmount.ToString("N0") ₫</div>
+                            </div>
+
+                            <div class="bg-info-subtle border border-info-subtle rounded-3 p-3 mb-3 text-start">
+                                <div class="d-flex gap-2 align-items-start">
+                                    <i class="bi bi-shield-lock text-info mt-1"></i>
+                                    <div class="small">
+                                        <div class="fw-bold mb-1">Quy trình thanh toán</div>
+                                        <ul class="mb-0 ps-3 lh-lg">
+                                            <li>Nhấn nút thanh toán VNPay</li>
+                                            <li>Chọn ngân hàng/phương thức thanh toán</li>
+                                            <li>Xác nhận giao dịch và quay lại website</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white border-0 p-4 pt-0">
+                            <form method="post" asp-page-handler="VnPay">
+                                <input type="hidden" asp-for="RequestData.CustomerId" />
+                                <input type="hidden" asp-for="RequestData.RoomId" />
+                                <input type="hidden" asp-for="RequestData.CheckInDate" />
+                                <input type="hidden" asp-for="RequestData.CheckOutDate" />
+                                @foreach (var id in Model.RequestData.SelectedServiceIds)
+                                {
+                                    <input type="hidden" name="RequestData.SelectedServiceIds" value="@id" />
+                                }
+                                <button type="submit" class="btn w-100 py-2 fw-bold rounded-3 mb-2 text-white"
+                                        style="background: linear-gradient(135deg, #005baa 0%, #00a2ff 100%);">
+                                    <i class="bi bi-bank me-2"></i>Thanh toán qua VNPay
                                 </button>
                             </form>
                             <a asp-page="/Booking" asp-route-roomId="@Model.RequestData.RoomId"

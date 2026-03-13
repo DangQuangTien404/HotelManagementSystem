@@ -17,6 +17,7 @@ namespace HotelManagementSystem.Web.Pages
     {
         private readonly IBookingService _service;
         private readonly IMoMoService _momoService;
+        private readonly IVnPayService _vnPayService;
         private readonly HotelManagementDbContext _context;
         private readonly IConfiguration _configuration;
 
@@ -36,11 +37,13 @@ namespace HotelManagementSystem.Web.Pages
         public PaymentModel(
             IBookingService service,
             IMoMoService momoService,
+            IVnPayService vnPayService,
             HotelManagementDbContext context,
             IConfiguration configuration)
         {
             _service = service;
             _momoService = momoService;
+            _vnPayService = vnPayService;
             _context = context;
             _configuration = configuration;
         }
@@ -100,7 +103,11 @@ namespace HotelManagementSystem.Web.Pages
 
             CalculateTotal();
 
-            var pendingResult = await _service.CreatePendingBookingAsync(RequestData, DepositAmount);
+            var pendingResult = await _service.CreatePendingBookingAsync(
+                RequestData,
+                DepositAmount,
+                paymentMethod: "MoMo",
+                orderPrefix: "MOMO");
             if (pendingResult == null)
             {
                 BuildVietQrUrl();
@@ -108,7 +115,7 @@ namespace HotelManagementSystem.Web.Pages
                 return Page();
             }
 
-            var (reservationId, orderId) = pendingResult.Value;
+            var (_, orderId) = pendingResult.Value;
 
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
             var returnUrl = _configuration["MoMo:ReturnUrl"] ?? "/PaymentCallback";
@@ -135,6 +142,59 @@ namespace HotelManagementSystem.Web.Pages
             ModelState.AddModelError("",
                 $"Không thể kết nối MoMo: {momoResponse?.Message ?? "Không có phản hồi"}");
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostVnPayAsync()
+        {
+            var customer = await GetCurrentCustomerAsync();
+            if (customer != null)
+            {
+                RequestData.CustomerId = customer.Id;
+                CustomerName = customer.FullName;
+            }
+
+            await LoadDataAsync();
+            if (SelectedRoom == null) return RedirectToPage("/Rooms");
+
+            CalculateTotal();
+
+            if (string.IsNullOrWhiteSpace(_configuration["VNPay:TmnCode"])
+                || string.IsNullOrWhiteSpace(_configuration["VNPay:HashSecret"])
+                || _configuration["VNPay:TmnCode"] == "YOUR_VNPAY_TMN_CODE"
+                || _configuration["VNPay:HashSecret"] == "YOUR_VNPAY_HASH_SECRET")
+            {
+                BuildVietQrUrl();
+                ModelState.AddModelError("", "VNPay chưa được cấu hình. Vui lòng liên hệ quản trị viên.");
+                return Page();
+            }
+
+            var pendingResult = await _service.CreatePendingBookingAsync(
+                RequestData,
+                DepositAmount,
+                paymentMethod: "VNPay",
+                orderPrefix: "VNPAY");
+            if (pendingResult == null)
+            {
+                BuildVietQrUrl();
+                ModelState.AddModelError("", "Không thể tạo đặt phòng. Phòng có thể đã được đặt.");
+                return Page();
+            }
+
+            var (_, orderId) = pendingResult.Value;
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var returnPath = _configuration["VNPay:ReturnUrl"] ?? "/PaymentCallback";
+            var returnUrl = $"{baseUrl}{returnPath}";
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+
+            var paymentUrl = _vnPayService.CreatePaymentUrl(
+                orderId,
+                $"Thanh toan phong {SelectedRoom.RoomNumber}",
+                (long)DepositAmount,
+                returnUrl,
+                ipAddress);
+
+            TempData.Remove("BookingRequest");
+            return Redirect(paymentUrl);
         }
 
         private async Task LoadDataAsync()

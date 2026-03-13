@@ -11,7 +11,11 @@ namespace HotelManagementSystem.Business.interfaces
     {
         Task<List<HotelService>> GetAvailableServicesAsync();
         Task<bool> ProcessBooking(BookingRequest request);
-        Task<(int ReservationId, string OrderId)?> CreatePendingBookingAsync(BookingRequest request, decimal amount);
+        Task<(int ReservationId, string OrderId)?> CreatePendingBookingAsync(
+            BookingRequest request,
+            decimal amount,
+            string paymentMethod = "MoMo",
+            string orderPrefix = "MOMO");
         Task<bool> ConfirmPaymentAsync(string orderId, string transactionId);
         Task<bool> FailPaymentAsync(string orderId);
         Task<List<Reservation>> GetCustomerReservationsAsync(int customerId);
