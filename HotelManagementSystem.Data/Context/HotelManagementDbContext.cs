@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using HotelManagementSystem.Data.Models;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +24,7 @@ public partial class HotelManagementDbContext : DbContext
     public virtual DbSet<RoomCleaning> RoomCleanings { get; set; }
     public virtual DbSet<Staff> Staffs { get; set; }
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<ChatMessage> ChatMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
