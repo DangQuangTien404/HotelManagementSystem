@@ -69,20 +69,26 @@
         max-width: 85%;
         line-height: 1.4;
         animation: chat-fadeIn 0.3s ease-out;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: pre-wrap; /* Quan trọng: Giữ lại xuống dòng từ AI */
+        width: fit-content;
     }
     .message.bot {
-        align-self: flex-start;
-        background: #f1f1f1;
-        border-bottom-left-radius: 4px;
-        min-height: 40px;
-        display: flex;
-        align-items: center;
+         align-self: flex-start;
+    display: inline-block;  /* tự tính width theo toàn bộ content */
+    width: auto;            /* không fix cứng */
+    max-width: 88%;   
     }
     .message.user {
         align-self: flex-end;
         background: #ffc107;
         color: #000;
         border-bottom-right-radius: 4px;
+    }
+    .message.bot:has(.typing-indicator) {
+        display: flex;
+        align-items: center;
     }
 
     .typing-indicator {
@@ -125,6 +131,14 @@
 
         if (!launcher) return;
 
+        // --- CẤU HÌNH SIGNALR ---
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.start().catch(err => console.error(err.toString()));
+
         launcher.onclick = () => {
             chatWin.style.display = chatWin.style.display === 'flex' ? 'none' : 'flex';
             if (chatWin.style.display === 'flex') input.focus();
@@ -141,6 +155,24 @@
             return div;
         }
 
+        let currentLoadingMsg = null;
+
+        connection.on("ReceiveChunk", (chunk) => {
+            if (currentLoadingMsg) {
+                // Nếu đang hiển thị typing indicator, chuyển sang text
+                const indicator = currentLoadingMsg.querySelector('.typing-indicator');
+                if (indicator) {
+                    currentLoadingMsg.innerText = '';
+                }
+                currentLoadingMsg.innerText += chunk;
+                msgList.scrollTop = msgList.scrollHeight;
+            }
+        });
+
+        connection.on("Finished", () => {
+            currentLoadingMsg = null;
+        });
+
         async function doSend() {
             const msg = input.value.trim();
             if (!msg) return;
@@ -156,24 +188,13 @@
                     <span></span>
                 </div>
             `;
+            currentLoadingMsg = loading;
 
             try {
-                const url = '/api/chat-ai';
-                const resp = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: msg })
-                });
-
-                if (!resp.ok) {
-                    loading.innerText = "Lỗi phản hồi từ server.";
-                    return;
-                }
-
-                const data = await resp.json();
-                loading.innerText = data.response;
-            } catch (e) {
-                loading.innerText = "Lỗi kết nối AI.";
+                await connection.invoke("SendMessage", msg);
+            } catch (err) {
+                loading.innerText = "Lỗi kết nối SignalR: " + err.toString();
+                currentLoadingMsg = null;
             }
         }
 

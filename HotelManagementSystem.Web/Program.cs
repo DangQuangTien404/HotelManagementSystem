@@ -127,6 +127,7 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.MapHub<HotelManagementSystem.Web.Hubs.NotificationHub>("/notificationHub");
 app.MapHub<HotelManagementSystem.Web.Hubs.RoomHub>("/roomHub");
+app.MapHub<HotelManagementSystem.Web.Hubs.ChatHub>("/chatHub");
 
 app.MapPost("/api/momo-ipn", async (HttpContext context, IBookingService bookingService, IMoMoService momoService) =>
 {
