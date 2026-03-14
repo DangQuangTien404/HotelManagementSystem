@@ -1,0 +1,37 @@
+@page
+@model HotelManagementSystem.Web.Pages.TestAiModel
+@{
+    ViewData["Title"] = "Test AI Connection";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0"><i class="bi bi-robot me-2"></i>Test Chatbot Connection</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div class="mb-4">
+                            <label for="userMessage" class="form-label fw-bold">Your Question:</label>
+                            <input type="text" asp-for="UserMessage" class="form-control form-control-lg" id="userMessage" placeholder="Ask something like: 'Say this is a test'" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                            <i class="bi bi-send-fill me-2"></i>Send to OpenAI
+                        </button>
+                    </form>
+
+                    @if (!string.IsNullOrEmpty(Model.AiResponse))
+                    {
+                        <hr class="my-4">
+                        <div class="mt-4 p-4 bg-light rounded border">
+                            <h5 class="fw-bold text-success mb-3"><i class="bi bi-chat-left-dots-fill me-2"></i>AI Response:</h5>
+                            <p class="mb-0 lead">@Model.AiResponse</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
