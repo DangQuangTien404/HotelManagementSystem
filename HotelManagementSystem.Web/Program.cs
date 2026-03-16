@@ -41,13 +41,28 @@ builder.Services.AddScoped<ICleaningService, CleaningService>();
 builder.Services.AddHttpClient<IMoMoService, MoMoService>();
 
 // --- CONFIG CHATBOT AI ---
-var openAiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "";
+var openAiKey   = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "";
 var openAiModel = Environment.GetEnvironmentVariable("OPENAI_MODEL") ?? "gpt-4o-mini";
 
-builder.Services.AddKernel()
-    .AddOpenAIChatCompletion(openAiModel, openAiKey);
-
+// Plugin và Service đều Scoped
+builder.Services.AddScoped<HotelManagementSystem.Business.service.HotelDataPlugin>();
 builder.Services.AddScoped<IChatbotService, ChatbotService>();
+
+// Kernel là Scoped — tạo mới theo từng request, inject được DbContext
+builder.Services.AddScoped<Kernel>(sp =>
+{
+    var kernelBuilder = Kernel.CreateBuilder();
+
+    kernelBuilder.AddOpenAIChatCompletion(openAiModel, openAiKey);
+
+    // Lấy plugin từ DI scope hiện tại — DbContext cùng scope → OK
+    kernelBuilder.Plugins.AddFromObject(
+        sp.GetRequiredService<HotelManagementSystem.Business.service.HotelDataPlugin>(),
+        pluginName: "HotelPlugin"
+    );
+
+    return kernelBuilder.Build();
+});
 // -------------------------
 
 builder.Services.AddHostedService<NoShowSweepService>();
