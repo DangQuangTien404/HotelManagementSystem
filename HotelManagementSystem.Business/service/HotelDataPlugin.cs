@@ -29,7 +29,7 @@ namespace HotelManagementSystem.Business.service
             {
                 var rooms = await _context.Rooms
                     .GroupBy(r => r.RoomType)
-                    .Select(g => new { Type = g.Key, Price = g.FirstOrDefault().Price })
+                    .Select(g => new { Type = g.Key, Price = g.Min(r => r.Price) }) // Dùng Min để lấy giá thấp nhất của loại phòng đó, tối ưu SQL hơn
                     .ToListAsync();
 
                 _logger.LogInformation($"[HotelDataPlugin] Hoàn thành lấy giá phòng sau {sw.ElapsedMilliseconds}ms");
@@ -100,7 +100,7 @@ namespace HotelManagementSystem.Business.service
                 // 1. Lấy giá và loại phòng
                 var pricing = await _context.Rooms
                     .GroupBy(r => r.RoomType)
-                    .Select(g => new { Type = g.Key, Price = g.FirstOrDefault().Price })
+                    .Select(g => new { Type = g.Key, Price = g.Min(r => r.Price) })
                     .ToListAsync();
 
                 // 2. Lấy số lượng phòng trống theo từng loại
@@ -131,7 +131,8 @@ namespace HotelManagementSystem.Business.service
             try
             {
                 var services = await _context.HotelServices
-                    .Select(s => new { s.Name, s.Price }) // Đã sửa tên trường từ Name và xóa Description (không có trong model)
+                    .Where(s => s.IsActive) // CHỈ LẤY dịch vụ đang hoạt động
+                    .Select(s => new { s.Name, s.Price })
                     .ToListAsync();
 
                 return JsonSerializer.Serialize(new { Message = "Danh sách dịch vụ khách sạn", Data = services });
