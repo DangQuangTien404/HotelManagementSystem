@@ -1,14 +1,17 @@
-﻿using HotelManagementSystem.Business;
+using HotelManagementSystem.Business;
 using HotelManagementSystem.Business.service;
 using HotelManagementSystem.Business.interfaces;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
+using Microsoft.SemanticKernel;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Cấu hình DbContext
+DotNetEnv.Env.Load();
 builder.Services.AddDbContext<HotelManagementDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -36,6 +39,32 @@ builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<IMaintenanceService, MaintenanceService>();
 builder.Services.AddScoped<ICleaningService, CleaningService>();
 builder.Services.AddHttpClient<IMoMoService, MoMoService>();
+
+// --- CONFIG CHATBOT AI ---
+var openAiKey   = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "";
+var openAiModel = Environment.GetEnvironmentVariable("OPENAI_MODEL") ?? "gpt-4o-mini";
+
+// Plugin và Service đều Scoped
+builder.Services.AddScoped<HotelManagementSystem.Business.service.HotelDataPlugin>();
+builder.Services.AddScoped<IChatbotService, ChatbotService>();
+
+// Kernel là Scoped — tạo mới theo từng request, inject được DbContext
+builder.Services.AddScoped<Kernel>(sp =>
+{
+    var kernelBuilder = Kernel.CreateBuilder();
+
+    kernelBuilder.AddOpenAIChatCompletion(openAiModel, openAiKey);
+
+    // Lấy plugin từ DI scope hiện tại — DbContext cùng scope → OK
+    kernelBuilder.Plugins.AddFromObject(
+        sp.GetRequiredService<HotelManagementSystem.Business.service.HotelDataPlugin>(),
+        pluginName: "HotelPlugin"
+    );
+
+    return kernelBuilder.Build();
+});
+// -------------------------
+
 builder.Services.AddHostedService<NoShowSweepService>();
 
 var app = builder.Build();
@@ -113,6 +142,7 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.MapHub<HotelManagementSystem.Web.Hubs.NotificationHub>("/notificationHub");
 app.MapHub<HotelManagementSystem.Web.Hubs.RoomHub>("/roomHub");
+app.MapHub<HotelManagementSystem.Web.Hubs.ChatHub>("/chatHub");
 
 app.MapPost("/api/momo-ipn", async (HttpContext context, IBookingService bookingService, IMoMoService momoService) =>
 {
@@ -133,4 +163,15 @@ app.MapPost("/api/momo-ipn", async (HttpContext context, IBookingService booking
     return Results.NoContent();
 });
 
+app.MapPost("/api/chat-ai", async (HttpContext context, IChatbotService chatbotService) =>
+{
+    var data = await context.Request.ReadFromJsonAsync<ChatRequest>();
+    if (data == null || string.IsNullOrEmpty(data.Message)) return Results.BadRequest();
+
+    var response = await chatbotService.GetChatResponseAsync(data.Message);
+    return Results.Ok(new { response });
+});
+
 app.Run();
+
+public record ChatRequest(string Message);
