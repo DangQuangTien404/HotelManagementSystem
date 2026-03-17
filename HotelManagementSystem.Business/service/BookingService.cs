@@ -119,8 +119,8 @@ namespace HotelManagementSystem.Business.service
         public async Task<(int ReservationId, string OrderId)?> CreatePendingBookingAsync(
             BookingRequest request,
             decimal amount,
-            string paymentMethod = "MoMo",
-            string orderPrefix = "MOMO")
+            string paymentMethod = "Stripe",
+            string orderPrefix = "STRIPE")
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -191,9 +191,19 @@ namespace HotelManagementSystem.Business.service
         {
             var payment = await _context.Payments
                 .Include(p => p.Reservation)
-                .FirstOrDefaultAsync(p => p.OrderId == orderId && p.Status == "Pending");
+                .FirstOrDefaultAsync(p => p.OrderId == orderId);
 
             if (payment == null) return false;
+
+            if (payment.Status == "Completed")
+            {
+                return true;
+            }
+
+            if (payment.Status != "Pending")
+            {
+                return false;
+            }
 
             payment.Status = "Completed";
             payment.TransactionId = transactionId;
@@ -224,7 +234,6 @@ namespace HotelManagementSystem.Business.service
 
             string roomNumber = room?.RoomNumber ?? payment.Reservation.RoomId.ToString();
 
-            // Notify Admin
             await _notificationService.CreateAndSendNotificationAsync(new Notification
             {
                 Message = $"Đơn đặt phòng mới đã thanh toán {payment.PaymentMethod}: Phòng {roomNumber}",
@@ -270,7 +279,9 @@ namespace HotelManagementSystem.Business.service
         }
 
         public async Task<(bool Success, string Message)> ProcessRefundAsync(
-            int reservationId, int customerId, IMoMoService momoService)
+            int reservationId,
+            int customerId,
+            IStripeService stripeService)
         {
             var reservation = await _context.Reservations
                 .Include(r => r.Room)
@@ -280,7 +291,7 @@ namespace HotelManagementSystem.Business.service
             if (reservation == null)
                 return (false, "Không tìm thấy đặt phòng.");
 
-            if (reservation.Status != "Confirmed" && reservation.Status != "PendingPayment")
+            if (reservation.Status != "Confirmed" && reservation.Status != "PendingPayment" && reservation.Status != "CheckedIn")
                 return (false, "Không thể hoàn tiền cho đặt phòng này.");
 
             var refundDeadline = reservation.CheckInDate.AddHours(-48);
@@ -295,24 +306,26 @@ namespace HotelManagementSystem.Business.service
             if (payment == null)
                 return (false, "Không tìm thấy thanh toán.");
 
-            if (payment.PaymentMethod == "MoMo" && payment.Status == "Completed"
-                && !string.IsNullOrEmpty(payment.TransactionId))
+            if (!string.Equals(payment.PaymentMethod, "Stripe", StringComparison.OrdinalIgnoreCase)
+                || payment.Status != "Completed")
             {
-                var refundResult = await momoService.RefundAsync(
-                    payment.OrderId,
-                    long.Parse(payment.TransactionId),
-                    (long)payment.Amount,
-                    $"Hoan tien dat phong #{reservation.Id}");
-
-                if (refundResult == null || refundResult.ResultCode != 0)
-                {
-                    return (false,
-                        $"Hoàn tiền MoMo thất bại: {refundResult?.Message ?? "Không có phản hồi"}");
-                }
-
-                payment.RefundTransactionId = refundResult.TransId.ToString();
+                return (false, "Chỉ hỗ trợ hoàn tiền cho giao dịch Stripe đã thanh toán thành công.");
             }
 
+            if (string.IsNullOrWhiteSpace(payment.TransactionId))
+                return (false, "Không tìm thấy mã giao dịch Stripe để hoàn tiền.");
+
+            var refundResult = await stripeService.RefundAsync(
+                payment.TransactionId,
+                (long)payment.Amount,
+                $"Hoan tien dat phong #{reservation.Id}");
+
+            if (refundResult == null || !string.Equals(refundResult.Status, "succeeded", StringComparison.OrdinalIgnoreCase))
+            {
+                return (false, "Hoàn tiền Stripe thất bại. Vui lòng thử lại sau.");
+            }
+
+            payment.RefundTransactionId = refundResult.Id;
             payment.Status = "Refunded";
             payment.RefundedAt = DateTime.Now;
             reservation.Status = "Cancelled";

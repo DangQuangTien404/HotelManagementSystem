@@ -14,18 +14,18 @@ namespace HotelManagementSystem.Web.Pages
     public class MyReservationsModel : PageModel
     {
         private readonly IBookingService _bookingService;
-        private readonly IMoMoService _momoService;
+        private readonly IStripeService _stripeService;
         private readonly HotelManagementDbContext _context;
 
         public List<Reservation> Reservations { get; set; } = new();
 
         public MyReservationsModel(
             IBookingService bookingService,
-            IMoMoService momoService,
+            IStripeService stripeService,
             HotelManagementDbContext context)
         {
             _bookingService = bookingService;
-            _momoService = momoService;
+            _stripeService = stripeService;
             _context = context;
         }
 
@@ -44,7 +44,7 @@ namespace HotelManagementSystem.Web.Pages
             if (customer == null) return RedirectToPage("/Login");
 
             var (success, message) = await _bookingService.ProcessRefundAsync(
-                reservationId, customer.Id, _momoService);
+                reservationId, customer.Id, _stripeService);
 
             if (success)
                 TempData["SuccessMessage"] = message;

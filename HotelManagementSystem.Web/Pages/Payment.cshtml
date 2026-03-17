@@ -6,12 +6,6 @@
 
 <style>
     .ls-wide { letter-spacing: .07em; }
-    .payment-header {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    }
-    .qr-glow {
-        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ee 100%);
-    }
     .price-row {
         display: flex;
         justify-content: space-between;
@@ -30,12 +24,11 @@
 
 <div class="container py-4">
 
-    <!-- Header -->
     <div class="mb-4">
         <h4 class="fw-bold mb-1">
             <i class="bi bi-credit-card-2-front me-2 text-primary"></i>Thanh toán đặt phòng
         </h4>
-        <p class="text-muted small mb-0">Kiểm tra thông tin và quét mã VietQR để thanh toán.</p>
+        <p class="text-muted small mb-0">Kiểm tra thông tin và thanh toán bằng Stripe Checkout.</p>
     </div>
 
     @if (!ViewData.ModelState.IsValid)
@@ -49,10 +42,7 @@
 
     <div class="row g-4 align-items-start">
 
-        <!-- ── Left: Booking recap ── -->
         <div class="col-lg-7">
-
-            <!-- Customer -->
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4 d-flex align-items-center gap-3">
                     <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width:42px;height:42px;min-width:42px">
@@ -65,7 +55,6 @@
                 </div>
             </div>
 
-            <!-- Room -->
             <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                 <div class="bg-primary p-4">
                     <div class="text-white">
@@ -78,7 +67,6 @@
                 </div>
             </div>
 
-            <!-- Dates -->
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
                     <p class="fw-bold text-uppercase text-muted ls-wide mb-3" style="font-size:.7rem">
@@ -110,7 +98,6 @@
                 </div>
             </div>
 
-            <!-- Price breakdown -->
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
                     <p class="fw-bold text-uppercase text-muted ls-wide mb-3" style="font-size:.7rem">
@@ -143,12 +130,12 @@
                         <span class="fw-bold text-secondary fs-5">@Model.TotalPrice.ToString("N0") ₫</span>
                     </div>
 
-                    <div class="mt-3 p-3 rounded-3" style="background:#fff8e1;border:1px solid #ffe082">
+                    <div class="mt-3 p-3 rounded-3" style="background:#eef2ff;border:1px solid #c7d2fe">
                         <div class="price-row">
                             <span class="fw-semibold small">
-                                <i class="bi bi-lock-fill text-warning me-1"></i>Thanh toán ngay (1 đêm đặt cọ)
+                                <i class="bi bi-lock-fill text-primary me-1"></i>Thanh toán ngay (1 đêm đặt cọc)
                             </span>
-                            <span class="fw-bold text-warning-emphasis">@Model.DepositAmount.ToString("N0") ₫</span>
+                            <span class="fw-bold text-primary">@Model.DepositAmount.ToString("N0") ₫</span>
                         </div>
                         <div class="price-row mb-0">
                             <span class="text-muted small">
@@ -159,226 +146,54 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <!-- ── Right: Payment options ── -->
         <div class="col-lg-5">
             <div class="card border-0 shadow rounded-4 sticky-top" style="top:1.25rem">
-
-                <!-- Payment method tabs -->
-                <div class="card-header bg-white rounded-top-4 border-0 p-4 pb-0">
-                    <ul class="nav nav-tabs" id="paymentTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="vietqr-tab" data-bs-toggle="tab"
-                                    data-bs-target="#vietqr-pane" type="button" role="tab">
-                                <i class="bi bi-qr-code me-1"></i>VietQR
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="momo-tab" data-bs-toggle="tab"
-                                    data-bs-target="#momo-pane" type="button" role="tab">
-                                <i class="bi bi-wallet2 me-1"></i>MoMo
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="vnpay-tab" data-bs-toggle="tab"
-                                    data-bs-target="#vnpay-pane" type="button" role="tab">
-                                <i class="bi bi-bank me-1"></i>VNPay
-                            </button>
-                        </li>
-                    </ul>
+                <div class="text-white border-0 p-4 rounded-top-4" style="background: linear-gradient(135deg, #635bff 0%, #7a73ff 100%);">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-credit-card fs-5"></i>
+                        <span class="fw-bold">Thanh toán qua Stripe</span>
+                    </div>
+                    <p class="text-white-50 small mb-0 mt-1">Bạn sẽ được chuyển sang Stripe Checkout để thanh toán bằng thẻ.</p>
                 </div>
 
-                <div class="tab-content">
-
-                    <!-- VietQR tab -->
-                    <div class="tab-pane fade show active" id="vietqr-pane" role="tabpanel">
-                        <div class="payment-header text-white border-0 p-4">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-qr-code fs-5"></i>
-                                <span class="fw-bold">Quét mã để thanh toán</span>
-                            </div>
-                            <p class="text-white-50 small mb-0 mt-1">Sử dụng ứng dụng ngân hàng để quét mã VietQR bên dưới.</p>
+                <div class="card-body p-4 text-center">
+                    <div class="mb-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3"
+                             style="width:80px;height:80px">
+                            <i class="bi bi-credit-card text-primary" style="font-size:2rem"></i>
                         </div>
-
-                        <div class="card-body p-4 text-center">
-                            <div class="qr-glow rounded-4 p-4 mb-3 d-inline-block">
-                                <img src="@Model.VietQrUrl"
-                                     alt="VietQR Payment Code"
-                                     class="img-fluid rounded-3"
-                                     style="max-width:260px" />
-                            </div>
-
-                            <div class="bg-warning-subtle border border-warning-subtle rounded-3 p-3 mb-3 text-start">
-                                <div class="d-flex gap-2 align-items-start">
-                                    <i class="bi bi-info-circle-fill text-warning mt-1"></i>
-                                    <div class="small">
-                                        <div class="fw-bold mb-1">Hướng dẫn thanh toán</div>
-                                        <ol class="mb-0 ps-3 lh-lg">
-                                            <li>Mở ứng dụng ngân hàng</li>
-                                            <li>Chọn <strong>Quét QR</strong></li>
-                                            <li>Quét mã QR ở trên</li>
-                                            <li>Xác nhận chuyển khoản</li>
-                                            <li>Nhấn <strong>Hoàn tất</strong> bên dưới</li>
-                                        </ol>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-light rounded-3 p-3 mb-3">
-                                <div class="text-muted ls-wide" style="font-size:.6rem;text-transform:uppercase">Số tiền đặt cọ (1 đêm)</div>
-                                <div class="fw-bold text-primary fs-4">@Model.DepositAmount.ToString("N0") ₫</div>
-                            </div>
-                        </div>
-
-                        <div class="card-footer bg-white border-0 p-4 pt-0">
-                            <form method="post">
-                                <input type="hidden" asp-for="RequestData.CustomerId" />
-                                <input type="hidden" asp-for="RequestData.RoomId" />
-                                <input type="hidden" asp-for="RequestData.CheckInDate" />
-                                <input type="hidden" asp-for="RequestData.CheckOutDate" />
-                                @foreach (var id in Model.RequestData.SelectedServiceIds)
-                                {
-                                    <input type="hidden" name="RequestData.SelectedServiceIds" value="@id" />
-                                }
-                                <button type="submit" class="btn btn-success w-100 py-2 fw-bold rounded-3 mb-2">
-                                    <i class="bi bi-check-circle me-2"></i>Đã thanh toán — Hoàn tất đặt phòng
-                                </button>
-                            </form>
-                            <a asp-page="/Booking" asp-route-roomId="@Model.RequestData.RoomId"
-                               class="btn btn-outline-secondary w-100 rounded-3 btn-sm">
-                                <i class="bi bi-arrow-left me-1"></i>Quay lại
-                            </a>
-                        </div>
+                        <h5 class="fw-bold">Stripe Checkout</h5>
+                        <p class="text-muted small">Hỗ trợ thanh toán thẻ quốc tế nhanh chóng và bảo mật.</p>
                     </div>
 
-                    <!-- MoMo tab -->
-                    <div class="tab-pane fade" id="momo-pane" role="tabpanel">
-                        <div class="text-white border-0 p-4" style="background: linear-gradient(135deg, #a50064 0%, #d82d8b 100%);">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-wallet2 fs-5"></i>
-                                <span class="fw-bold">Thanh toán qua MoMo</span>
-                            </div>
-                            <p class="text-white-50 small mb-0 mt-1">Bạn sẽ được chuyển sang MoMo để hoàn tất thanh toán.</p>
-                        </div>
-
-                        <div class="card-body p-4 text-center">
-                            <div class="mb-4">
-                                <div class="rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3"
-                                     style="width:80px;height:80px">
-                                    <i class="bi bi-wallet2 text-danger" style="font-size:2rem"></i>
-                                </div>
-                                <h5 class="fw-bold">Ví MoMo</h5>
-                                <p class="text-muted small">Thanh toán nhanh chóng và an toàn qua ví điện tử MoMo</p>
-                            </div>
-
-                            <div class="bg-light rounded-3 p-3 mb-3">
-                                <div class="text-muted ls-wide" style="font-size:.6rem;text-transform:uppercase">Số tiền đặt cọ (1 đêm)</div>
-                                <div class="fw-bold text-danger fs-4">@Model.DepositAmount.ToString("N0") ₫</div>
-                            </div>
-
-                            <div class="bg-info-subtle border border-info-subtle rounded-3 p-3 mb-3 text-start">
-                                <div class="d-flex gap-2 align-items-start">
-                                    <i class="bi bi-shield-check text-info mt-1"></i>
-                                    <div class="small">
-                                        <div class="fw-bold mb-1">Thanh toán an toàn</div>
-                                        <ul class="mb-0 ps-3 lh-lg">
-                                            <li>Nhấn nút bên dưới để chuyển sang MoMo</li>
-                                            <li>Xác nhận thanh toán trên ứng dụng MoMo</li>
-                                            <li>Bạn sẽ được chuyển về trang kết quả</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card-footer bg-white border-0 p-4 pt-0">
-                            <form method="post" asp-page-handler="MoMo">
-                                <input type="hidden" asp-for="RequestData.CustomerId" />
-                                <input type="hidden" asp-for="RequestData.RoomId" />
-                                <input type="hidden" asp-for="RequestData.CheckInDate" />
-                                <input type="hidden" asp-for="RequestData.CheckOutDate" />
-                                @foreach (var id in Model.RequestData.SelectedServiceIds)
-                                {
-                                    <input type="hidden" name="RequestData.SelectedServiceIds" value="@id" />
-                                }
-                                <button type="submit" class="btn w-100 py-2 fw-bold rounded-3 mb-2 text-white"
-                                        style="background: linear-gradient(135deg, #a50064 0%, #d82d8b 100%);">
-                                    <i class="bi bi-wallet2 me-2"></i>Thanh toán qua MoMo
-                                </button>
-                            </form>
-                            <a asp-page="/Booking" asp-route-roomId="@Model.RequestData.RoomId"
-                               class="btn btn-outline-secondary w-100 rounded-3 btn-sm">
-                                <i class="bi bi-arrow-left me-1"></i>Quay lại
-                            </a>
-                        </div>
+                    <div class="bg-light rounded-3 p-3 mb-3">
+                        <div class="text-muted ls-wide" style="font-size:.6rem;text-transform:uppercase">Số tiền đặt cọc (1 đêm)</div>
+                        <div class="fw-bold text-primary fs-4">@Model.DepositAmount.ToString("N0") ₫</div>
                     </div>
-
-                    <!-- VNPay tab -->
-                    <div class="tab-pane fade" id="vnpay-pane" role="tabpanel">
-                        <div class="text-white border-0 p-4" style="background: linear-gradient(135deg, #005baa 0%, #00a2ff 100%);">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-bank fs-5"></i>
-                                <span class="fw-bold">Thanh toán qua VNPay</span>
-                            </div>
-                            <p class="text-white-50 small mb-0 mt-1">Bạn sẽ được chuyển sang cổng VNPay để hoàn tất thanh toán.</p>
-                        </div>
-
-                        <div class="card-body p-4 text-center">
-                            <div class="mb-4">
-                                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center mx-auto mb-3"
-                                     style="width:80px;height:80px">
-                                    <i class="bi bi-bank text-primary" style="font-size:2rem"></i>
-                                </div>
-                                <h5 class="fw-bold">Cổng VNPay</h5>
-                                <p class="text-muted small">Thanh toán bằng thẻ ATM nội địa, Internet Banking hoặc QR VNPay</p>
-                            </div>
-
-                            <div class="bg-light rounded-3 p-3 mb-3">
-                                <div class="text-muted ls-wide" style="font-size:.6rem;text-transform:uppercase">Số tiền đặt cọ (1 đêm)</div>
-                                <div class="fw-bold text-primary fs-4">@Model.DepositAmount.ToString("N0") ₫</div>
-                            </div>
-
-                            <div class="bg-info-subtle border border-info-subtle rounded-3 p-3 mb-3 text-start">
-                                <div class="d-flex gap-2 align-items-start">
-                                    <i class="bi bi-shield-lock text-info mt-1"></i>
-                                    <div class="small">
-                                        <div class="fw-bold mb-1">Quy trình thanh toán</div>
-                                        <ul class="mb-0 ps-3 lh-lg">
-                                            <li>Nhấn nút thanh toán VNPay</li>
-                                            <li>Chọn ngân hàng/phương thức thanh toán</li>
-                                            <li>Xác nhận giao dịch và quay lại website</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card-footer bg-white border-0 p-4 pt-0">
-                            <form method="post" asp-page-handler="VnPay">
-                                <input type="hidden" asp-for="RequestData.CustomerId" />
-                                <input type="hidden" asp-for="RequestData.RoomId" />
-                                <input type="hidden" asp-for="RequestData.CheckInDate" />
-                                <input type="hidden" asp-for="RequestData.CheckOutDate" />
-                                @foreach (var id in Model.RequestData.SelectedServiceIds)
-                                {
-                                    <input type="hidden" name="RequestData.SelectedServiceIds" value="@id" />
-                                }
-                                <button type="submit" class="btn w-100 py-2 fw-bold rounded-3 mb-2 text-white"
-                                        style="background: linear-gradient(135deg, #005baa 0%, #00a2ff 100%);">
-                                    <i class="bi bi-bank me-2"></i>Thanh toán qua VNPay
-                                </button>
-                            </form>
-                            <a asp-page="/Booking" asp-route-roomId="@Model.RequestData.RoomId"
-                               class="btn btn-outline-secondary w-100 rounded-3 btn-sm">
-                                <i class="bi bi-arrow-left me-1"></i>Quay lại
-                            </a>
-                        </div>
-                    </div>
-
                 </div>
 
+                <div class="card-footer bg-white border-0 p-4 pt-0">
+                    <form method="post" asp-page-handler="Stripe">
+                        <input type="hidden" asp-for="RequestData.CustomerId" />
+                        <input type="hidden" asp-for="RequestData.RoomId" />
+                        <input type="hidden" asp-for="RequestData.CheckInDate" />
+                        <input type="hidden" asp-for="RequestData.CheckOutDate" />
+                        @foreach (var id in Model.RequestData.SelectedServiceIds)
+                        {
+                            <input type="hidden" name="RequestData.SelectedServiceIds" value="@id" />
+                        }
+                        <button type="submit" class="btn w-100 py-2 fw-bold rounded-3 mb-2 text-white"
+                                style="background: linear-gradient(135deg, #635bff 0%, #7a73ff 100%);">
+                            <i class="bi bi-credit-card me-2"></i>Thanh toán qua Stripe
+                        </button>
+                    </form>
+                    <a asp-page="/Booking" asp-route-roomId="@Model.RequestData.RoomId"
+                       class="btn btn-outline-secondary w-100 rounded-3 btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>Quay lại
+                    </a>
+                </div>
             </div>
         </div>
 

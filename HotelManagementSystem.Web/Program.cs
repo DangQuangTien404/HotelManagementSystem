@@ -1,12 +1,14 @@
+﻿using DotNetEnv;
 using HotelManagementSystem.Business;
-using HotelManagementSystem.Business.service;
 using HotelManagementSystem.Business.interfaces;
+using HotelManagementSystem.Business.service;
 using HotelManagementSystem.Data.Context;
-using HotelManagementSystem.Data.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using DotNetEnv;
 using Microsoft.SemanticKernel;
+
+Env.Load();
+Env.Load("../.env");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +17,6 @@ DotNetEnv.Env.Load();
 builder.Services.AddDbContext<HotelManagementDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Cấu hình Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -27,7 +28,6 @@ builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IRoomUpdateBroadcaster, HotelManagementSystem.Web.Services.RoomUpdateBroadcaster>();
 
-// 3. Đăng ký các Business Services
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<ICheckOutService, CheckOutService>();
@@ -66,18 +66,15 @@ builder.Services.AddScoped<Kernel>(sp =>
 // -------------------------
 
 builder.Services.AddScoped<IVnPayService, VnPayService>();
+builder.Services.AddHttpClient<IStripeService, StripeService>();
 builder.Services.AddHostedService<NoShowSweepService>();
 
 var app = builder.Build();
 
-// --- BẮT ĐẦU PHẦN TỰ ĐỘNG DỌN DẸP VÀ SEED DATA ---
-
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<HotelManagementSystem.Data.Context.HotelManagementDbContext>();
-
-    // ... (Phần A: Xử lý tài khoản trùng giữ nguyên) ...
+    var context = services.GetRequiredService<HotelManagementDbContext>();
 
     // B. TẠO TÀI KHOẢN ADMIN MẪU
     if (!context.Users.Any(u => u.Username == "admin"))
@@ -123,9 +120,7 @@ using (var scope = app.Services.CreateScope())
         context.SaveChanges();
     }
 }
-// --- KẾT THÚC PHẦN SEED DATA ---
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -145,21 +140,36 @@ app.MapHub<HotelManagementSystem.Web.Hubs.NotificationHub>("/notificationHub");
 app.MapHub<HotelManagementSystem.Web.Hubs.RoomHub>("/roomHub");
 app.MapHub<HotelManagementSystem.Web.Hubs.ChatHub>("/chatHub");
 
-app.MapPost("/api/momo-ipn", async (HttpContext context, IBookingService bookingService, IMoMoService momoService) =>
+// Stripe webhook
+app.MapPost("/api/stripe-webhook", async (HttpContext context, IBookingService bookingService, IStripeService stripeService) =>
 {
     using var reader = new StreamReader(context.Request.Body);
-    var body = await reader.ReadToEndAsync();
-    var data = System.Text.Json.JsonSerializer.Deserialize<MoMoCallbackData>(
-        body, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+    var payload = await reader.ReadToEndAsync();
+    var signatureHeader = context.Request.Headers["Stripe-Signature"].ToString();
 
-    if (data == null) return Results.BadRequest();
+    var stripeEvent = stripeService.ParseWebhookEvent(payload, signatureHeader);
+    if (stripeEvent == null)
+    {
+        return Results.BadRequest();
+    }
 
-    if (!momoService.VerifySignature(data)) return Results.BadRequest();
+    if (string.IsNullOrWhiteSpace(stripeEvent.OrderId))
+    {
+        return Results.NoContent();
+    }
 
-    if (data.ResultCode == 0)
-        await bookingService.ConfirmPaymentAsync(data.OrderId, data.TransId.ToString());
-    else
-        await bookingService.FailPaymentAsync(data.OrderId);
+    if ((string.Equals(stripeEvent.Type, "checkout.session.completed", StringComparison.OrdinalIgnoreCase)
+         || string.Equals(stripeEvent.Type, "checkout.session.async_payment_succeeded", StringComparison.OrdinalIgnoreCase))
+        && string.Equals(stripeEvent.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
+    {
+        var transactionId = stripeEvent.TransactionId ?? stripeEvent.SessionId ?? stripeEvent.OrderId;
+        await bookingService.ConfirmPaymentAsync(stripeEvent.OrderId, transactionId);
+    }
+    else if (string.Equals(stripeEvent.Type, "checkout.session.expired", StringComparison.OrdinalIgnoreCase)
+             || string.Equals(stripeEvent.Type, "checkout.session.async_payment_failed", StringComparison.OrdinalIgnoreCase))
+    {
+        await bookingService.FailPaymentAsync(stripeEvent.OrderId);
+    }
 
     return Results.NoContent();
 });

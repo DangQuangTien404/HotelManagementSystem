@@ -14,12 +14,15 @@ namespace HotelManagementSystem.Business.interfaces
         Task<(int ReservationId, string OrderId)?> CreatePendingBookingAsync(
             BookingRequest request,
             decimal amount,
-            string paymentMethod = "MoMo",
-            string orderPrefix = "MOMO");
+            string paymentMethod = "Stripe",
+            string orderPrefix = "STRIPE");
         Task<bool> ConfirmPaymentAsync(string orderId, string transactionId);
         Task<bool> FailPaymentAsync(string orderId);
         Task<List<Reservation>> GetCustomerReservationsAsync(int customerId);
-        Task<(bool Success, string Message)> ProcessRefundAsync(int reservationId, int customerId, IMoMoService momoService);
+        Task<(bool Success, string Message)> ProcessRefundAsync(
+            int reservationId,
+            int customerId,
+            IStripeService stripeService);
         Task<List<(DateTime CheckIn, DateTime CheckOut)>> GetReservedPeriodsAsync(int roomId, int? excludeReservationId = null);
     }
 }

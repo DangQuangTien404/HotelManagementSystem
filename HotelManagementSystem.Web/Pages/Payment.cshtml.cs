@@ -1,4 +1,3 @@
-using HotelManagementSystem.Business.service;
 using HotelManagementSystem.Business.interfaces;
 using HotelManagementSystem.Data.Context;
 using HotelManagementSystem.Data.Models;
@@ -16,8 +15,7 @@ namespace HotelManagementSystem.Web.Pages
     public class PaymentModel : PageModel
     {
         private readonly IBookingService _service;
-        private readonly IMoMoService _momoService;
-        private readonly IVnPayService _vnPayService;
+        private readonly IStripeService _stripeService;
         private readonly HotelManagementDbContext _context;
         private readonly IConfiguration _configuration;
 
@@ -32,18 +30,15 @@ namespace HotelManagementSystem.Web.Pages
         public decimal TotalPrice { get; set; }
         public decimal DepositAmount { get; set; }
         public int Nights { get; set; }
-        public string VietQrUrl { get; set; } = string.Empty;
 
         public PaymentModel(
             IBookingService service,
-            IMoMoService momoService,
-            IVnPayService vnPayService,
+            IStripeService stripeService,
             HotelManagementDbContext context,
             IConfiguration configuration)
         {
             _service = service;
-            _momoService = momoService;
-            _vnPayService = vnPayService;
+            _stripeService = stripeService;
             _context = context;
             _configuration = configuration;
         }
@@ -60,36 +55,10 @@ namespace HotelManagementSystem.Web.Pages
             if (SelectedRoom == null) return RedirectToPage("/Rooms");
 
             CalculateTotal();
-            BuildVietQrUrl();
-
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
-        {
-            var customer = await GetCurrentCustomerAsync();
-            if (customer != null)
-            {
-                RequestData.CustomerId = customer.Id;
-                CustomerName = customer.FullName;
-            }
-
-            var result = await _service.ProcessBooking(RequestData);
-            if (result)
-            {
-                TempData.Remove("BookingRequest");
-                TempData["SuccessMessage"] = "Đặt phòng thành công! Cảm ơn bạn đã thanh toán.";
-                return RedirectToPage("/Rooms");
-            }
-
-            await LoadDataAsync();
-            CalculateTotal();
-            BuildVietQrUrl();
-            ModelState.AddModelError("", "Đặt phòng không thành công! Vui lòng kiểm tra lại.");
-            return Page();
-        }
-
-        public async Task<IActionResult> OnPostMoMoAsync()
+        public async Task<IActionResult> OnPostStripeAsync()
         {
             var customer = await GetCurrentCustomerAsync();
             if (customer != null)
@@ -103,14 +72,19 @@ namespace HotelManagementSystem.Web.Pages
 
             CalculateTotal();
 
+            if (string.IsNullOrWhiteSpace(_configuration["Stripe:SecretKey"]) || _configuration["Stripe:SecretKey"] == "YOUR_STRIPE_SECRET_KEY")
+            {
+                ModelState.AddModelError("", "Stripe chưa được cấu hình. Vui lòng liên hệ quản trị viên.");
+                return Page();
+            }
+
             var pendingResult = await _service.CreatePendingBookingAsync(
                 RequestData,
                 DepositAmount,
-                paymentMethod: "MoMo",
-                orderPrefix: "MOMO");
+                paymentMethod: "Stripe",
+                orderPrefix: "STRIPE");
             if (pendingResult == null)
             {
-                BuildVietQrUrl();
                 ModelState.AddModelError("", "Không thể tạo đặt phòng. Phòng có thể đã được đặt.");
                 return Page();
             }
@@ -118,83 +92,26 @@ namespace HotelManagementSystem.Web.Pages
             var (_, orderId) = pendingResult.Value;
 
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var returnUrl = _configuration["MoMo:ReturnUrl"] ?? "/PaymentCallback";
-            var ipnPath = _configuration["MoMo:IpnUrl"] ?? "/api/momo-ipn";
+            var callbackPath = _configuration["Stripe:ReturnUrl"] ?? "/PaymentCallback";
+            var successUrl = $"{baseUrl}{callbackPath}?provider=stripe&orderId={Uri.EscapeDataString(orderId)}&session_id={{CHECKOUT_SESSION_ID}}";
+            var cancelUrl = $"{baseUrl}{callbackPath}?provider=stripe&orderId={Uri.EscapeDataString(orderId)}&cancelled=1";
 
-            var redirectUrl = $"{baseUrl}{returnUrl}";
-            var ipnUrl = $"{baseUrl}{ipnPath}";
-
-            var orderInfo = $"Thanh toan phong {SelectedRoom!.RoomNumber}";
-            var amount = (long)DepositAmount;
-
-            var momoResponse = await _momoService.CreatePaymentAsync(
-                orderId, orderInfo, amount, redirectUrl, ipnUrl);
-
-            if (momoResponse != null && momoResponse.ResultCode == 0
-                && !string.IsNullOrEmpty(momoResponse.PayUrl))
-            {
-                TempData.Remove("BookingRequest");
-                return Redirect(momoResponse.PayUrl);
-            }
-
-            await _service.FailPaymentAsync(orderId);
-            BuildVietQrUrl();
-            ModelState.AddModelError("",
-                $"Không thể kết nối MoMo: {momoResponse?.Message ?? "Không có phản hồi"}");
-            return Page();
-        }
-
-        public async Task<IActionResult> OnPostVnPayAsync()
-        {
-            var customer = await GetCurrentCustomerAsync();
-            if (customer != null)
-            {
-                RequestData.CustomerId = customer.Id;
-                CustomerName = customer.FullName;
-            }
-
-            await LoadDataAsync();
-            if (SelectedRoom == null) return RedirectToPage("/Rooms");
-
-            CalculateTotal();
-
-            if (string.IsNullOrWhiteSpace(_configuration["VNPay:TmnCode"])
-                || string.IsNullOrWhiteSpace(_configuration["VNPay:HashSecret"])
-                || _configuration["VNPay:TmnCode"] == "YOUR_VNPAY_TMN_CODE"
-                || _configuration["VNPay:HashSecret"] == "YOUR_VNPAY_HASH_SECRET")
-            {
-                BuildVietQrUrl();
-                ModelState.AddModelError("", "VNPay chưa được cấu hình. Vui lòng liên hệ quản trị viên.");
-                return Page();
-            }
-
-            var pendingResult = await _service.CreatePendingBookingAsync(
-                RequestData,
-                DepositAmount,
-                paymentMethod: "VNPay",
-                orderPrefix: "VNPAY");
-            if (pendingResult == null)
-            {
-                BuildVietQrUrl();
-                ModelState.AddModelError("", "Không thể tạo đặt phòng. Phòng có thể đã được đặt.");
-                return Page();
-            }
-
-            var (_, orderId) = pendingResult.Value;
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var returnPath = _configuration["VNPay:ReturnUrl"] ?? "/PaymentCallback";
-            var returnUrl = $"{baseUrl}{returnPath}";
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
-
-            var paymentUrl = _vnPayService.CreatePaymentUrl(
+            var session = await _stripeService.CreateCheckoutSessionAsync(
                 orderId,
                 $"Thanh toan phong {SelectedRoom.RoomNumber}",
                 (long)DepositAmount,
-                returnUrl,
-                ipAddress);
+                successUrl,
+                cancelUrl);
 
-            TempData.Remove("BookingRequest");
-            return Redirect(paymentUrl);
+            if (session != null && !string.IsNullOrWhiteSpace(session.Url))
+            {
+                TempData.Remove("BookingRequest");
+                return Redirect(session.Url);
+            }
+
+            await _service.FailPaymentAsync(orderId);
+            ModelState.AddModelError("", "Không thể tạo phiên thanh toán Stripe.");
+            return Page();
         }
 
         private async Task LoadDataAsync()
@@ -220,21 +137,7 @@ namespace HotelManagementSystem.Web.Pages
             RoomTotal = (SelectedRoom?.BasePrice ?? 0) * Nights;
             ServiceTotal = SelectedServices.Sum(s => s.Price);
             TotalPrice = RoomTotal + ServiceTotal;
-            DepositAmount = SelectedRoom?.BasePrice ?? 0; // 1-night deposit charged at booking
-        }
-
-        private void BuildVietQrUrl()
-        {
-            var bankId = _configuration["VietQR:BankId"] ?? "970422";
-            var accountNo = _configuration["VietQR:AccountNo"] ?? "0000000000";
-            var accountName = _configuration["VietQR:AccountName"] ?? "LUXURY HOTEL";
-            var template = _configuration["VietQR:Template"] ?? "compact2";
-
-            var description = $"Thanh toan phong {SelectedRoom?.RoomNumber}";
-            var amount = (long)DepositAmount;
-
-            VietQrUrl = $"https://img.vietqr.io/image/{bankId}-{accountNo}-{template}.png"
-                      + $"?amount={amount}&addInfo={Uri.EscapeDataString(description)}&accountName={Uri.EscapeDataString(accountName)}";
+            DepositAmount = SelectedRoom?.BasePrice ?? 0;
         }
 
         private async Task<Customer?> GetCurrentCustomerAsync()
