@@ -10,7 +10,7 @@ using HotelManagementSystem.Business.interfaces;
 
 namespace HotelManagementSystem.Web.Pages
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Receptionist")]
     public class ReservationsModel : PageModel
     {
         private readonly HotelManagementDbContext _context;

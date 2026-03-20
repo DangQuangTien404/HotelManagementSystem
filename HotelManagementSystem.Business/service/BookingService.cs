@@ -209,13 +209,9 @@ namespace HotelManagementSystem.Business.service
             payment.TransactionId = transactionId;
             payment.CompletedAt = DateTime.Now;
 
-            payment.Reservation.Status = "CheckedIn";
+            payment.Reservation.Status = "Confirmed";
 
             var room = await _context.Rooms.FindAsync(payment.Reservation.RoomId);
-            if (room != null)
-            {
-                room.Status = "Occupied";
-            }
 
             var existingCheckIn = await _context.CheckInOuts
                 .FirstOrDefaultAsync(c => c.ReservationId == payment.Reservation.Id);
@@ -242,11 +238,6 @@ namespace HotelManagementSystem.Business.service
                 RecipientType = "Admin",
                 IsAnnouncement = true
             }, toAdminGroup: true);
-
-            if (room != null)
-            {
-                await _roomUpdateBroadcaster.BroadcastRoomStatusAsync(room.Id, room.RoomNumber, room.Status);
-            }
 
             return true;
         }
