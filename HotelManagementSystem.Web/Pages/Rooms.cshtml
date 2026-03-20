@@ -223,23 +223,13 @@
         .build();
 
     roomConnection.on("RoomStatusUpdated", function (room) {
-        const card = document.querySelector(`[data-room-id="${room.id}"]`);
-        if (room.status !== "Available") {
-            if (card) {
-                card.remove();
-                const countEl = document.querySelector("strong");
-                if (countEl) {
-                    const current = parseInt(countEl.textContent) || 0;
-                    if (current > 0) countEl.textContent = current - 1;
-                }
-                toastr.warning(`Phòng ${room.roomNumber} vừa được đặt.`, "Cập nhật phòng");
-            }
-        } else {
-            if (!card) {
-                toastr.info(`Phòng ${room.roomNumber} vừa trở thành trống. Làm mới trang để xem.`, "Cập nhật phòng");
-            }
-        }
-    });
+    const card = document.querySelector(`[data-room-id="${room.id}"]`);
+    if (!card) {
+        return;
+    }
+
+    toastr.info(`Phòng ${room.roomNumber} vừa cập nhật trạng thái. Vui lòng tải lại để xem ngày đã đặt mới nhất.`, "Cập nhật phòng");
+});
 
     roomConnection.start().catch(err => console.error("RoomHub error:", err));
 }());

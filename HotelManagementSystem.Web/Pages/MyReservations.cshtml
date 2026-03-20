@@ -53,7 +53,8 @@
                 var refundDeadline  = MyReservationsModel.GetRefundDeadline(reservation);
                 var isRefundEligible = MyReservationsModel.IsRefundEligible(reservation);
                 var hoursLeft = (refundDeadline - DateTime.Now).TotalHours;
-                var canShowRefund = reservation.Status == "Confirmed" && payment?.Status == "Completed";
+                var canShowRefund = (reservation.Status == "Confirmed" || reservation.Status == "CheckedIn")
+                    && payment?.Status == "Completed";
                 var statusClass = reservation.Status switch
                 {
                     "Confirmed" => "success",
@@ -250,11 +251,18 @@
                                             Tiền sẽ được hoàn về ví MoMo của bạn.
                                         </div>
                                     }
+                                    else if (payment.PaymentMethod == "Stripe")
+                                    {
+                                        <div class="alert alert-info small mt-3 mb-0 rounded-3">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Tiền sẽ được hoàn về thẻ đã thanh toán qua Stripe.
+                                        </div>
+                                    }
                                     else
                                     {
                                         <div class="alert alert-warning small mt-3 mb-0 rounded-3">
                                             <i class="bi bi-info-circle me-1"></i>
-                                            Đặt phòng sẽ được hủy. Vui lòng liên hệ lễ tân để hoàn tiền chuyển khoản.
+                                            Chỉ hỗ trợ hoàn tiền tự động cho thanh toán Stripe.
                                         </div>
                                     }
                                 </div>

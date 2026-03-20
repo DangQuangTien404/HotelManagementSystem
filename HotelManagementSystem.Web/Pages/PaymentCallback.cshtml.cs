@@ -1,4 +1,3 @@
-using HotelManagementSystem.Business.service;
 using HotelManagementSystem.Business.interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,72 +9,71 @@ namespace HotelManagementSystem.Web.Pages
     public class PaymentCallbackModel : PageModel
     {
         private readonly IBookingService _bookingService;
-        private readonly IMoMoService _momoService;
+        private readonly IStripeService _stripeService;
 
         public bool IsSuccess { get; set; }
         public string ResultMessage { get; set; } = string.Empty;
         public string? OrderId { get; set; }
 
-        public PaymentCallbackModel(IBookingService bookingService, IMoMoService momoService)
+        public PaymentCallbackModel(
+            IBookingService bookingService,
+            IStripeService stripeService)
         {
             _bookingService = bookingService;
-            _momoService = momoService;
+            _stripeService = stripeService;
         }
 
-        public async Task<IActionResult> OnGetAsync(
-            string? partnerCode, string? orderId, string? requestId,
-            long amount, string? orderInfo, string? orderType,
-            long transId, int resultCode, string? message,
-            string? payType, long responseTime, string? extraData,
-            string? signature)
+        public async Task<IActionResult> OnGetAsync()
         {
-            OrderId = orderId;
+            return await HandleStripeCallbackAsync();
+        }
 
-            if (string.IsNullOrEmpty(orderId) || string.IsNullOrEmpty(signature))
+        private async Task<IActionResult> HandleStripeCallbackAsync()
+        {
+            OrderId = Request.Query["orderId"].ToString();
+            var sessionId = Request.Query["session_id"].ToString();
+            var cancelled = Request.Query["cancelled"].ToString();
+
+            if (string.Equals(cancelled, "1", StringComparison.OrdinalIgnoreCase))
             {
+                if (!string.IsNullOrWhiteSpace(OrderId))
+                {
+                    await _bookingService.FailPaymentAsync(OrderId);
+                }
+
                 IsSuccess = false;
-                ResultMessage = "Thông tin thanh toán không hợp lệ.";
+                ResultMessage = "Bạn đã hủy thanh toán Stripe.";
                 return Page();
             }
 
-            var callbackData = new MoMoCallbackData
-            {
-                PartnerCode = partnerCode ?? string.Empty,
-                OrderId = orderId,
-                RequestId = requestId ?? string.Empty,
-                Amount = amount,
-                OrderInfo = orderInfo ?? string.Empty,
-                OrderType = orderType ?? string.Empty,
-                TransId = transId,
-                ResultCode = resultCode,
-                Message = message ?? string.Empty,
-                PayType = payType ?? string.Empty,
-                ResponseTime = responseTime,
-                ExtraData = extraData ?? string.Empty,
-                Signature = signature
-            };
-
-            if (!_momoService.VerifySignature(callbackData))
+            if (string.IsNullOrWhiteSpace(OrderId) || string.IsNullOrWhiteSpace(sessionId))
             {
                 IsSuccess = false;
-                ResultMessage = "Chữ ký không hợp lệ. Thanh toán không được xác nhận.";
+                ResultMessage = "Thông tin thanh toán Stripe không hợp lệ.";
                 return Page();
             }
 
-            if (resultCode == 0)
+            var session = await _stripeService.GetSessionAsync(sessionId);
+            if (session == null)
             {
-                var confirmed = await _bookingService.ConfirmPaymentAsync(orderId, transId.ToString());
-                IsSuccess = confirmed;
-                ResultMessage = confirmed
-                    ? "Thanh toán MoMo thành công! Đặt phòng của bạn đã được xác nhận."
-                    : "Thanh toán thành công nhưng không thể cập nhật đặt phòng. Vui lòng liên hệ hỗ trợ.";
-            }
-            else
-            {
-                await _bookingService.FailPaymentAsync(orderId);
                 IsSuccess = false;
-                ResultMessage = $"Thanh toán không thành công: {message}";
+                ResultMessage = "Không thể xác minh phiên thanh toán Stripe. Vui lòng kiểm tra lại trong mục đặt phòng của bạn.";
+                return Page();
             }
+
+            if (!string.Equals(session.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
+            {
+                IsSuccess = false;
+                ResultMessage = "Thanh toán đang được Stripe xử lý. Nếu đã trừ tiền, đặt phòng sẽ tự động cập nhật sau ít phút.";
+                return Page();
+            }
+
+            var transactionId = session.PaymentIntent ?? session.Id;
+            var confirmed = await _bookingService.ConfirmPaymentAsync(OrderId, transactionId);
+            IsSuccess = confirmed;
+            ResultMessage = confirmed
+                ? "Thanh toán Stripe thành công! Đặt phòng của bạn đã được xác nhận."
+                : "Thanh toán thành công nhưng không thể cập nhật đặt phòng. Vui lòng liên hệ hỗ trợ.";
 
             return Page();
         }
