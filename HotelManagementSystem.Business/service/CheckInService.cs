@@ -10,11 +10,13 @@ namespace HotelManagementSystem.Business.service
     {
         private readonly HotelManagementDbContext _context;
         private readonly IRoomUpdateBroadcaster _broadcaster;
+        private readonly IReservationUpdateBroadcaster _reservationBroadcaster;
 
-        public CheckInService(HotelManagementDbContext context, IRoomUpdateBroadcaster broadcaster)
+        public CheckInService(HotelManagementDbContext context, IRoomUpdateBroadcaster broadcaster, IReservationUpdateBroadcaster reservationBroadcaster)
         {
             _context = context;
             _broadcaster = broadcaster;
+            _reservationBroadcaster = reservationBroadcaster;
         }
 
         // Thêm tham số staffId vào đây
@@ -25,6 +27,7 @@ namespace HotelManagementSystem.Business.service
             {
                 var res = await _context.Reservations
                     .Include(r => r.Room)
+                    .Include(r => r.Customer)
                     .FirstOrDefaultAsync(r => r.Id == reservationId);
                 if (res == null || res.Status != "Confirmed") return false;
 
@@ -45,7 +48,11 @@ namespace HotelManagementSystem.Business.service
                 await transaction.CommitAsync();
 
                 if (res.Room != null)
+                {
                     await _broadcaster.BroadcastRoomStatusAsync(res.Room.Id, res.Room.RoomNumber, "Occupied");
+                    await _reservationBroadcaster.BroadcastReservationCheckInAsync(
+                        res.Id, res.Room.Id, res.Room.RoomNumber, res.Customer?.FullName ?? "Unknown");
+                }
 
                 return true;
             }

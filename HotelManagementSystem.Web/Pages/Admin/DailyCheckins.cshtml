@@ -210,7 +210,7 @@
                                         <span class="text-muted">—</span>
                                     }
                                 </td>
-                                <td>
+                                <td data-reservation-id="@res.Id">
                                     @if (res.Status == "Confirmed")
                                     {
                                         if (isOverdue)
@@ -288,3 +288,105 @@
     </div>
 
 </div>
+
+@section Scripts {
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script>
+"use strict";
+(function () {
+    const reservationConnection = new signalR.HubConnectionBuilder()
+        .withUrl("/reservationHub")
+        .withAutomaticReconnect()
+        .build();
+
+    // Get current date filter from page
+    const currentDateFilter = new Date("@Model.Date.ToString("yyyy-MM-dd")");
+
+    reservationConnection.on("ReservationCreated", function (data) {
+        console.log("New reservation created:", data);
+        const resCheckInDate = new Date(data.checkInDate);
+        
+        // Only add if it matches the current date filter
+        if (resCheckInDate.toDateString() === currentDateFilter.toDateString()) {
+            // Find the table body
+            const tbody = document.querySelector("table tbody");
+            if (tbody) {
+                // Create new row for the reservation
+                const newRow = document.createElement("tr");
+                newRow.setAttribute("data-reservation-id", data.reservationId);
+                newRow.className = "table-success";
+                
+                newRow.innerHTML = `
+                    <td class="ps-4">
+                        <span class="fw-bold text-primary">${data.roomNumber}</span>
+                    </td>
+                    <td>
+                        <div class="fw-semibold">${data.customerName}</div>
+                    </td>
+                    <td class="text-muted">—</td>
+                    <td>${resCheckInDate.toLocaleDateString('vi-VN')}</td>
+                    <td>${new Date(data.checkOutDate).toLocaleDateString('vi-VN')}</td>
+                    <td><span class="text-muted">—</span></td>
+                    <td>
+                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Chờ check-in</span>
+                    </td>
+                    <td class="text-end pe-4">
+                        <form method="post" asp-page-handler="CheckIn" asp-route-id="${data.reservationId}" class="d-inline">
+                            <button type="submit" class="btn btn-primary btn-sm rounded-3 px-3">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Check-in
+                            </button>
+                        </form>
+                    </td>
+                `;
+                
+                tbody.insertBefore(newRow, tbody.firstChild);
+                
+                // Highlight briefly
+                setTimeout(() => newRow.classList.remove("table-success"), 2000);
+            }
+        }
+    });
+
+    reservationConnection.on("ReservationCheckedIn", function (data) {
+        console.log("Check-in received:", data);
+        // Find and update the corresponding row
+        const row = document.querySelector(`tr[data-reservation-id="${data.reservationId}"]`);
+        if (row) {
+            // Update status badge
+            const statusCell = row.querySelector("td:nth-child(7)");
+            if (statusCell) {
+                statusCell.innerHTML = '<span class="badge bg-success"><i class="bi bi-door-open"></i> Đã check-in</span>';
+            }
+            // Highlight the row briefly
+            row.classList.add("table-success");
+            setTimeout(() => row.classList.remove("table-success"), 2000);
+        }
+    });
+
+    reservationConnection.on("ReservationCheckedOut", function (data) {
+        console.log("Check-out received:", data);
+        // Remove or fade out the row since reservation is completed
+        const row = document.querySelector(`tr[data-reservation-id="${data.reservationId}"]`);
+        if (row) {
+            row.classList.add("table-danger");
+            setTimeout(() => {
+                row.style.opacity = "0.5";
+            }, 1000);
+        }
+    });
+
+    reservationConnection.start()
+        .then(function () {
+            console.log("SignalR ReservationHub connected");
+        })
+        .catch(function (err) {
+            return console.error(err.toString());
+        });
+
+    window.addEventListener("beforeunload", () => {
+        reservationConnection.stop();
+    });
+})();
+</script>
+}
+

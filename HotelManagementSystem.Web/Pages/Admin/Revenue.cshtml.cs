@@ -43,7 +43,7 @@ namespace HotelManagementSystem.Web.Pages.Admin
                 var days = (res.CheckOutDate - res.CheckInDate).Days;
                 if (days <= 0) days = 1; // Tính tối thiểu 1 ngày
 
-                RoomRevenue += days * (res.Room?.BasePrice ?? 0);
+                RoomRevenue += days * (res.Room?.Price ?? 0);
             }
 
             // 3. Doanh thu dịch vụ

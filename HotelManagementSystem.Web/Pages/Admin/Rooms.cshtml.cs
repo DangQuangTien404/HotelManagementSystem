@@ -31,7 +31,6 @@ namespace HotelManagementSystem.Web.Pages.Admin
         public async Task<IActionResult> OnPostSaveRoomAsync()
         {
             // Ignore properties not present in the form to pass validation
-            ModelState.Remove("NewRoom.Price");
             ModelState.Remove("NewRoom.Capacity");
             ModelState.Remove("NewRoom.Status");
 

@@ -17,8 +17,6 @@ public partial class Room
 
     public string Status { get; set; } = null!;
 
-    public decimal BasePrice { get; set; }
-
     public virtual ICollection<MaintenanceTask> MaintenanceTasks { get; set; } = new List<MaintenanceTask>();
 
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();

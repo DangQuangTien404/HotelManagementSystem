@@ -49,7 +49,7 @@ namespace HotelManagementSystem.Web.Pages
                 Id = r.Id,
                 RoomNumber = r.RoomNumber,
                 RoomType = r.RoomType,
-                Price = r.BasePrice,
+                Price = r.Price,
                 Status = r.Status,
                 // Tìm mã đơn đặt phòng tương ứng cho phòng này (nếu có khách)
                 CurrentReservationId = activeReservations.FirstOrDefault(res => res.RoomId == r.Id)?.Id

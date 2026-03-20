@@ -134,10 +134,10 @@ namespace HotelManagementSystem.Web.Pages
         private void CalculateTotal()
         {
             Nights = Math.Max(1, (RequestData.CheckOutDate - RequestData.CheckInDate).Days);
-            RoomTotal = (SelectedRoom?.BasePrice ?? 0) * Nights;
+            RoomTotal = (SelectedRoom?.Price ?? 0) * Nights;
             ServiceTotal = SelectedServices.Sum(s => s.Price);
             TotalPrice = RoomTotal + ServiceTotal;
-            DepositAmount = SelectedRoom?.BasePrice ?? 0;
+            DepositAmount = SelectedRoom?.Price ?? 0;
         }
 
         private async Task<Customer?> GetCurrentCustomerAsync()

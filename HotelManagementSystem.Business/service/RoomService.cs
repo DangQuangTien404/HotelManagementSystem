@@ -48,9 +48,6 @@ namespace HotelManagementSystem.Business.service
         // Thêm hoặc Cập nhật phòng
         public async Task SaveRoomAsync(Room room)
         {
-            // Sync Price to BasePrice for backward compatibility
-            room.Price = room.BasePrice;
-
             if (room.Id == 0)
             {
                 room.Status = "Available"; // Mặc định phòng mới là Trống

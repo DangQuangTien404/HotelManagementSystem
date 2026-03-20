@@ -32,7 +32,7 @@ namespace HotelManagementSystem.Web.Pages.Admin
             // Tính tiền
             var diff = DateTime.Now - Reservation.CheckInDate;
             TotalDays = diff.Days <= 0 ? 1 : diff.Days;
-            RoomTotalPrice = TotalDays * (Reservation.Room?.BasePrice ?? 0);
+            RoomTotalPrice = TotalDays * (Reservation.Room?.Price ?? 0);
             ServiceTotalPrice = await _context.ReservationServices
                 .Where(s => s.ReservationId == Reservation.Id)
                 .SumAsync(s => s.Quantity * s.UnitPrice);

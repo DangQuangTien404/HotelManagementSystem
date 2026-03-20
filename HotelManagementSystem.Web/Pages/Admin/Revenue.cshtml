@@ -78,7 +78,7 @@
                                 @{
                                     var days = (item.CheckOutDate - item.CheckInDate).Days;
                                     if (days <= 0) days = 1;
-                                    var amount = days * (item.Room?.BasePrice ?? 0);
+                                    var amount = days * (item.Room?.Price ?? 0);
                                 }
                                 @amount.ToString("N0") VND
                             </td>

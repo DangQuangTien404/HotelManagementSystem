@@ -10,11 +10,13 @@ namespace HotelManagementSystem.Business.service
     {
         private readonly HotelManagementDbContext _context;
         private readonly IRoomUpdateBroadcaster _broadcaster;
+        private readonly IReservationUpdateBroadcaster _reservationBroadcaster;
 
-        public CheckOutService(HotelManagementDbContext context, IRoomUpdateBroadcaster broadcaster)
+        public CheckOutService(HotelManagementDbContext context, IRoomUpdateBroadcaster broadcaster, IReservationUpdateBroadcaster reservationBroadcaster)
         {
             _context = context;
             _broadcaster = broadcaster;
+            _reservationBroadcaster = reservationBroadcaster;
         }
 
         // Thêm tham số staffId vào đây
@@ -26,6 +28,8 @@ namespace HotelManagementSystem.Business.service
                 var checkInfo = await _context.CheckInOuts
                     .Include(c => c.Reservation)
                     .ThenInclude(r => r.Room)
+                    .Include(c => c.Reservation)
+                    .ThenInclude(r => r.Customer)
                     .FirstOrDefaultAsync(c => c.ReservationId == reservationId && c.CheckOutTime == null);
 
                 if (checkInfo == null)
@@ -53,7 +57,7 @@ namespace HotelManagementSystem.Business.service
                 var stayDuration = (checkInfo.CheckOutTime.Value - checkInfo.CheckInTime!.Value).Days;
                 if (stayDuration <= 0) stayDuration = 1;
 
-                var roomAmount = stayDuration * checkInfo.Reservation.Room.BasePrice;
+                var roomAmount = stayDuration * checkInfo.Reservation.Room.Price;
                 var serviceAmount = await _context.ReservationServices
                     .Where(s => s.ReservationId == reservationId)
                     .SumAsync(s => s.Quantity * s.UnitPrice);
@@ -90,6 +94,12 @@ namespace HotelManagementSystem.Business.service
                     checkInfo.Reservation.Room.Id,
                     checkInfo.Reservation.Room.RoomNumber,
                     "Available");
+                
+                await _reservationBroadcaster.BroadcastReservationCheckOutAsync(
+                    checkInfo.Reservation.Id,
+                    checkInfo.Reservation.Room.Id,
+                    checkInfo.Reservation.Room.RoomNumber,
+                    checkInfo.Reservation.Customer?.FullName ?? "Unknown");
 
                 return true;
             }

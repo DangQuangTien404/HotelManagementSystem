@@ -11,12 +11,14 @@ namespace HotelManagementSystem.Business.service
         private readonly HotelManagementDbContext _context;
         private readonly INotificationService _notificationService;
         private readonly IRoomUpdateBroadcaster _roomUpdateBroadcaster;
+        private readonly IReservationUpdateBroadcaster _reservationBroadcaster;
 
-        public BookingService(HotelManagementDbContext context, INotificationService notificationService, IRoomUpdateBroadcaster roomUpdateBroadcaster)
+        public BookingService(HotelManagementDbContext context, INotificationService notificationService, IRoomUpdateBroadcaster roomUpdateBroadcaster, IReservationUpdateBroadcaster reservationBroadcaster)
         {
             _context = context;
             _notificationService = notificationService;
             _roomUpdateBroadcaster = roomUpdateBroadcaster;
+            _reservationBroadcaster = reservationBroadcaster;
         }
 
         public async Task<List<HotelService>> GetAvailableServicesAsync()
@@ -191,6 +193,7 @@ namespace HotelManagementSystem.Business.service
         {
             var payment = await _context.Payments
                 .Include(p => p.Reservation)
+                .ThenInclude(r => r.Customer)
                 .FirstOrDefaultAsync(p => p.OrderId == orderId);
 
             if (payment == null) return false;
@@ -238,6 +241,16 @@ namespace HotelManagementSystem.Business.service
                 RecipientType = "Admin",
                 IsAnnouncement = true
             }, toAdminGroup: true);
+
+            // Broadcast new reservation to admins
+            await _reservationBroadcaster.BroadcastReservationCreatedAsync(
+                payment.Reservation.Id,
+                payment.Reservation.RoomId,
+                roomNumber,
+                payment.Reservation.Customer?.FullName ?? "Unknown",
+                payment.Reservation.CheckInDate,
+                payment.Reservation.CheckOutDate
+            );
 
             return true;
         }
@@ -361,7 +374,7 @@ namespace HotelManagementSystem.Business.service
         private static decimal CalculateTotal(
             Room room, BookingRequest request, Dictionary<int, decimal> servicePrices)
         {
-            return room.BasePrice; // deposit: 1 night only
+            return room.Price; // deposit: 1 night only
         }
     }
 }

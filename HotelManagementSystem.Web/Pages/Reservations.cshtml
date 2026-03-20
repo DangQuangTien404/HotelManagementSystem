@@ -45,7 +45,7 @@
                     }
                     @foreach (var res in Model.Reservations)
                     {
-                        <tr>
+                        <tr data-reservation-id="@res.Id">
                             <td class="ps-4">
                                 <span class="fw-bold text-primary">@res.Room.RoomNumber</span><br />
                                 <small class="text-muted">@res.Room.RoomType</small>
@@ -115,3 +115,112 @@
         border-radius: 20px;
     }
 </style>
+
+@section Scripts {
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script>
+"use strict";
+(function () {
+    const reservationConnection = new signalR.HubConnectionBuilder()
+        .withUrl("/reservationHub")
+        .withAutomaticReconnect()
+        .build();
+
+    reservationConnection.on("ReservationCreated", function (data) {
+        console.log("New reservation created:", data);
+        
+        // Find the table body
+        const tbody = document.querySelector("table tbody");
+        if (tbody) {
+            // Create new row for the reservation
+            const newRow = document.createElement("tr");
+            newRow.setAttribute("data-reservation-id", data.reservationId);
+            newRow.className = "table-success";
+            
+            const checkInDate = new Date(data.checkInDate).toLocaleDateString('vi-VN');
+            const checkOutDate = new Date(data.checkOutDate).toLocaleDateString('vi-VN');
+            
+            newRow.innerHTML = `
+                <td class="ps-4">
+                    <span class="fw-bold text-primary">${data.roomNumber}</span><br />
+                    <small class="text-muted">Unknown Type</small>
+                </td>
+                <td>
+                    <div>${data.customerName}</div>
+                    <small class="text-muted"><i class="bi bi-phone"></i> —</small>
+                </td>
+                <td>${checkInDate}</td>
+                <td>${checkOutDate}</td>
+                <td>
+                    <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Chờ Check-in</span>
+                </td>
+                <td class="text-end pe-4">
+                    <a href="#" class="btn btn-outline-info btn-sm px-3 shadow-sm" onclick="return false;">
+                        <i class="bi bi-bag-plus"></i> Dịch vụ
+                    </a>
+                    <form method="post" asp-page-handler="CheckIn" asp-route-id="${data.reservationId}" class="d-inline">
+                        <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm">
+                            <i class="bi bi-box-arrow-in-right"></i> Check-in
+                        </button>
+                    </form>
+                </td>
+            `;
+            
+            tbody.insertBefore(newRow, tbody.firstChild);
+            
+            // Highlight briefly
+            setTimeout(() => newRow.classList.remove("table-success"), 2000);
+        }
+    });
+
+    reservationConnection.on("ReservationCheckedIn", function (data) {
+        console.log("Check-in received:", data);
+        // Find and update the corresponding row
+        const row = document.querySelector(`tr[data-reservation-id="${data.reservationId}"]`);
+        if (row) {
+            // Update status badge
+            const statusCell = row.querySelector("td:nth-child(5)");
+            if (statusCell) {
+                statusCell.innerHTML = '<span class="badge bg-success"><i class="bi bi-door-open"></i> Đang ở</span>';
+            }
+            // Update action buttons
+            const actionCell = row.querySelector("td:nth-child(6)");
+            if (actionCell) {
+                actionCell.innerHTML = `<form method="post" asp-page-handler="CheckOut" asp-route-id="${data.reservationId}" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn thanh toán và trả phòng?')">
+                    <button type="submit" class="btn btn-danger btn-sm px-3 shadow-sm">
+                        <i class="bi bi-cash-stack"></i> Check-out
+                    </button>
+                </form>`;
+            }
+            // Highlight the row briefly
+            row.classList.add("table-success");
+            setTimeout(() => row.classList.remove("table-success"), 2000);
+        }
+    });
+
+    reservationConnection.on("ReservationCheckedOut", function (data) {
+        console.log("Check-out received:", data);
+        // Remove or fade out the row since reservation is completed
+        const row = document.querySelector(`tr[data-reservation-id="${data.reservationId}"]`);
+        if (row) {
+            row.classList.add("table-danger");
+            setTimeout(() => {
+                row.style.opacity = "0.5";
+            }, 1000);
+        }
+    });
+
+    reservationConnection.start()
+        .then(function () {
+            console.log("SignalR ReservationHub connected");
+        })
+        .catch(function (err) {
+            return console.error(err.toString());
+        });
+
+    window.addEventListener("beforeunload", () => {
+        reservationConnection.stop();
+    });
+})();
+</script>
+}

@@ -30,7 +30,7 @@
                         <tr data-room-id="@room.Id">
                             <td class="fw-bold fs-5">@room.RoomNumber</td>
                             <td><span class="badge bg-info text-dark">@room.RoomType</span></td>
-                            <td class="text-primary fw-bold">@room.BasePrice.ToString("N0")</td>
+                            <td class="text-primary fw-bold">@room.Price.ToString("N0")</td>
                             <td>
                                 <span class="badge @(room.Status == "Available" ? "bg-success" : "bg-danger")">@room.Status</span>
                             </td>
@@ -69,7 +69,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Giá phòng (VND)</label>
-                    <input asp-for="NewRoom.BasePrice" type="number" class="form-control" required />
+                    <input asp-for="NewRoom.Price" type="number" class="form-control" required />
                 </div>
             </div>
             <div class="modal-footer">

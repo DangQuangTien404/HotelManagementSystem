@@ -27,6 +27,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IRoomUpdateBroadcaster, HotelManagementSystem.Web.Services.RoomUpdateBroadcaster>();
+builder.Services.AddScoped<IReservationUpdateBroadcaster, HotelManagementSystem.Web.Services.ReservationUpdateBroadcaster>();
 
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
@@ -139,6 +140,7 @@ app.MapRazorPages();
 app.MapHub<HotelManagementSystem.Web.Hubs.NotificationHub>("/notificationHub");
 app.MapHub<HotelManagementSystem.Web.Hubs.RoomHub>("/roomHub");
 app.MapHub<HotelManagementSystem.Web.Hubs.ChatHub>("/chatHub");
+app.MapHub<HotelManagementSystem.Web.Hubs.ReservationHub>("/reservationHub");
 
 // Stripe webhook
 app.MapPost("/api/stripe-webhook", async (HttpContext context, IBookingService bookingService, IStripeService stripeService) =>

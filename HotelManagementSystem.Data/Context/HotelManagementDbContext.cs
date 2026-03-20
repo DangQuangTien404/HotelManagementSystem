@@ -35,7 +35,6 @@ public partial class HotelManagementDbContext : DbContext
 
         // 2. Cấu hình kiểu dữ liệu Decimal cho tiền tệ
         modelBuilder.Entity<Room>(entity => {
-            entity.Property(e => e.BasePrice).HasColumnType("decimal(18,2)");
             entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
         });
         modelBuilder.Entity<HotelService>().Property(e => e.Price).HasColumnType("decimal(18,2)");
